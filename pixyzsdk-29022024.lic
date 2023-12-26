@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<license product="PixyzSDKCSharp">
+  <version>1</version>
+  <validity start="2023-12-21" end="2024-02-29"/>
+  <customer>
+    <company/>
+    <name/>
+    <email/>
+    <site/>
+    <phone/>
+  </customer>
+  <EnableVM>True</EnableVM>
+  <tokens>
+    <token name="PixyzSDKCSharp" count="1" startDate="" endDate="" version=""/>
+    <token name="Script" count="1" startDate="" endDate="" version=""/>
+    <token name="Publish" count="1" startDate="" endDate="" version=""/>
+    <token name="IO" count="1" startDate="" endDate="" version=""/>
+    <token name="AllFormats" count="1" startDate="" endDate="" version=""/>
+    <token name="Algo" count="1" startDate="" endDate="" version=""/>
+    <token name="Process" count="1" startDate="" endDate="" version=""/>
+    <token name="AllFormats" count="1" startDate="" endDate="" version=""/>
+    <token name="PxzImport" count="1" startDate="" endDate="" version=""/>
+    <token name="PxzExport" count="1" startDate="" endDate="" version=""/>
+    <token name="ImportBundle0" count="1" startDate="" endDate="" version=""/>
+    <token name="ImportBundle1" count="1" startDate="" endDate="" version=""/>
+    <token name="ImportBundle2" count="1" startDate="" endDate="" version=""/>
+    <token name="ImportBundle3" count="1" startDate="" endDate="" version=""/>
+    <token name="ExportBundle0" count="1" startDate="" endDate="" version=""/>
+    <token name="ExportBundle1" count="1" startDate="" endDate="" version=""/>
+    <token name="ExportBundle2" count="1" startDate="" endDate="" version=""/>
+    <token name="Catia" count="1" startDate="" endDate="" version=""/>
+    <token name="3DXml" count="1" startDate="" endDate="" version=""/>
+    <token name="NX" count="1" startDate="" endDate="" version=""/>
+    <token name="Creo" count="1" startDate="" endDate="" version=""/>
+    <token name="JT" count="1" startDate="" endDate="" version=""/>
+    <token name="Step" count="1" startDate="" endDate="" version=""/>
+    <token name="PlmXml" count="1" startDate="" endDate="" version=""/>
+    <token name="Iges" count="1" startDate="" endDate="" version=""/>
+    <token name="CSB" count="1" startDate="" endDate="" version=""/>
+    <token name="SolidWorks" count="1" startDate="" endDate="" version=""/>
+    <token name="Parasolid" count="1" startDate="" endDate="" version=""/>
+    <token name="SolidEdge" count="1" startDate="" endDate="" version=""/>
+    <token name="Rhino" count="1" startDate="" endDate="" version=""/>
+    <token name="Alias" count="1" startDate="" endDate="" version=""/>
+    <token name="IFC" count="1" startDate="" endDate="" version=""/>
+    <token name="PointCloud" count="1" startDate="" endDate="" version=""/>
+    <token name="Sketchup" count="1" startDate="" endDate="" version=""/>
+    <token name="FBX" count="1" startDate="" endDate="" version=""/>
+    <token name="Collada" count="1" startDate="" endDate="" version=""/>
+    <token name="OBJ" count="1" startDate="" endDate="" version=""/>
+    <token name="STL" count="1" startDate="" endDate="" version=""/>
+    <token name="VRML" count="1" startDate="" endDate="" version=""/>
+    <token name="Inventor" count="1" startDate="" endDate="" version=""/>
+    <token name="GLTF" count="1" startDate="" endDate="" version=""/>
+    <token name="PRC" count="1" startDate="" endDate="" version=""/>
+    <token name="PDF3D" count="1" startDate="" endDate="" version=""/>
+    <token name="SAT" count="1" startDate="" endDate="" version=""/>
+    <token name="U3D" count="1" startDate="" endDate="" version=""/>
+    <token name="VDA" count="1" startDate="" endDate="" version=""/>
+    <token name="AutoCAD" count="1" startDate="" endDate="" version=""/>
+    <token name="Revit" count="1" startDate="" endDate="" version=""/>
+    <token name="USD" count="1" startDate="" endDate="" version=""/>
+    <token name="VRED" count="1" startDate="" endDate="" version=""/>
+    <token name="RVM" count="1" startDate="" endDate="" version=""/>
+    <token name="Recap" count="1" startDate="" endDate="" version=""/>
+    <token name="GdsII" count="1" startDate="" endDate="" version=""/>
+  </tokens>
+  <machine/>
+  <key>2c94e825665cc06c689f0944c0826662a12a9b454fc87152a23b06fd1c25f4047806a0a276e0f092aacdd88eeed0bd81ad0a5343ac684a4be6cebada8aca144af62e7bf69e0fa6d8e8c3f23c9c2e2a923851c81c4ccefa71a2b5bff19f16dff6a4ff6a88380548c4716cdc542fb6a350670e214f115aedd504f6f26528915c7f</key>
+</license>
