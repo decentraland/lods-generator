@@ -31,6 +31,7 @@ namespace DCL_PiXYZ
         
         public static void Scale(this Matrix4 matrix4, Vector3 scaleFactors)
         {
+            //TODO: Ask Pravus. There are values set as 0 anyways. Whats your opinion here? (Like 828 in Genesis Plaza)
             // Replace zero values with 1 to avoid collapsing the object
             scaleFactors = new Vector3(
                 scaleFactors.X == 0 ? 1 : scaleFactors.X,

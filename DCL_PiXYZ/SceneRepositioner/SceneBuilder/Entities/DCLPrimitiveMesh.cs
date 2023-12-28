@@ -60,10 +60,8 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
         protected override uint GetMesh(PiXYZAPI pxz, string entityID)
         {
             string planeCreated = PlaneFactory.Create(entityID, uvs);
-            return pxz.IO.ImportScene(Path.Combine(PiXYZConstants.RESOURCES_DIRECTORY, $"Plane_{entityID}.obj"));
-            
+            return pxz.IO.ImportScene(Path.Combine(PiXYZConstants.RESOURCES_DIRECTORY, planeCreated));
             //pxz.Scene.CreatePlane(PrimitivesSize.PLANE_SIZE.X, PrimitivesSize.PLANE_SIZE.Y);
-
         }
     }
 
