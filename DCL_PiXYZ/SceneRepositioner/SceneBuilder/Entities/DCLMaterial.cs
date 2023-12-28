@@ -6,6 +6,7 @@ using DCL_PiXYZ.SceneRepositioner.JsonParsing.Parsers;
 using Newtonsoft.Json;
 using UnityEngine.Pixyz.API;
 using UnityEngine.Pixyz.Core;
+using UnityEngine.Pixyz.Geom;
 using UnityEngine.Pixyz.Material;
 
 namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
@@ -16,31 +17,41 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
     public abstract class DCLMaterial
     {
         public TextureData texture;
-        protected virtual ColorAlpha GetColor() => new ColorAlpha();
+        protected virtual ColorAlpha GetColor()
+        {
+            ColorAlpha colorAlpha = new ColorAlpha();
+            colorAlpha.r = 1;
+            colorAlpha.g = 1;
+            colorAlpha.b = 1;
+            colorAlpha.a = 1;
+            return colorAlpha;
+        }
 
         public uint GetMaterial(PiXYZAPI pxz, string entityID, Dictionary<string, string> contentTable)
         {
-            pxz.Material.CreateCustomMaterialPattern(entityID);
-            uint material = pxz.Material.CreateMaterial("Material", entityID);
-            pxz.Material.SetMaterialMainColor(material, GetColor());
+            uint material = pxz.Material.CreateMaterial($"Material_{entityID}" , "PBR");
             
             if (texture?.tex?.src != null)
             {
                 if (contentTable.TryGetValue(texture.tex.src, out string texturePath))
                 {
                     uint image = pxz.Material.ImportImage(texturePath);
-                    
+            
                     UnityEngine.Pixyz.Material.Texture albedoTexture = new UnityEngine.Pixyz.Material.Texture();
+                    Point2 point = new Point2();
+                    point.x = 1;
+                    point.y = 1;
+                    albedoTexture.tilling = point;
                     albedoTexture.image = image;
-                    
+            
                     ColorOrTexture colorOrTexture = new ColorOrTexture();
+                    colorOrTexture._type = ColorOrTexture.Type.TEXTURE;
                     colorOrTexture.texture = albedoTexture;
-                    
-                    PBRMaterialInfos materialInfos = new PBRMaterialInfos();
+            
+                    PBRMaterialInfos materialInfos = pxz.Material.GetPBRMaterialInfos(material);
                     materialInfos.albedo = colorOrTexture;
-                    
+            
                     pxz.Material.SetPBRMaterialInfos(material, materialInfos);
-
                 }
             }
             return material;

@@ -14,9 +14,8 @@ namespace AssetBundleConverter.LODs
             this.src = src;
         }
 
-        public override void InstantiateMesh(PiXYZAPI pxz, uint parent, uint material,Dictionary<string, string> sceneContent)
+        public override void InstantiateMesh(PiXYZAPI pxz, string entityID ,uint parent, uint material,Dictionary<string, string> sceneContent)
         {
-            return;
             if (sceneContent.TryGetValue(src, out string modelPath))
             {
                 uint baseOccurrence = pxz.Scene.CreateOccurrence($"{src}_BaseTransform", parent); //# set baseOccurrence parent to rootOccurrence

@@ -1,41 +1,57 @@
+using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.Linq;
+using System.Numerics;
+
 namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.PrimitiveFactory
 {
-    /*
+    
     public static class PlaneFactory
     {
         public const int VERTICES_NUM = 8;
         public const int TRIS_NUM = 12;
 
-        // Creates a two-sided quad (clockwise)
-        public static Mesh Create(float[] customUvs)
-        {
-            var mesh = new Mesh();
-            mesh.name = "DCL Plane";
+        public static string defaultPlane;
 
+        // Creates a two-sided quad (clockwise)
+        public static string Create(string entityID, float[] customUvs)
+        {
+            if (customUvs.Length == 0 && !string.IsNullOrEmpty(defaultPlane))
+                return defaultPlane;
+
+            string fileName = $"Plane_{entityID}.obj";
+            
             Vector3 halfSize = PrimitivesSize.PLANE_SIZE / 2;
 
             Vector3[] vertices = PrimitivesBuffersPool.EQUAL_TO_VERTICES.Rent(VERTICES_NUM);
-            vertices[0] = new Vector3(-halfSize.x, -halfSize.y, 0);
-            vertices[1] = new Vector3(-halfSize.x, halfSize.y, 0);
-            vertices[2] = new Vector3(halfSize.x, halfSize.y, 0);
-            vertices[3] = new Vector3(halfSize.x, -halfSize.y, 0);
+            vertices[0] = new Vector3(-halfSize.X, -halfSize.Y, 0);
+            vertices[1] = new Vector3(-halfSize.X, halfSize.Y, 0);
+            vertices[2] = new Vector3(halfSize.X, halfSize.Y, 0);
+            vertices[3] = new Vector3(halfSize.X, -halfSize.Y, 0);
 
-            vertices[4] = new Vector3(halfSize.x, -halfSize.y, 0);
-            vertices[5] = new Vector3(halfSize.x, halfSize.y, 0);
-            vertices[6] = new Vector3(-halfSize.x, halfSize.y, 0);
-            vertices[7] = new Vector3(-halfSize.x, -halfSize.y, 0);
+            vertices[4] = new Vector3(halfSize.X, -halfSize.Y, 0);
+            vertices[5] = new Vector3(halfSize.X, halfSize.Y, 0);
+            vertices[6] = new Vector3(-halfSize.X, halfSize.Y, 0);
+            vertices[7] = new Vector3(-halfSize.X, -halfSize.Y, 0);
 
-            Vector2[] defaultUVs = PrimitivesBuffersPool.UVS.Rent(VERTICES_NUM);
-
-            defaultUVs[0] = new Vector2(0f, 0f);
-            defaultUVs[1] = new Vector2(0f, 1f);
-            defaultUVs[2] = new Vector2(1f, 1f);
-            defaultUVs[3] = new Vector2(1f, 0f);
-
-            defaultUVs[4] = new Vector2(1f, 0f);
-            defaultUVs[5] = new Vector2(1f, 1f);
-            defaultUVs[6] = new Vector2(0f, 1f);
-            defaultUVs[7] = new Vector2(0f, 0f);
+            float[] defaultUVs = PrimitivesBuffersPool.UVS.Rent(VERTICES_NUM);
+            defaultUVs[0] = 0;
+            defaultUVs[1] = 0;
+            defaultUVs[2] = 0;
+            defaultUVs[3] = 1;
+            defaultUVs[4] = 1;
+            defaultUVs[5] = 1;
+            defaultUVs[6] = 1;
+            defaultUVs[7] = 0;
+            defaultUVs[8] = 1;
+            defaultUVs[9] = 0;
+            defaultUVs[10] = 1;
+            defaultUVs[11] = 1;
+            defaultUVs[12] = 0;
+            defaultUVs[13] = 1;
+            defaultUVs[14] = 0;
+            defaultUVs[15] = 0;
 
             int[] tris = PrimitivesBuffersPool.TRIANGLES.Rent(TRIS_NUM);
             tris[0] = 0;
@@ -53,41 +69,28 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.PrimitiveFactory
             tris[11] = 4;
 
             Vector3[] normals = PrimitivesBuffersPool.EQUAL_TO_VERTICES.Rent(VERTICES_NUM);
-            normals[0] = Vector3.back;
-            normals[1] = Vector3.back;
-            normals[2] = Vector3.back;
-            normals[3] = Vector3.back;
+            normals[0] = new Vector3(0, 0, -1);
+            normals[1] = new Vector3(0, 0, -1);
+            normals[2] = new Vector3(0, 0, -1);
+            normals[3] = new Vector3(0, 0, -1);
 
-            normals[4] = Vector3.forward;
-            normals[5] = Vector3.forward;
-            normals[6] = Vector3.forward;
-            normals[7] = Vector3.forward;
+            normals[4] = new Vector3(0, 0, 1);
+            normals[5] = new Vector3(0, 0, 1);
+            normals[6] = new Vector3(0, 0, 1);
+            normals[7] = new Vector3(0, 0, 1);
 
-            var colors = new Color[8];
-
-            for (var i = 0; i < colors.Length; i++)
-                colors[i] = Color.white;
-
-            mesh.SetVertices(vertices, 0, VERTICES_NUM);
-            mesh.SetNormals(normals, 0, VERTICES_NUM);
-            mesh.SetUVs(0, defaultUVs, 0, VERTICES_NUM);
-            mesh.SetTriangles(tris, 0, TRIS_NUM, 0);
-
-            mesh.colors = colors;
-
-            try
-            {
-                if (customUvs.Length > 0)
-                    mesh.SetUVs(0, PrimitivesUtils.FloatArrayToV2List(customUvs.ToList()), 0, VERTICES_NUM);
-            }
-            catch (Exception e) { Debug.Log("FOR THE DEBUG " + e.Message); }
-
+            OBJExporter.CreateOBJFile(fileName , VERTICES_NUM, TRIS_NUM,vertices,  tris, normals, customUvs.Length > 0  ? customUvs : defaultUVs);
+            
             PrimitivesBuffersPool.EQUAL_TO_VERTICES.Return(vertices);
             PrimitivesBuffersPool.TRIANGLES.Return(tris);
             PrimitivesBuffersPool.EQUAL_TO_VERTICES.Return(normals);
+            PrimitivesBuffersPool.UVS.Return(defaultUVs);
 
-            return mesh;
+            if (customUvs.Length == 0)
+                defaultPlane = fileName;
+
+            return fileName;
         }
     }
-    */
+    
 }

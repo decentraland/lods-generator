@@ -24,13 +24,12 @@ namespace DCL_PiXYZ
             InitializePiXYZ();
             WebRequestsHandler webRequestsHandler = new WebRequestsHandler();
 
-            string resourcesDirectory = CreateResourcesDirectory();
+         
             
             Console.WriteLine("-------------------------");
             Console.WriteLine("BEGIN IMPORT");
             Importer importer = new Importer("bafkreieifr7pyaofncd6o7vdptvqgreqxxtcn3goycmiz4cnwz7yewjldq",
-                "https://peer.decentraland.org/content/contents/", 
-                resourcesDirectory,
+                "https://peer.decentraland.org/content/contents/",
                 webRequestsHandler);
             await importer.GenerateSceneContent();
             Dictionary<string,string> sceneContent = await importer.DownloadAllContent();
@@ -50,8 +49,13 @@ namespace DCL_PiXYZ
             
             
             Console.WriteLine("-------------------------");
+            
+            
+            OccurrenceList occurenceToDelete = pxz.Scene.FindOccurrencesByProperty("Name", ".*collider.*");
+            pxz.Scene.DeleteOccurrences(occurenceToDelete);
+            
             Console.WriteLine("BEGIN PXZ EXPORT " + pxz.Core.GetVersion());
-            pxz.IO.ExportScene(Path.Combine("C:/Users/juanm/Documents/Decentraland/asset-bundle-converter/asset-bundle-converter/Assets/Resources", $"Combined_Meshes_{DateTime.Now.ToString("yyyyMMdd_HHmmss")}.glb"), pxz.Scene.GetRoot());
+            pxz.IO.ExportScene(Path.Combine("C:/Users/juanm/Documents/Decentraland/asset-bundle-converter/asset-bundle-converter/Assets/Resources", $"0_Combined_Meshes_{DateTime.Now.ToString("yyyyMMdd_HHmmss")}.fbx"), pxz.Scene.GetRoot());
             Console.WriteLine("END PXZ EXPORT");
            
             
@@ -102,11 +106,9 @@ namespace DCL_PiXYZ
             */
         }
 
-        private static string CreateResourcesDirectory()
+        private static void CreateResourcesDirectory()
         {
-            string directory = Path.Combine(Directory.GetCurrentDirectory(), "Resources");
-            Directory.CreateDirectory(directory);
-            return directory;
+            Directory.CreateDirectory(PiXYZConstants.RESOURCES_DIRECTORY);
         }
 
 

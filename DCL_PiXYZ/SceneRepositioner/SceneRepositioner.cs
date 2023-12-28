@@ -45,14 +45,8 @@ namespace DCL_PiXYZ.SceneRepositioner
             foreach (var dclRendereableEntity in renderableEntitiesDictionary)
                 dclRendereableEntity.Value.InitEntity(pxz, pxz.Scene.GetRoot());
 
-            int i = 0;
             foreach (KeyValuePair<int, DCLRendereableEntity> dclRendereableEntity in renderableEntitiesDictionary)
-            {
-                if (i != 103)
-                    dclRendereableEntity.Value.PositionAndInstantiteMesh(sceneContent, renderableEntitiesDictionary);
-
-                i++;
-            }
+                dclRendereableEntity.Value.PositionAndInstantiteMesh(sceneContent, renderableEntitiesDictionary);
 
         }
     }

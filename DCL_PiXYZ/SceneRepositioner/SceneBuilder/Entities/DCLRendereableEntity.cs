@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Numerics;
 using DCL_PiXYZ.SceneRepositioner.JsonParsing;
 using UnityEngine.Pixyz.API;
@@ -48,7 +50,7 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
         public void PositionAndInstantiteMesh(Dictionary<string, string> contentTable, Dictionary<int, DCLRendereableEntity> renderableEntities)
         {
             InstantiateTransform(renderableEntities);
-            rendereableMesh?.InstantiateMesh(pxz, instantiatedEntity, dclMaterial.GetMaterial(pxz, entityID.ToString(), contentTable) ,contentTable);
+            rendereableMesh?.InstantiateMesh(pxz, entityID.ToString(), instantiatedEntity, dclMaterial.GetMaterial(pxz, entityID.ToString(),contentTable) ,contentTable);
         }
 
         private void InstantiateTransform(Dictionary<int, DCLRendereableEntity> renderableEntities)
@@ -59,9 +61,9 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
 
             Matrix4 matrix4 = new Matrix4();
             matrix4.Init();
-            matrix4.Translate(new Vector3(transform.position.x, transform.position.y, transform.position.z));
-            matrix4.Rotate(new Quaternion(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w));
             matrix4.Scale(new Vector3(transform.scale.x, transform.scale.y, transform.scale.z));
+            matrix4.Rotate(new Quaternion(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w));
+            matrix4.Translate(new Vector3(transform.position.x, transform.position.y, transform.position.z));
             pxz.Scene.ApplyTransformation(instantiatedEntity, matrix4);
         }
 
