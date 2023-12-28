@@ -14,16 +14,14 @@ namespace SceneImporter
     {
         private string baseURL;
         private string sceneID;
-        private string resourcesPath;
         private WebRequestsHandler webRequestsHandler;
         private SceneDefinition sceneDefinition;
         private string[] ignoreExtensions;
 
         private bool debugLog;
-        public Importer(string sceneID, string baseURL, string resourcesPath, WebRequestsHandler webRequestsHandler)
+        public Importer(string sceneID, string baseURL, WebRequestsHandler webRequestsHandler)
         {
             this.baseURL = baseURL;
-            this.resourcesPath = resourcesPath;
             this.sceneID = sceneID;
             this.webRequestsHandler = webRequestsHandler;
             ignoreExtensions = new []{".mp3", ".js", ".lib", ".json", ".md"};
@@ -58,7 +56,7 @@ namespace SceneImporter
                         continue;
                     }
                     Console.WriteLine($"Getting File {content.file}");
-                    string filePath = Path.Combine(resourcesPath, content.file);
+                    string filePath = Path.Combine(PiXYZConstants.RESOURCES_DIRECTORY, content.file);
                     await webRequestsHandler.DownloadFileAsync($"{baseURL}{content.hash}", filePath);
                     contentDictionary.Add(content.file, filePath);
                     Console.WriteLine($"File {content.file} Success!");

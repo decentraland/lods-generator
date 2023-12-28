@@ -1,10 +1,8 @@
 // unset:none
-
 using System;
-using AssetBundleConverter.LODs;
+using DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using UnityEngine.Pixyz.Material;
 
 namespace DCL_PiXYZ.SceneRepositioner.JsonParsing.Parsers
 {
@@ -15,13 +13,10 @@ namespace DCL_PiXYZ.SceneRepositioner.JsonParsing.Parsers
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            return null;
-            /*
             JObject jsonObject = JObject.Load(reader);
             Texture texture = new Texture();
             texture.src = jsonObject["texture"]["src"].Value<string>();
             return texture;
-            */
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)

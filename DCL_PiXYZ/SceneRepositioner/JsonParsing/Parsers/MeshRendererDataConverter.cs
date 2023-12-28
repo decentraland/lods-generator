@@ -1,5 +1,5 @@
 using System;
-using AssetBundleConverter.LODs;
+using DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -13,8 +13,6 @@ namespace DCL_PiXYZ.SceneRepositioner.JsonParsing.Parsers
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            return null;
-            /*
             JObject jsonObject = JObject.Load(reader);
 
             DCLMesh dclMesh = null;
@@ -39,7 +37,7 @@ namespace DCL_PiXYZ.SceneRepositioner.JsonParsing.Parsers
             }
 
             return dclMesh;
-            */
+            
         }
 
 
