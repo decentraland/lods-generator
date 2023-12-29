@@ -1,4 +1,5 @@
-﻿using UnityEngine.Pixyz.Algo;
+﻿using System;
+using UnityEngine.Pixyz.Algo;
 using UnityEngine.Pixyz.API;
 using UnityEngine.Pixyz.Scene;
 
@@ -8,15 +9,18 @@ namespace DCL_PiXYZ
     {
         public OccurrenceList ApplyModification(PiXYZAPI pxz, OccurrenceList occurrenceList)
         {
+            Console.WriteLine("-------------------------");
+            Console.WriteLine("BEGIN PXZ MERGE MESHES FOR SETTINGS " + pxz.Core.GetVersion());
             BakeOption bakeOption = new BakeOption();
             BakeMaps bakeMaps = new BakeMaps();
             bakeMaps.diffuse = true;
-            bakeOption.bakingMethod = BakingMethod.ProjOnly;
-            bakeOption.padding = 0;
-            bakeOption.resolution = 256;
+            bakeOption.bakingMethod = BakingMethod.RayOnly;
+            bakeOption.resolution = 1024;
+            bakeOption.padding = 1;
             bakeOption.textures = bakeMaps;
             uint combinedMesh = pxz.Algo.CombineMeshes(occurrenceList, bakeOption);
-            return new OccurrenceList(new uint[] { combinedMesh });
+            Console.WriteLine("END PXZ MERGE MESHES FOR SETTINGS " + pxz.Core.GetVersion());
+            return new OccurrenceList(new[] { combinedMesh });
         }
     }
 }

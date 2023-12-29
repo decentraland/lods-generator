@@ -7,12 +7,23 @@ namespace DCL_PiXYZ
 {
     public class PXZExporter : IPXZModifier
     {
+        private string extension;
+        private string path;
+        private string filename;
+
+        public PXZExporter(string path, string filename, string extension)
+        {
+            this.extension = extension;
+            this.path = path;
+            this.filename = filename;
+        }
+
         public OccurrenceList ApplyModification(PiXYZAPI pxz, OccurrenceList occurrenceList)
         {
-            //pxz.Core.Save(Path.Combine("C:/Users/juanm/Documents/Decentraland/asset-bundle-converter/asset-bundle-converter/Assets/Resources", $"Combined_Meshes_{DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss")}"));
-            
-            pxz.IO.ExportScene(Path.Combine("C:/Users/juanm/Documents/Decentraland/asset-bundle-converter/asset-bundle-converter/Assets/Resources",
-                $"Combined_Meshes_{DateTime.Now.ToString("yyyyMMdd_HHmmss")}.glb"), occurrenceList[0]);
+            Console.WriteLine("-------------------------");
+            Console.WriteLine($"BEGIN PXZ EXPORT {filename}{extension}");
+            pxz.IO.ExportScene(Path.Combine(path, $"{filename}{extension}"), occurrenceList[0]);
+            Console.WriteLine("END PXZ EXPORT ");
             return new OccurrenceList();
         }
     }
