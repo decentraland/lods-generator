@@ -22,9 +22,8 @@ namespace DCL_PiXYZ
         static async Task Main(string[] args)
         {
             InitializePiXYZ();
+            CreateResourcesDirectory();
             WebRequestsHandler webRequestsHandler = new WebRequestsHandler();
-
-         
             
             Console.WriteLine("-------------------------");
             Console.WriteLine("BEGIN IMPORT");
@@ -34,7 +33,7 @@ namespace DCL_PiXYZ
             await importer.GenerateSceneContent();
             Dictionary<string,string> sceneContent = await importer.DownloadAllContent();
             Console.WriteLine("END IMPORT");
-
+/*
             Console.WriteLine("-------------------------");
             Console.WriteLine("BEGIN REPOSITIONING");
             SceneRepositioner.SceneRepositioner sceneRepositioner =
@@ -44,58 +43,52 @@ namespace DCL_PiXYZ
             await sceneRepositioner.SetupSceneInPiXYZ();
             Console.WriteLine("END REPOSITIONING");
 
-            
-            
-            
-            
+
             Console.WriteLine("-------------------------");
+
+
+            OccurrenceList occurenceToDelete = pxz.Scene.FindOccurrencesByProperty("Name", ".*collider.*");
+            pxz.Scene.DeleteOccurrences(occurenceToDelete);
+
+            Console.WriteLine("BEGIN PXZ EXPORT " + pxz.Core.GetVersion());
+            pxz.IO.ExportScene(Path.Combine("C:/Users/juanm/Documents/Decentraland/asset-bundle-converter/asset-bundle-converter/Assets/Resources", $"0_Combined_Meshes_{DateTime.Now.ToString("yyyyMMdd_HHmmss")}.fbx"), pxz.Scene.GetRoot());
+            Console.WriteLine("END PXZ EXPORT");
+            */
+
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            //Trading Center
+            uint tradingCenter = pxz.IO.ImportScene(sceneContent["models/trading_center.glb"]);
+            pxz.Scene.SetParent(tradingCenter, pxz.Scene.GetRoot());
             
+            //The Shell
+            uint theShell = pxz.IO.ImportScene(sceneContent["models/shell.glb"]);
+            pxz.Scene.SetParent(theShell, pxz.Scene.GetRoot());
             
             OccurrenceList occurenceToDelete = pxz.Scene.FindOccurrencesByProperty("Name", ".*collider.*");
             pxz.Scene.DeleteOccurrences(occurenceToDelete);
             
-            Console.WriteLine("BEGIN PXZ EXPORT " + pxz.Core.GetVersion());
-            pxz.IO.ExportScene(Path.Combine("C:/Users/juanm/Documents/Decentraland/asset-bundle-converter/asset-bundle-converter/Assets/Resources", $"0_Combined_Meshes_{DateTime.Now.ToString("yyyyMMdd_HHmmss")}.fbx"), pxz.Scene.GetRoot());
-            Console.WriteLine("END PXZ EXPORT");
-           
-            
-            /*
-
-            //Trading Center
-            uint baseOccurrence = pxz.Scene.CreateOccurrence("trading_center.glb_BaseTransform", pxzRootOcurrence); //# set baseOccurrence parent to rootOccurrence
-            uint importedFileOccurrence = pxz.IO.ImportScene(sceneContent["models/trading_center.glb"]);
-            pxz.Scene.SetParent(importedFileOccurrence, baseOccurrence);
-            Matrix4 matrix4 = new Matrix4();
-            matrix4.Init();
-            matrix4.Rotate(new Quaternion(0f, 1f, 0, 6.123234262925839e-17f));
-            pxz.Scene.ApplyTransformation(baseOccurrence, matrix4);
-            
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
-            //The Shell
-            uint baseOccurrence_2 = pxz.Scene.CreateOccurrence("shell.glb_BaseTransform", pxzRootOcurrence); //# set baseOccurrence parent to rootOccurrence
-            uint importedFileOccurrence_2 = pxz.IO.ImportScene(sceneContent["models/shell.glb"]);
-            pxz.Scene.SetParent(importedFileOccurrence_2, baseOccurrence_2);
-            pxz.Scene.ApplyTransformation(baseOccurrence_2, matrix4);
-            
-
+            pxz.Core.SetModuleProperty("Algo", "UseGPUBaking", "False");
 
             BakeOption bakeOption = new BakeOption();
             BakeMaps bakeMaps = new BakeMaps();
             bakeMaps.diffuse = true;
-            bakeOption.bakingMethod = BakingMethod.ProjOnly;
-            bakeOption.padding = 0;
-            bakeOption.resolution = 256;
+            bakeOption.bakingMethod = BakingMethod.RayOnly;
+            bakeOption.resolution = 1024;
+            bakeOption.padding = 1;
             bakeOption.textures = bakeMaps;
-            uint combinedMesh = pxz.Algo.CombineMeshes(new OccurrenceList(new uint[] {baseOccurrence}), bakeOption);
+            uint combinedMesh = pxz.Algo.CombineMeshes(new OccurrenceList(new uint[] {tradingCenter, theShell}), bakeOption);
+            
+
+            
+            pxz.IO.ExportScene(Path.Combine("C:/Users/juanm/Documents/Decentraland/asset-bundle-converter/asset-bundle-converter/Assets/Resources", $"0_Combined_Meshes_{DateTime.Now.ToString("yyyyMMdd_HHmmss")}.fbx"), combinedMesh);
+            
             
             //DecimateOptionsSelector decimate = new DecimateOptionsSelector();
             //decimate.ratio = 100f;
             //decimate._type = DecimateOptionsSelector.Type.RATIO;
             //pxz.Algo.DecimateTarget(new OccurrenceList(new uint[] {combinedMesh}), decimate);
-            
-            pxz.IO.ExportScene(Path.Combine(Path.Combine(resourcesDirectory, "Optimized"), $"Combined_Meshes_Combined_NoDecimate.glb"), combinedMesh);
-            
             stopwatch.Stop();
             TimeSpan timeTaken = stopwatch.Elapsed;
             // For a formatted string:
@@ -103,7 +96,7 @@ namespace DCL_PiXYZ
                 timeTaken.Hours, timeTaken.Minutes, timeTaken.Seconds,
                 timeTaken.Milliseconds / 10);
             Console.WriteLine("RunTime " + elapsedTime);
-            */
+            
         }
 
         private static void CreateResourcesDirectory()

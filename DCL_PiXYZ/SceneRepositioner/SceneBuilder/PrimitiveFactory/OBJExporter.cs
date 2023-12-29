@@ -6,13 +6,13 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.PrimitiveFactory
 {
     public static class OBJExporter
     {
-        public static void CreateOBJFile(string filePath, int verticesNum, int trisNum, Vector3[] vertices, int[] tris, Vector3[] normals, float[] customUvs = null)
+        public static void CreateOBJFile(string filePath, int verticesNum, int trisNum, Vector3[] vertices, int[] tris, Vector3[] normals, Vector2[] customUvs)
         {
             var objContent = CreateOBJContent(verticesNum, trisNum, vertices, tris, normals, customUvs);
             File.WriteAllText(Path.Combine(PiXYZConstants.RESOURCES_DIRECTORY, filePath), objContent);
         }
 
-        private static string CreateOBJContent(int verticesNum, int trisNum, Vector3[] vertices, int[] tris, Vector3[] normals, float[] uvs)
+        private static string CreateOBJContent(int verticesNum, int trisNum, Vector3[] vertices, int[] tris, Vector3[] normals, Vector2[] uvs)
         {
             List<string> objLines = new List<string>();
 
@@ -22,10 +22,10 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.PrimitiveFactory
                 objLines.Add($"v {v.X} {v.Y} {v.Z}");
             }
 
-            for (int i = 0; i < verticesNum; i += 2)
+            for (var index = 0; index < verticesNum; index++)
             {
-                string u = uvs[i].ToString("0.0");
-                string v = uvs[i + 1].ToString("0.0");
+                string u = uvs[index].Y.ToString("0.0");
+                string v = uvs[index].X.ToString("0.0");
                 objLines.Add($"vt {u} {v}");
             }
 

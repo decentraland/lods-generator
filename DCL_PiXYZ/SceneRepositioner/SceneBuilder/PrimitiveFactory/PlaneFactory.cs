@@ -25,6 +25,11 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.PrimitiveFactory
             Vector3 halfSize = PrimitivesSize.PLANE_SIZE / 2;
 
             Vector3[] vertices = PrimitivesBuffersPool.EQUAL_TO_VERTICES.Rent(VERTICES_NUM);
+            Vector2[] defaultUVs = PrimitivesBuffersPool.UVS.Rent(VERTICES_NUM);
+            int[] tris = PrimitivesBuffersPool.TRIANGLES.Rent(TRIS_NUM);
+            Vector3[] normals = PrimitivesBuffersPool.EQUAL_TO_VERTICES.Rent(VERTICES_NUM);
+
+            
             vertices[0] = new Vector3(-halfSize.X, -halfSize.Y, 0);
             vertices[1] = new Vector3(-halfSize.X, halfSize.Y, 0);
             vertices[2] = new Vector3(halfSize.X, halfSize.Y, 0);
@@ -35,25 +40,18 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.PrimitiveFactory
             vertices[6] = new Vector3(-halfSize.X, halfSize.Y, 0);
             vertices[7] = new Vector3(-halfSize.X, -halfSize.Y, 0);
 
-            float[] defaultUVs = PrimitivesBuffersPool.UVS.Rent(VERTICES_NUM);
-            defaultUVs[0] = 0;
-            defaultUVs[1] = 0;
-            defaultUVs[2] = 0;
-            defaultUVs[3] = 1;
-            defaultUVs[4] = 1;
-            defaultUVs[5] = 1;
-            defaultUVs[6] = 1;
-            defaultUVs[7] = 0;
-            defaultUVs[8] = 1;
-            defaultUVs[9] = 0;
-            defaultUVs[10] = 1;
-            defaultUVs[11] = 1;
-            defaultUVs[12] = 0;
-            defaultUVs[13] = 1;
-            defaultUVs[14] = 0;
-            defaultUVs[15] = 0;
+            defaultUVs = new Vector2[VERTICES_NUM];
 
-            int[] tris = PrimitivesBuffersPool.TRIANGLES.Rent(TRIS_NUM);
+            defaultUVs[0] = new Vector2(0f, 0f);
+            defaultUVs[1] = new Vector2(0f, 1f);
+            defaultUVs[2] = new Vector2(1f, 1f);
+            defaultUVs[3] = new Vector2(1f, 0f);
+
+            defaultUVs[4] = new Vector2(1f, 0f);
+            defaultUVs[5] = new Vector2(1f, 1f);
+            defaultUVs[6] = new Vector2(0f, 1f);
+            defaultUVs[7] = new Vector2(0f, 0f);
+
             tris[0] = 0;
             tris[1] = 1;
             tris[2] = 2;
@@ -68,7 +66,6 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.PrimitiveFactory
             tris[10] = 7;
             tris[11] = 4;
 
-            Vector3[] normals = PrimitivesBuffersPool.EQUAL_TO_VERTICES.Rent(VERTICES_NUM);
             normals[0] = new Vector3(0, 0, -1);
             normals[1] = new Vector3(0, 0, -1);
             normals[2] = new Vector3(0, 0, -1);
@@ -79,7 +76,8 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.PrimitiveFactory
             normals[6] = new Vector3(0, 0, 1);
             normals[7] = new Vector3(0, 0, 1);
 
-            OBJExporter.CreateOBJFile(fileName , VERTICES_NUM, TRIS_NUM,vertices,  tris, normals, customUvs.Length > 0  ? customUvs : defaultUVs);
+            OBJExporter.CreateOBJFile(fileName , VERTICES_NUM, TRIS_NUM,vertices,  tris, normals, 
+                customUvs.Length > 0  ? PrimitiveFactoryUtils.FloatArrayToVector2Array(customUvs, VERTICES_NUM) : defaultUVs);
             
             PrimitivesBuffersPool.EQUAL_TO_VERTICES.Return(vertices);
             PrimitivesBuffersPool.TRIANGLES.Return(tris);
