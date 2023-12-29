@@ -29,6 +29,8 @@ namespace SceneImporter
 
         public async Task GenerateSceneContent()
         {
+            Console.WriteLine("-------------------------");
+            Console.WriteLine("BEGIN IMPORT");
             Console.WriteLine("Getting Scene Definition");
             try
             {
@@ -67,6 +69,7 @@ namespace SceneImporter
                 }
             }
             Console.WriteLine("File Content Success!");
+            Console.WriteLine("END IMPORT");
             return contentDictionary;
         }
 

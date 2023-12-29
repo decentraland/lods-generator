@@ -34,19 +34,15 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.PrimitiveFactory
             vertices[1] = new Vector3(-halfSize.X, halfSize.Y, 0);
             vertices[2] = new Vector3(halfSize.X, halfSize.Y, 0);
             vertices[3] = new Vector3(halfSize.X, -halfSize.Y, 0);
-
             vertices[4] = new Vector3(halfSize.X, -halfSize.Y, 0);
             vertices[5] = new Vector3(halfSize.X, halfSize.Y, 0);
             vertices[6] = new Vector3(-halfSize.X, halfSize.Y, 0);
             vertices[7] = new Vector3(-halfSize.X, -halfSize.Y, 0);
 
-            defaultUVs = new Vector2[VERTICES_NUM];
-
             defaultUVs[0] = new Vector2(0f, 0f);
             defaultUVs[1] = new Vector2(0f, 1f);
             defaultUVs[2] = new Vector2(1f, 1f);
             defaultUVs[3] = new Vector2(1f, 0f);
-
             defaultUVs[4] = new Vector2(1f, 0f);
             defaultUVs[5] = new Vector2(1f, 1f);
             defaultUVs[6] = new Vector2(0f, 1f);
@@ -58,7 +54,6 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.PrimitiveFactory
             tris[3] = 2;
             tris[4] = 3;
             tris[5] = 0;
-
             tris[6] = 4;
             tris[7] = 5;
             tris[8] = 6;
@@ -70,7 +65,6 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.PrimitiveFactory
             normals[1] = new Vector3(0, 0, -1);
             normals[2] = new Vector3(0, 0, -1);
             normals[3] = new Vector3(0, 0, -1);
-
             normals[4] = new Vector3(0, 0, 1);
             normals[5] = new Vector3(0, 0, 1);
             normals[6] = new Vector3(0, 0, 1);

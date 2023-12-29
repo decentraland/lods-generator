@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -28,6 +29,9 @@ namespace DCL_PiXYZ.SceneRepositioner
     
         public async Task SetupSceneInPiXYZ()
         {
+            Console.WriteLine("-------------------------");
+            Console.WriteLine("BEGIN REPOSITIONING");
+            
             //string rawSceneDefinition = await webRequestsHandler.FetchStringAsync($"{baseURL}{sceneID}");
             SceneDescriptorData sceneDescriptor = JsonConvert.DeserializeObject<SceneDescriptorData>(File.ReadAllText($"{baseURL}{sceneID}"));
 
@@ -48,6 +52,7 @@ namespace DCL_PiXYZ.SceneRepositioner
             foreach (KeyValuePair<int, DCLRendereableEntity> dclRendereableEntity in renderableEntitiesDictionary)
                 dclRendereableEntity.Value.PositionAndInstantiteMesh(sceneContent, renderableEntitiesDictionary);
 
+            Console.WriteLine("END REPOSITIONING");
         }
     }
 }
