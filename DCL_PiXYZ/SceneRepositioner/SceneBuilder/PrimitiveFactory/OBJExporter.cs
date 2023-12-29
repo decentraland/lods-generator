@@ -21,11 +21,11 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.PrimitiveFactory
                 var v = vertices[index];
                 objLines.Add($"v {v.X} {v.Y} {v.Z}");
             }
-
+            
             for (var index = 0; index < verticesNum; index++)
             {
-                string u = uvs[index].Y.ToString("0.0");
-                string v = uvs[index].X.ToString("0.0");
+                string u = uvs[index].X.ToString("0.0");
+                string v = uvs[index].Y.ToString("0.0");
                 objLines.Add($"vt {u} {v}");
             }
 
