@@ -1,7 +1,10 @@
 ﻿
+using System;
+using System.Numerics;
+
 namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.PrimitiveFactory
 {
-    /*
+    
     /// <summary>
     ///     Produces cylinder, cone, or truncated cone based on the arguments
     /// </summary>
@@ -11,27 +14,32 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.PrimitiveFactory
         public const float OPENING_ANGLE = 0f;
         public const float HEIGHT = PrimitivesSize.CYLINDER_HEIGHT;
 
-        public static Mesh Create(
+        public static string defaultCylinder;
+
+        public static string Create(
+            string entityID,
             float radiusTop = 0.5f,
             float radiusBottom = 0.5f,
             int numVertices = VERTICES_NUM,
             float length = HEIGHT,
             float openingAngle = OPENING_ANGLE)
         {
-            Mesh mesh = new Mesh();
-            mesh.name = "DCL Cylinder/Cone";
-
-            if (openingAngle is > 0 and < 180)
+            if (Math.Abs(radiusTop - 0.5f) < 0.01f && Math.Abs(radiusBottom - 0.5f) < 0.01f 
+                                                   && !string.IsNullOrEmpty(defaultCylinder))
+                return defaultCylinder;
+            
+            string fileName = $"Cylinder_{entityID}.obj";
+            
+            if ( openingAngle > 0 && openingAngle < 180)
             {
                 radiusTop = 0;
-                radiusBottom = length * Mathf.Tan(openingAngle * Mathf.Deg2Rad / 2);
+                radiusBottom = (float) (length * Math.Tan(openingAngle * (Math.PI / 180) / 2));
             }
 
             var offsetPos = new Vector3(0f, -length / 2, 0f);
 
             int numVertices2 = numVertices + 1;
 
-            if (mesh == null) mesh = new Mesh { name = "DCL Cylinder/Cone" };
 
             int finalVerticesCount = 4 * numVertices2;
 
@@ -43,19 +51,19 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.PrimitiveFactory
             Vector2[] uvs = PrimitivesBuffersPool.UVS.Rent(finalVerticesCount);
 
             int[] tris;
-            float slope = Mathf.Atan((radiusBottom - radiusTop) / length); // (rad difference)/height
-            float slopeSin = Mathf.Sin(slope);
-            float slopeCos = Mathf.Cos(slope);
+            float slope = (float)Math.Atan((radiusBottom - radiusTop) / length); // (rad difference)/height
+            float slopeSin = (float)Math.Sin(slope);
+            float slopeCos = (float)Math.Cos(slope);
             int i;
 
             for (i = 0; i < numVertices; i++)
             {
-                float angle = 2 * Mathf.PI * i / numVertices;
-                float angleSin = Mathf.Sin(angle);
-                float angleCos = Mathf.Cos(angle);
-                float angleHalf = 2 * Mathf.PI * (i + 0.5f) / numVertices; // for degenerated normals at cone tips
-                float angleHalfSin = Mathf.Sin(angleHalf);
-                float angleHalfCos = Mathf.Cos(angleHalf);
+                float angle = (float)(2 * Math.PI * i / numVertices);
+                float angleSin = (float)Math.Sin(angle);
+                float angleCos = (float)Math.Cos(angle);
+                float angleHalf = (float)(2 * Math.PI * (i + 0.5f) / numVertices); // for degenerated normals at cone tips
+                float angleHalfSin = (float)Math.Sin(angleHalf);
+                float angleHalfCos = (float)Math.Cos(angleHalf);
 
                 vertices[i] = new Vector3(radiusTop * angleCos, length, radiusTop * angleSin) + offsetPos;
 
@@ -88,9 +96,9 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.PrimitiveFactory
 
             for (i = 0; i < numVertices; i++)
             {
-                float angle = 2 * Mathf.PI * i / numVertices;
-                float angleSin = Mathf.Sin(angle);
-                float angleCos = Mathf.Cos(angle);
+                float angle = (float)(2 * Math.PI * i / numVertices);
+                float angleSin = (float)Math.Sin(angle);
+                float angleCos = (float)Math.Cos(angle);
 
                 vertices[coverTopIndexStart + i] =
                     new Vector3(radiusTop * angleCos, length, radiusTop * angleSin) + offsetPos;
@@ -108,9 +116,9 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.PrimitiveFactory
 
             for (i = 0; i < numVertices; i++)
             {
-                float angle = 2 * Mathf.PI * i / numVertices;
-                float angleSin = Mathf.Sin(angle);
-                float angleCos = Mathf.Cos(angle);
+                float angle = (float)(2 * Math.PI * i / numVertices);
+                float angleSin = (float)Math.Sin(angle);
+                float angleCos = (float)Math.Cos(angle);
 
                 vertices[coverBottomIndexStart + i] =
                     new Vector3(radiusBottom * angleCos, 0f, radiusBottom * angleSin) +
@@ -124,13 +132,7 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.PrimitiveFactory
             normals[coverBottomIndexStart + numVertices] = new Vector3(0, -1, 0);
             uvs[coverBottomIndexStart + numVertices] = new Vector2(0.5f, 0.5f);
 
-            mesh.SetVertices(vertices, 0, finalVerticesCount);
-            mesh.SetNormals(normals, 0, finalVerticesCount);
-            mesh.SetUVs(0, uvs, 0, finalVerticesCount);
 
-            PrimitivesBuffersPool.EQUAL_TO_VERTICES.Return(vertices);
-            PrimitivesBuffersPool.EQUAL_TO_VERTICES.Return(normals);
-            PrimitivesBuffersPool.UVS.Return(uvs);
 
             // create triangles
             // here we need to take care of point order, depending on inside and outside
@@ -206,13 +208,20 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.PrimitiveFactory
                 tris[cnt++] = next;
             }
 
-            mesh.SetTriangles(tris, 0, trianglesCount, 0);
+            OBJExporter.CreateOBJFile(fileName , finalVerticesCount, trianglesCount,vertices,  tris, normals, uvs);
 
+            PrimitivesBuffersPool.EQUAL_TO_VERTICES.Return(vertices);
+            PrimitivesBuffersPool.EQUAL_TO_VERTICES.Return(normals);
+            PrimitivesBuffersPool.UVS.Return(uvs);
             PrimitivesBuffersPool.TRIANGLES.Return(tris);
+            
+            if (Math.Abs(radiusTop - 0.5f) < 0.01f && Math.Abs(radiusBottom - 0.5f) < 0.01f )
+                defaultCylinder = fileName;
 
-            return mesh;
+            return fileName;
+
         }
-
+        
     }
-    */
+    
 }

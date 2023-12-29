@@ -1,16 +1,24 @@
 
+using System;
+using System.Numerics;
+
 namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.PrimitiveFactory
 {
-    /*
-    public class SphereFactory : MonoBehaviour
+    public class SphereFactory 
     {
         internal const int LONGITUDE = 24;
         internal const int LATITUDE = 16;
 
-        public static Mesh Create()
+        public static string defaultSphere;
+        
+        public static string Create(string entityID)
         {
-            var mesh = new Mesh();
-            mesh.name = "DCL Sphere";
+            if (!string.IsNullOrEmpty(defaultSphere))
+                return defaultSphere;
+            
+            string fileName = $"Sphere_{entityID}.obj";
+
+            
             float radius = PrimitivesSize.SPHERE_RADIUS;
 
             //float radius = 1f;
@@ -24,41 +32,41 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.PrimitiveFactory
             int verticesLength = ((nbLong + 1) * nbLat) + 2;
 
             Vector3[] vertices = PrimitivesBuffersPool.EQUAL_TO_VERTICES.Rent(verticesLength);
-            float _pi = Mathf.PI;
+            float _pi = (float)Math.PI;
             float _2pi = _pi * 2f;
 
-            vertices[0] = Vector3.up * radius;
+            vertices[0] = new Vector3(0,1,0) * radius;
 
             for (var lat = 0; lat < nbLat; lat++)
             {
                 float a1 = _pi * (lat + 1) / (nbLat + 1);
-                float sin1 = Mathf.Sin(a1);
-                float cos1 = Mathf.Cos(a1);
+                float sin1 = (float)Math.Sin(a1);
+                float cos1 = (float)Math.Cos(a1);
 
                 for (var lon = 0; lon <= nbLong; lon++)
                 {
                     float a2 = _2pi * (lon == nbLong ? 0 : lon) / nbLong;
-                    float sin2 = Mathf.Sin(a2);
-                    float cos2 = Mathf.Cos(a2);
+                    float sin2 = (float)Math.Sin(a2);
+                    float cos2 = (float)Math.Cos(a2);
 
                     vertices[lon + (lat * (nbLong + 1)) + 1] = new Vector3(sin1 * cos2, cos1, sin1 * sin2) * radius;
                 }
             }
 
-            vertices[verticesLength - 1] = Vector3.up * -radius;
+            vertices[verticesLength - 1] = new Vector3(0,1,0) * -radius;
 #endregion
 
 #region Normales
             Vector3[] normales = PrimitivesBuffersPool.EQUAL_TO_VERTICES.Rent(verticesLength);
 
             for (var n = 0; n < verticesLength; n++)
-                normales[n] = vertices[n].normalized;
+                normales[n] = Vector3.Normalize(vertices[n]);
 #endregion
 
 #region UVs
             Vector2[] uvs = PrimitivesBuffersPool.UVS.Rent(verticesLength);
-            uvs[0] = Vector2.up;
-            uvs[uvs.Length - 1] = Vector2.zero;
+            uvs[0] = new Vector2(0,1);
+            uvs[uvs.Length - 1] = new Vector2(0,0);
 
             for (var lat = 0; lat < nbLat; lat++)
             for (var lon = 0; lon <= nbLong; lon++)
@@ -110,19 +118,17 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.PrimitiveFactory
             }
 #endregion
 
-            mesh.SetVertices(vertices, 0, verticesLength);
-            mesh.SetNormals(normales, 0, verticesLength);
-            mesh.SetUVs(0, uvs, 0, verticesLength);
-            mesh.SetTriangles(triangles, 0, nbIndexes, 0);
-            mesh.RecalculateBounds();
+            OBJExporter.CreateOBJFile(fileName, verticesLength, nbIndexes, vertices, triangles, normales, uvs);
 
             PrimitivesBuffersPool.EQUAL_TO_VERTICES.Return(vertices);
             PrimitivesBuffersPool.EQUAL_TO_VERTICES.Return(normales);
             PrimitivesBuffersPool.UVS.Return(uvs);
             PrimitivesBuffersPool.TRIANGLES.Return(triangles);
 
-            return mesh;
+            defaultSphere = fileName;
+            
+            return fileName;
         }
     }
-    */
+    
 }

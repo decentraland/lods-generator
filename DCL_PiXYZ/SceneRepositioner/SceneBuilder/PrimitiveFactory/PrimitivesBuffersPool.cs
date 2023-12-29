@@ -16,7 +16,7 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.PrimitiveFactory
         // Vertices + Normals
         public static readonly ArrayPool<Vector3> EQUAL_TO_VERTICES = ArrayPool<Vector3>.Create(MAX_ARRAY_LENGTH, MAX_ARRAYS_PER_BUCKET * 2);
         public static readonly ArrayPool<int> TRIANGLES = ArrayPool<int>.Create(MAX_ARRAY_LENGTH * 10, MAX_ARRAYS_PER_BUCKET);
-        public static readonly ArrayPool<float> UVS = ArrayPool<float>.Create(MAX_ARRAY_LENGTH * 10, MAX_ARRAYS_PER_BUCKET);
+        public static readonly ArrayPool<Vector2> UVS = ArrayPool<Vector2>.Create(MAX_ARRAY_LENGTH, MAX_ARRAYS_PER_BUCKET);
 
     }
 }

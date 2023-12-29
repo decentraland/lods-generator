@@ -34,7 +34,9 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
 
         protected override uint GetMesh(PiXYZAPI pxz, string entityID)
         {
-            return pxz.Scene.CreateCube(PrimitivesSize.CUBE_SIZE, PrimitivesSize.CUBE_SIZE, PrimitivesSize.CUBE_SIZE);
+            string boxCreated = BoxFactory.Create(entityID, uvs);
+            return pxz.IO.ImportScene(Path.Combine(PiXYZConstants.RESOURCES_DIRECTORY, boxCreated));
+            //return pxz.Scene.CreateCube(PrimitivesSize.CUBE_SIZE, PrimitivesSize.CUBE_SIZE, PrimitivesSize.CUBE_SIZE);
         }
 
     }
@@ -46,10 +48,12 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
 
         protected override uint GetMesh(PiXYZAPI pxz, string entityID)
         {
-            if (radiusTop == 0)
+            string cylinderCreated = CylinderVariantsFactory.Create(entityID, radiusTop, radiusBottom);
+            return pxz.IO.ImportScene(Path.Combine(PiXYZConstants.RESOURCES_DIRECTORY, cylinderCreated));
+            /*if (radiusTop == 0)
                 return pxz.Scene.CreateCone(radiusBottom, PrimitivesSize.CYLINDER_HEIGHT);
             else
-                return pxz.Scene.CreateCylinder(radiusTop, PrimitivesSize.CYLINDER_HEIGHT);
+                return pxz.Scene.CreateCylinder(radiusTop, PrimitivesSize.CYLINDER_HEIGHT);*/
         }
     }
 
@@ -67,8 +71,12 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
 
     public class Sphere : DCLPrimitiveMesh
     {
-        protected override uint GetMesh(PiXYZAPI pxz, string entityID) =>
-            pxz.Scene.CreateSphere(PrimitivesSize.SPHERE_RADIUS);
+        protected override uint GetMesh(PiXYZAPI pxz, string entityID)
+        {
+            string sphereCreated = SphereFactory.Create(entityID);
+            return pxz.IO.ImportScene(Path.Combine(PiXYZConstants.RESOURCES_DIRECTORY, sphereCreated));
+            //pxz.Scene.CreateSphere(PrimitivesSize.SPHERE_RADIUS);
+        }
     }
     
 }

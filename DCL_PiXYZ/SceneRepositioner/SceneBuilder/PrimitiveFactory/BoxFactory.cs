@@ -1,16 +1,22 @@
 
+using System.Numerics;
+
 namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.PrimitiveFactory
 {
-    /*
+    
     public static class BoxFactory
     {
         internal const int VERTICES_NUM = 24;
         internal const int TRIS_NUM = 36;
 
-        public static Mesh Create(float[] customUvs)
+        public static string defaultBox;
+        
+        public static string Create(string entityID, float[] customUvs)
         {
-            Mesh mesh = new Mesh();
-            mesh.name = "DCL Box";
+            if (customUvs.Length == 0 && !string.IsNullOrEmpty(defaultBox))
+                return defaultBox;
+
+            string fileName = $"Box_{entityID}.obj";
 
             Vector3[] vertices = PrimitivesBuffersPool.EQUAL_TO_VERTICES.Rent(VERTICES_NUM); //top bottom left right front back
             Vector3[] normals = PrimitivesBuffersPool.EQUAL_TO_VERTICES.Rent(VERTICES_NUM);
@@ -22,44 +28,52 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.PrimitiveFactory
 
             float size = PrimitivesSize.CUBE_SIZE;
 
+            Vector3 right = new Vector3(1, 0, 0);
+            Vector3 left = new Vector3(-1, 0, 0);
+            Vector3 forward = new Vector3(0, 0, 1);
+            Vector3 back = new Vector3(0, 0, -1);
+            Vector3 up = new Vector3(0, 1, 0);
+            Vector3 down = new Vector3(0, -1, 0);
+
+            
             //top and bottom
             var start = new Vector3(-size / 2, size / 2, size / 2);
             vertices[vIndex++] = start;
-            vertices[vIndex++] = start + (Vector3.right * size);
-            vertices[vIndex++] = start + (Vector3.right * size) + (Vector3.back * size);
-            vertices[vIndex++] = start + (Vector3.back * size);
+            vertices[vIndex++] = start + (right * size);
+            vertices[vIndex++] = start + (right * size) + (back * size);
+            vertices[vIndex++] = start + (back * size);
 
             start = new Vector3(-size / 2, -size / 2, size / 2);
             vertices[vIndex++] = start;
-            vertices[vIndex++] = start + (Vector3.right * size);
-            vertices[vIndex++] = start + (Vector3.right * size) + (Vector3.back * size);
-            vertices[vIndex++] = start + (Vector3.back * size);
+            vertices[vIndex++] = start + (right * size);
+            vertices[vIndex++] = start + (right * size) + (back * size);
+            vertices[vIndex++] = start + (back * size);
 
             //left and right
             start = new Vector3(-size / 2, size / 2, size / 2);
             vertices[vIndex++] = start;
-            vertices[vIndex++] = start + (Vector3.back * size);
-            vertices[vIndex++] = start + (Vector3.back * size) + (Vector3.down * size);
-            vertices[vIndex++] = start + (Vector3.down * size);
+            vertices[vIndex++] = start + (back * size);
+            vertices[vIndex++] = start + (back * size) + (down * size);
+            vertices[vIndex++] = start + (down * size);
 
             start = new Vector3(size / 2, size / 2, size / 2);
             vertices[vIndex++] = start;
-            vertices[vIndex++] = start + (Vector3.back * size);
-            vertices[vIndex++] = start + (Vector3.back * size) + (Vector3.down * size);
-            vertices[vIndex++] = start + (Vector3.down * size);
+            vertices[vIndex++] = start + (back * size);
+            vertices[vIndex++] = start + (back * size) + (down * size);
+            vertices[vIndex++] = start + (down * size);
 
             //front and back
             start = new Vector3(-size / 2, size / 2, size / 2);
             vertices[vIndex++] = start;
-            vertices[vIndex++] = start + (Vector3.right * size);
-            vertices[vIndex++] = start + (Vector3.right * size) + (Vector3.down * size);
-            vertices[vIndex++] = start + (Vector3.down * size);
+            vertices[vIndex++] = start + (right * size);
+            vertices[vIndex++] = start + (right * size) + (down * size);
+            vertices[vIndex++] = start + (down * size);
 
             start = new Vector3(-size / 2, size / 2, -size / 2);
             vertices[vIndex++] = start;
-            vertices[vIndex++] = start + (Vector3.right * size);
-            vertices[vIndex++] = start + (Vector3.right * size) + (Vector3.down * size);
-            vertices[vIndex++] = start + (Vector3.down * size);
+            vertices[vIndex++] = start + (right * size);
+            vertices[vIndex++] = start + (right * size) + (down * size);
+            vertices[vIndex++] = start + (down * size);
 
             //uv
             var uvIndex = 0;
@@ -137,37 +151,37 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.PrimitiveFactory
             vIndex = 0;
 
             //top and bottom
-            normals[vIndex++] = Vector3.up;
-            normals[vIndex++] = Vector3.up;
-            normals[vIndex++] = Vector3.up;
-            normals[vIndex++] = Vector3.up;
+            normals[vIndex++] = up;
+            normals[vIndex++] = up;
+            normals[vIndex++] = up;
+            normals[vIndex++] = up;
 
-            normals[vIndex++] = Vector3.down;
-            normals[vIndex++] = Vector3.down;
-            normals[vIndex++] = Vector3.down;
-            normals[vIndex++] = Vector3.down;
+            normals[vIndex++] = down;
+            normals[vIndex++] = down;
+            normals[vIndex++] = down;
+            normals[vIndex++] = down;
 
             //left and right
-            normals[vIndex++] = Vector3.left;
-            normals[vIndex++] = Vector3.left;
-            normals[vIndex++] = Vector3.left;
-            normals[vIndex++] = Vector3.left;
+            normals[vIndex++] = left;
+            normals[vIndex++] = left;
+            normals[vIndex++] = left;
+            normals[vIndex++] = left;
 
-            normals[vIndex++] = Vector3.right;
-            normals[vIndex++] = Vector3.right;
-            normals[vIndex++] = Vector3.right;
-            normals[vIndex++] = Vector3.right;
+            normals[vIndex++] = right;
+            normals[vIndex++] = right;
+            normals[vIndex++] = right;
+            normals[vIndex++] = right;
 
             //front and back
-            normals[vIndex++] = Vector3.forward;
-            normals[vIndex++] = Vector3.forward;
-            normals[vIndex++] = Vector3.forward;
-            normals[vIndex++] = Vector3.forward;
+            normals[vIndex++] = forward;
+            normals[vIndex++] = forward;
+            normals[vIndex++] = forward;
+            normals[vIndex++] = forward;
 
-            normals[vIndex++] = Vector3.back;
-            normals[vIndex++] = Vector3.back;
-            normals[vIndex++] = Vector3.back;
-            normals[vIndex++] = Vector3.back;
+            normals[vIndex++] = back;
+            normals[vIndex++] = back;
+            normals[vIndex++] = back;
+            normals[vIndex++] = back;
 
             var cnt = 0;
 
@@ -216,22 +230,20 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.PrimitiveFactory
             tris[cnt++] = 20 + 2;
             tris[cnt++] = 20 + 3;
 
-            mesh.SetVertices(vertices, 0, VERTICES_NUM);
-            mesh.SetNormals(normals, 0, VERTICES_NUM);
-            mesh.SetUVs(0, defaultUVs, 0, VERTICES_NUM);
-            mesh.SetUVs(1, uvs2, 0, VERTICES_NUM);
-            mesh.SetTriangles(tris, 0, TRIS_NUM, 0);
-
-            if (customUvs.Length > 0)
-                mesh.SetUVs(0, PrimitivesUtils.FloatArrayToV2List(customUvs.ToList()), 0, VERTICES_NUM);
-
+            
+            OBJExporter.CreateOBJFile(fileName , VERTICES_NUM, TRIS_NUM,vertices,  tris, normals, 
+                customUvs.Length > 0  ? PrimitiveFactoryUtils.FloatArrayToVector2Array(customUvs, VERTICES_NUM) : defaultUVs);
+            
             PrimitivesBuffersPool.EQUAL_TO_VERTICES.Return(vertices);
-            PrimitivesBuffersPool.EQUAL_TO_VERTICES.Return(normals);
-            PrimitivesBuffersPool.UVS.Return(uvs2);
             PrimitivesBuffersPool.TRIANGLES.Return(tris);
+            PrimitivesBuffersPool.EQUAL_TO_VERTICES.Return(normals);
+            PrimitivesBuffersPool.UVS.Return(defaultUVs);
 
-            return mesh;
+            if (customUvs.Length == 0)
+                defaultBox = fileName;
+
+            return fileName;
         }
     }
-    */
+    
 }
