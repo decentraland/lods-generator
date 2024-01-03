@@ -38,9 +38,6 @@ namespace DCL_PiXYZ.SceneRepositioner
             Dictionary<int, DCLRendereableEntity> renderableEntitiesDictionary = new Dictionary<int, DCLRendereableEntity>();
             foreach (var sceneDescriptorRenderableEntity in sceneDescriptor.RenderableEntities)
             {
-                if(sceneDescriptorRenderableEntity.entityId != 512)
-                    continue;
-                
                 if (!renderableEntitiesDictionary.TryGetValue(sceneDescriptorRenderableEntity.entityId, out var dclEntity))
                 {
                     dclEntity = new DCLRendereableEntity();

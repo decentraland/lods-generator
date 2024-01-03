@@ -9,7 +9,7 @@ namespace DCL_PiXYZ
 {
     public class PXZMergeMeshes : IPXZModifier
     {
-        public OccurrenceList ApplyModification(PiXYZAPI pxz, OccurrenceList origin)
+        public void ApplyModification(PiXYZAPI pxz)
         {
             Console.WriteLine("-------------------------");
             Console.WriteLine("BEGIN PXZ MERGE MESHES FOR SETTINGS " + pxz.Core.GetVersion());
@@ -20,9 +20,8 @@ namespace DCL_PiXYZ
             bakeOption.resolution = 1024;
             bakeOption.padding = 1;
             bakeOption.textures = bakeMaps;
-            uint combinedMesh = pxz.Algo.CombineMeshes(origin, bakeOption);
+            pxz.Algo.CombineMeshes(new OccurrenceList(new uint[]{pxz.Scene.GetRoot()}), bakeOption);
             Console.WriteLine("END PXZ MERGE MESHES FOR SETTINGS " + pxz.Core.GetVersion());
-            return new OccurrenceList(new[] { combinedMesh });
         }
     }
 }

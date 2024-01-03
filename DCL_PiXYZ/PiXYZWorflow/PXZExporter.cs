@@ -20,13 +20,14 @@ namespace DCL_PiXYZ
             this.filename = filename;
         }
 
-        public OccurrenceList ApplyModification(PiXYZAPI pxz, OccurrenceList origin)
+        public void ApplyModification(PiXYZAPI pxz)
         {
             Console.WriteLine("-------------------------");
             Console.WriteLine($"BEGIN PXZ EXPORT {filename}{extension}");
-            pxz.IO.ExportScene(Path.Combine(path, $"{filename}{extension}"), origin[0]);
+            //Use it to flatten the hierarchy
+            //pxz.Scene.MergeOccurrencesByTreeLevel(new OccurrenceList(new uint[]{pxz.Scene.GetRoot()}),1);
+            pxz.IO.ExportScene(Path.Combine(path, $"{filename}{extension}"), pxz.Scene.GetRoot());
             Console.WriteLine("END PXZ EXPORT ");
-            return new OccurrenceList();
         }
     }
 }

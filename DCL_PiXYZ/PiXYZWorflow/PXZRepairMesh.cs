@@ -15,7 +15,7 @@ namespace DCL_PiXYZ
             this.PXZModels = pxzModels;
         }
         
-        public OccurrenceList ApplyModification(PiXYZAPI pxz, OccurrenceList origin)
+        public void ApplyModification(PiXYZAPI pxz)
         {
             Console.WriteLine("-------------------------");
             Console.WriteLine($"BEGIN PXZ MESH REPAIR");
@@ -25,7 +25,6 @@ namespace DCL_PiXYZ
                     pxz.Algo.RepairMesh(new OccurrenceList(new uint[]{pxzModel.modelOcurrence}), 0.1, true, false);
             }
             Console.WriteLine($"END PXZ MESH REPAIR");
-            return origin;
         }
     }
 }

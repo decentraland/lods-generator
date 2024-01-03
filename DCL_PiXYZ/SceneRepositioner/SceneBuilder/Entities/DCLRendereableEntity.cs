@@ -64,11 +64,6 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
             matrix4.Rotate(new Quaternion(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w));
             matrix4.Scale(new Vector3(transform.scale.x, transform.scale.y, transform.scale.z));
             matrix4.Translate(new Vector3(transform.position.x, transform.position.y, transform.position.z));
-            
-            Console.WriteLine($"Quaternion x:{transform.rotation.x} y:{transform.rotation.y} z:{transform.rotation.z} w:{transform.rotation.w}");
-            Console.WriteLine($"Position x:{transform.position.x} y:{transform.position.y} z:{transform.position.z}");
-            Console.WriteLine($"Scale x:{transform.scale.x} y:{transform.scale.y} z:{transform.scale.z}");
-            
             pxz.Scene.ApplyTransformation(instantiatedEntity, matrix4);
         }
 
