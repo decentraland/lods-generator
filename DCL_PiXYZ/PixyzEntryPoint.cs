@@ -22,24 +22,26 @@ namespace DCL_PiXYZ
             InitializePiXYZ();
             CreateResourcesDirectory();
             WebRequestsHandler webRequestsHandler = new WebRequestsHandler();
-            
 
-            Importer importer = new Importer("bafkreifaupi2ycrpneu7danakhxvhyjewv4ixcnryu5w25oqpvcnwtjohq",
+            if (args.Length == 0)
+            {
+                args = new string[]
+                {
+                    "bafkreifaupi2ycrpneu7danakhxvhyjewv4ixcnryu5w25oqpvcnwtjohq",
+                    "C:/Users/juanm/Documents/Decentraland/PiXYZ/DCL_PiXYZ/SceneRepositioner/Resources/",
+                };
+            }
+
+            Importer importer = new Importer(args[0],
                 "https://peer.decentraland.org/content/contents/",
-            //Importer importer = new Importer("bafkreieifr7pyaofncd6o7vdptvqgreqxxtcn3goycmiz4cnwz7yewjldq",
-            //    "https://peer.decentraland.org/content/contents/",
                 webRequestsHandler);
             await importer.GenerateSceneContent();
             Dictionary<string,string> sceneContent = await importer.DownloadAllContent();
-
-
-            SceneRepositioner.SceneRepositioner sceneRepositioner =
-           //     new SceneRepositioner.SceneRepositioner(webRequestsHandler,
-           //         "C:/Users/juanm/Documents/Decentraland/PiXYZ/DCL_PiXYZ/SceneRepositioner/Resources/",
-           //         "rendereable-entities-manifest.json", sceneContent, pxz);
+            
+            SceneRepositioner.SceneRepositioner sceneRepositioner = 
                  new SceneRepositioner.SceneRepositioner(webRequestsHandler,
-                     "C:/Users/juanm/Documents/Decentraland/PiXYZ/DCL_PiXYZ/SceneRepositioner/Resources/",
-                     "LOD-builder-test-scene-manifest_-129,-77.json", sceneContent, pxz);
+                     args[1],
+                     $"{args[0]}-lod-manifest.json", sceneContent, pxz);
             List<PXZModel> models = await sceneRepositioner.SetupSceneInPiXYZ();
 
             
