@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using DCL_PiXYZ.SceneRepositioner.JsonParsing;
 using UnityEngine.Pixyz.API;
 using UnityEngine.Pixyz.Scene;
 
@@ -18,11 +20,11 @@ namespace DCL_PiXYZ
             this.filename = filename;
         }
 
-        public OccurrenceList ApplyModification(PiXYZAPI pxz, OccurrenceList occurrenceList)
+        public OccurrenceList ApplyModification(PiXYZAPI pxz, OccurrenceList origin)
         {
             Console.WriteLine("-------------------------");
             Console.WriteLine($"BEGIN PXZ EXPORT {filename}{extension}");
-            pxz.IO.ExportScene(Path.Combine(path, $"{filename}{extension}"), occurrenceList[0]);
+            pxz.IO.ExportScene(Path.Combine(path, $"{filename}{extension}"), origin[0]);
             Console.WriteLine("END PXZ EXPORT ");
             return new OccurrenceList();
         }

@@ -47,10 +47,10 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
             this.pxz = pxz;
         }
 
-        public void PositionAndInstantiteMesh(Dictionary<string, string> contentTable, Dictionary<int, DCLRendereableEntity> renderableEntities)
+        public PXZModel PositionAndInstantiteMesh(Dictionary<string, string> contentTable, Dictionary<int, DCLRendereableEntity> renderableEntities)
         {
             InstantiateTransform(renderableEntities);
-            rendereableMesh?.InstantiateMesh(pxz, entityID.ToString(), instantiatedEntity, dclMaterial.GetMaterial(pxz, entityID.ToString(),contentTable) ,contentTable);
+            return rendereableMesh.InstantiateMesh(pxz, entityID.ToString(), instantiatedEntity, dclMaterial.GetMaterial(pxz, entityID.ToString(),contentTable) ,contentTable);
         }
 
         private void InstantiateTransform(Dictionary<int, DCLRendereableEntity> renderableEntities)
@@ -61,9 +61,14 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
 
             Matrix4 matrix4 = new Matrix4();
             matrix4.Init();
-            matrix4.Scale(new Vector3(transform.scale.x, transform.scale.y, transform.scale.z));
             matrix4.Rotate(new Quaternion(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w));
+            matrix4.Scale(new Vector3(transform.scale.x, transform.scale.y, transform.scale.z));
             matrix4.Translate(new Vector3(transform.position.x, transform.position.y, transform.position.z));
+            
+            Console.WriteLine($"Quaternion x:{transform.rotation.x} y:{transform.rotation.y} z:{transform.rotation.z} w:{transform.rotation.w}");
+            Console.WriteLine($"Position x:{transform.position.x} y:{transform.position.y} z:{transform.position.z}");
+            Console.WriteLine($"Scale x:{transform.scale.x} y:{transform.scale.y} z:{transform.scale.z}");
+            
             pxz.Scene.ApplyTransformation(instantiatedEntity, matrix4);
         }
 

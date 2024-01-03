@@ -27,17 +27,20 @@ namespace DCL_PiXYZ.SceneRepositioner
             this.pxz = pxz;
         }
     
-        public async Task SetupSceneInPiXYZ()
+        public async Task<List<PXZModel>> SetupSceneInPiXYZ()
         {
             Console.WriteLine("-------------------------");
             Console.WriteLine("BEGIN REPOSITIONING");
-            
+            List<PXZModel> models = new List<PXZModel>();
             //string rawSceneDefinition = await webRequestsHandler.FetchStringAsync($"{baseURL}{sceneID}");
             SceneDescriptorData sceneDescriptor = JsonConvert.DeserializeObject<SceneDescriptorData>(File.ReadAllText($"{baseURL}{sceneID}"));
 
             Dictionary<int, DCLRendereableEntity> renderableEntitiesDictionary = new Dictionary<int, DCLRendereableEntity>();
             foreach (var sceneDescriptorRenderableEntity in sceneDescriptor.RenderableEntities)
             {
+                if(sceneDescriptorRenderableEntity.entityId != 512)
+                    continue;
+                
                 if (!renderableEntitiesDictionary.TryGetValue(sceneDescriptorRenderableEntity.entityId, out var dclEntity))
                 {
                     dclEntity = new DCLRendereableEntity();
@@ -50,9 +53,11 @@ namespace DCL_PiXYZ.SceneRepositioner
                 dclRendereableEntity.Value.InitEntity(pxz, pxz.Scene.GetRoot());
 
             foreach (KeyValuePair<int, DCLRendereableEntity> dclRendereableEntity in renderableEntitiesDictionary)
-                dclRendereableEntity.Value.PositionAndInstantiteMesh(sceneContent, renderableEntitiesDictionary);
+                models.Add(dclRendereableEntity.Value.PositionAndInstantiteMesh(sceneContent, renderableEntitiesDictionary));
 
             Console.WriteLine("END REPOSITIONING");
+
+            return models;
         }
     }
 }

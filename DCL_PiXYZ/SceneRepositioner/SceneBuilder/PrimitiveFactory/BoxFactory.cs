@@ -20,7 +20,8 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.PrimitiveFactory
 
             Vector3[] vertices = PrimitivesBuffersPool.EQUAL_TO_VERTICES.Rent(VERTICES_NUM); //top bottom left right front back
             Vector3[] normals = PrimitivesBuffersPool.EQUAL_TO_VERTICES.Rent(VERTICES_NUM);
-            var defaultUVs = new Vector2[VERTICES_NUM];
+            var defaultUVs =  PrimitivesBuffersPool.UVS.Rent(VERTICES_NUM);
+            //TODO:  Do I need uv2?
             Vector2[] uvs2 = PrimitivesBuffersPool.UVS.Rent(VERTICES_NUM);
             int[] tris = PrimitivesBuffersPool.TRIANGLES.Rent(TRIS_NUM);
 

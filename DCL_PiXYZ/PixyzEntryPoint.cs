@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Numerics;
 using System.Threading.Tasks;
+using DCL_PiXYZ.SceneRepositioner.JsonParsing;
 using SceneImporter;
 using UnityEngine.Pixyz.Algo;
 using UnityEngine.Pixyz.API;
@@ -23,22 +24,30 @@ namespace DCL_PiXYZ
             WebRequestsHandler webRequestsHandler = new WebRequestsHandler();
             
 
-            Importer importer = new Importer("bafkreieifr7pyaofncd6o7vdptvqgreqxxtcn3goycmiz4cnwz7yewjldq",
+            Importer importer = new Importer("bafkreifaupi2ycrpneu7danakhxvhyjewv4ixcnryu5w25oqpvcnwtjohq",
                 "https://peer.decentraland.org/content/contents/",
+            //Importer importer = new Importer("bafkreieifr7pyaofncd6o7vdptvqgreqxxtcn3goycmiz4cnwz7yewjldq",
+            //    "https://peer.decentraland.org/content/contents/",
                 webRequestsHandler);
             await importer.GenerateSceneContent();
             Dictionary<string,string> sceneContent = await importer.DownloadAllContent();
 
 
             SceneRepositioner.SceneRepositioner sceneRepositioner =
-                new SceneRepositioner.SceneRepositioner(webRequestsHandler,
-                    "C:/Users/juanm/Documents/Decentraland/PiXYZ/DCL_PiXYZ/SceneRepositioner/Resources/",
-                    "rendereable-entities-manifest.json", sceneContent, pxz);
-            await sceneRepositioner.SetupSceneInPiXYZ();
+           //     new SceneRepositioner.SceneRepositioner(webRequestsHandler,
+           //         "C:/Users/juanm/Documents/Decentraland/PiXYZ/DCL_PiXYZ/SceneRepositioner/Resources/",
+           //         "rendereable-entities-manifest.json", sceneContent, pxz);
+                 new SceneRepositioner.SceneRepositioner(webRequestsHandler,
+                     "C:/Users/juanm/Documents/Decentraland/PiXYZ/DCL_PiXYZ/SceneRepositioner/Resources/",
+                     "LOD-builder-test-scene-manifest_-129,-77.json", sceneContent, pxz);
+            List<PXZModel> models = await sceneRepositioner.SetupSceneInPiXYZ();
 
-
+            
             List<IPXZModifier> modifiers = new List<IPXZModifier>();
             modifiers.Add(new PXZDeleteByName(".*collider.*"));
+            modifiers.Add(new PXZRepairMesh(models));
+            //modifiers.Add(new PXZDecimator());
+            modifiers.Add(new PXZMergeMeshes());
             modifiers.Add(new PXZExporter("C:/Users/juanm/Documents/Decentraland/asset-bundle-converter/asset-bundle-converter/Assets/Resources",
                 $"0_Combined_Meshes_{DateTime.Now.ToString("yyyyMMdd_HHmmss")}", ".fbx"));
 
