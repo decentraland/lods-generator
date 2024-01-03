@@ -17,20 +17,19 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
     public abstract class DCLMaterial
     {
         public TextureData texture;
-        protected virtual ColorAlpha GetColor()
+        protected virtual Color GetColor()
         {
-            ColorAlpha colorAlpha = new ColorAlpha();
+            Color colorAlpha = new Color();
             colorAlpha.r = 1;
             colorAlpha.g = 1;
             colorAlpha.b = 1;
-            colorAlpha.a = 1;
             return colorAlpha;
         }
 
         public uint GetMaterial(PiXYZAPI pxz, string entityID, Dictionary<string, string> contentTable)
         {
             uint material = pxz.Material.CreateMaterial($"Material_{entityID}" , "PBR");
-            
+            ColorOrTexture albedoColorOrTexture = new ColorOrTexture();
             if (texture?.tex?.src != null)
             {
                 if (contentTable.TryGetValue(texture.tex.src, out string texturePath))
@@ -44,16 +43,19 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
                     albedoTexture.tilling = point;
                     albedoTexture.image = image;
             
-                    ColorOrTexture colorOrTexture = new ColorOrTexture();
-                    colorOrTexture._type = ColorOrTexture.Type.TEXTURE;
-                    colorOrTexture.texture = albedoTexture;
-            
-                    PBRMaterialInfos materialInfos = pxz.Material.GetPBRMaterialInfos(material);
-                    materialInfos.albedo = colorOrTexture;
-            
-                    pxz.Material.SetPBRMaterialInfos(material, materialInfos);
+                    albedoColorOrTexture = new ColorOrTexture();
+                    albedoColorOrTexture._type = ColorOrTexture.Type.TEXTURE;
+                    albedoColorOrTexture.texture = albedoTexture;
                 }
             }
+            else
+            {
+                albedoColorOrTexture._type = ColorOrTexture.Type.COLOR;
+                albedoColorOrTexture.color = GetColor();
+            }
+            PBRMaterialInfos materialInfos = pxz.Material.GetPBRMaterialInfos(material);
+            materialInfos.albedo = albedoColorOrTexture;
+            pxz.Material.SetPBRMaterialInfos(material, materialInfos);
             return material;
         }
 
@@ -75,14 +77,13 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
     {
         public AlbedoColor albedoColor = new AlbedoColor ();
 
-        protected override ColorAlpha GetColor()
+        protected override Color GetColor()
         {
-            ColorAlpha colorAlpha = new ColorAlpha();
-            colorAlpha.r = albedoColor.r;
-            colorAlpha.g = albedoColor.g;
-            colorAlpha.b = albedoColor.b;
-            colorAlpha.a = colorAlpha.a;
-            return colorAlpha;
+            Color color = new Color();
+            color.r = albedoColor.r;
+            color.g = albedoColor.g;
+            color.b = albedoColor.b;
+            return color;
         }
     }
 

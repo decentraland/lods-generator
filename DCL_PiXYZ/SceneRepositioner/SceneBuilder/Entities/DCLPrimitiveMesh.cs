@@ -13,10 +13,9 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
     public abstract class DCLPrimitiveMesh : DCLMesh
     {
         protected abstract uint GetMesh(PiXYZAPI pxz, string entityID);
-        public override void InstantiateMesh(PiXYZAPI pxz, string entityID,uint parent, uint material, Dictionary<string, string> sceneContent)
+        public override PXZModel InstantiateMesh(PiXYZAPI pxz, string entityID,uint parent, uint material, Dictionary<string, string> sceneContent)
         {
             uint mesh = GetMesh(pxz, entityID);
-            
             Matrix4 matrix4 = new Matrix4();
             matrix4.Init();
             //TODO: Check this one. Mirroring on x axis to transform from PiXYZ space to Unity Space
@@ -25,6 +24,8 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
             
             pxz.Scene.SetParent(mesh, parent);
             pxz.Scene.SetOccurrenceMaterial(mesh,material);
+
+            return new PXZModel(false, mesh);
         }
     }
 
