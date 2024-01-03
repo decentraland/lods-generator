@@ -17,11 +17,10 @@ namespace AssetBundleConverter.LODs
 
         public override PXZModel InstantiateMesh(PiXYZAPI pxz, string entityID ,uint parent, uint material,Dictionary<string, string> sceneContent)
         {
-
             if (sceneContent.TryGetValue(src, out string modelPath))
             {
                 uint importedFileOccurrence = pxz.IO.ImportScene(modelPath);
-                pxz.Scene.SetParent(importedFileOccurrence, parent, worldPositionStays:true);
+                pxz.Scene.SetParent(importedFileOccurrence, parent);
                 return new PXZModel(true, importedFileOccurrence);
             }
             else

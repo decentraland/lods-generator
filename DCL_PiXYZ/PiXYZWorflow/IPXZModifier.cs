@@ -7,6 +7,6 @@ namespace DCL_PiXYZ
 {
     public interface IPXZModifier
     {
-        OccurrenceList ApplyModification(PiXYZAPI pxz, OccurrenceList origin);
+        void ApplyModification(PiXYZAPI pxz);
     }
 }

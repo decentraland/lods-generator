@@ -9,16 +9,15 @@ namespace DCL_PiXYZ
 {
     public class PXZDecimator : IPXZModifier
     {
-        public OccurrenceList ApplyModification(PiXYZAPI pxz, OccurrenceList origin)
+        public void ApplyModification(PiXYZAPI pxz)
         {
             Console.WriteLine("-------------------------");
             Console.WriteLine("BEGIN PXZ MODIFIER DECIMATOR");
             DecimateOptionsSelector decimate = new DecimateOptionsSelector();
             decimate.ratio = 100f;
             decimate._type = DecimateOptionsSelector.Type.RATIO;
-            pxz.Algo.DecimateTarget(origin, decimate);
+            pxz.Algo.DecimateTarget(new OccurrenceList(new uint[]{pxz.Scene.GetRoot()}), decimate);
             Console.WriteLine("END PXZ MODIFIER DECIMATOR");
-            return origin;
         }
     }
 }

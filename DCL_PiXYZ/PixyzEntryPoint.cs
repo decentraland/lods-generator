@@ -46,7 +46,7 @@ namespace DCL_PiXYZ
             List<IPXZModifier> modifiers = new List<IPXZModifier>();
             modifiers.Add(new PXZDeleteByName(".*collider.*"));
             modifiers.Add(new PXZRepairMesh(models));
-            //modifiers.Add(new PXZDecimator());
+            modifiers.Add(new PXZDecimator());
             modifiers.Add(new PXZMergeMeshes());
             modifiers.Add(new PXZExporter("C:/Users/juanm/Documents/Decentraland/asset-bundle-converter/asset-bundle-converter/Assets/Resources",
                 $"0_Combined_Meshes_{DateTime.Now.ToString("yyyyMMdd_HHmmss")}", ".fbx"));
@@ -54,7 +54,7 @@ namespace DCL_PiXYZ
             OccurrenceList result = new OccurrenceList(new[] { pxz.Scene.GetRoot() });
           
             foreach (var pxzModifier in modifiers)
-                result = pxzModifier.ApplyModification(pxz, result);
+                pxzModifier.ApplyModification(pxz);
    
         }
 
