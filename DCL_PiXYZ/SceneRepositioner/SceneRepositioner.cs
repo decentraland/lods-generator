@@ -33,10 +33,10 @@ namespace DCL_PiXYZ.SceneRepositioner
             Console.WriteLine("BEGIN REPOSITIONING");
             List<PXZModel> models = new List<PXZModel>();
             //string rawSceneDefinition = await webRequestsHandler.FetchStringAsync($"{baseURL}{sceneID}");
-            SceneDescriptorData sceneDescriptor = JsonConvert.DeserializeObject<SceneDescriptorData>(File.ReadAllText($"{baseURL}{sceneID}"));
-
+            List<RenderableEntity> renderableEntities = JsonConvert.DeserializeObject<List<RenderableEntity>>(File.ReadAllText($"{baseURL}{sceneID}"));
             Dictionary<int, DCLRendereableEntity> renderableEntitiesDictionary = new Dictionary<int, DCLRendereableEntity>();
-            foreach (var sceneDescriptorRenderableEntity in sceneDescriptor.RenderableEntities)
+           
+            foreach (var sceneDescriptorRenderableEntity in renderableEntities)
             {
                 if (!renderableEntitiesDictionary.TryGetValue(sceneDescriptorRenderableEntity.entityId, out var dclEntity))
                 {
