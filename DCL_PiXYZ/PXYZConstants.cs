@@ -1,9 +1,13 @@
 ﻿using System.IO;
+using DCL_PiXYZ.SceneRepositioner.JsonParsing;
 
 namespace DCL_PiXYZ
 {
-    public class PiXYZConstants
+    public class PXYZConstants
     {
         public static string RESOURCES_DIRECTORY = Path.Combine(Directory.GetCurrentDirectory(), "Resources");
+
+        public static PXZModel EMPTY_MODEL = new PXZModel(false, 500000);
+
     }
 }

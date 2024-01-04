@@ -21,7 +21,7 @@ $outputManifestBuilder = npm run start --sceneId=$sceneId
 Write-Host $outputManifestBuilder
 
 # Change to the Lod-Generator directory
-cd $scriptPath\Lod-Generator
+cd $scriptPath\Lod-Generator\netcoreapp3.1
 
 # Get output Manifest path
 $relativePath = "/Manifest-Builder/output-manifests/"

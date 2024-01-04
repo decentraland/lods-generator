@@ -38,6 +38,9 @@ namespace DCL_PiXYZ.SceneRepositioner
            
             foreach (var sceneDescriptorRenderableEntity in renderableEntities)
             {
+                //if (!sceneDescriptorRenderableEntity.entityId.Equals(513))
+                //    continue;
+                
                 if (!renderableEntitiesDictionary.TryGetValue(sceneDescriptorRenderableEntity.entityId, out var dclEntity))
                 {
                     dclEntity = new DCLRendereableEntity();

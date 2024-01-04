@@ -14,7 +14,7 @@ using Vector3 = System.Numerics.Vector3;
 
 namespace DCL_PiXYZ
 {
-    class PixyzEntryPoint
+    class PXZEntryPoint
     {
         private static PiXYZAPI pxz;
         static async Task Main(string[] args)
@@ -27,7 +27,10 @@ namespace DCL_PiXYZ
             {
                 args = new string[]
                 {
+                    //MonsterScene
                     "bafkreifaupi2ycrpneu7danakhxvhyjewv4ixcnryu5w25oqpvcnwtjohq",
+                    //Geneisis Plaza
+                    //"bafkreieifr7pyaofncd6o7vdptvqgreqxxtcn3goycmiz4cnwz7yewjldq",
                     "C:/Users/juanm/Documents/Decentraland/PiXYZ/DCL_PiXYZ/SceneRepositioner/Resources/",
                 };
             }
@@ -48,8 +51,9 @@ namespace DCL_PiXYZ
             List<IPXZModifier> modifiers = new List<IPXZModifier>();
             modifiers.Add(new PXZDeleteByName(".*collider.*"));
             modifiers.Add(new PXZRepairMesh(models));
-            modifiers.Add(new PXZDecimator());
+            modifiers.Add(new PXZDecimator(DecimateOptionsSelector.Type.RATIO, 100));
             modifiers.Add(new PXZMergeMeshes());
+            //modifiers.Add(new PXZDecimateAndBake());
             modifiers.Add(new PXZExporter("C:/Users/juanm/Documents/Decentraland/asset-bundle-converter/asset-bundle-converter/Assets/Resources",
                 $"0_Combined_Meshes_{DateTime.Now.ToString("yyyyMMdd_HHmmss")}", ".fbx"));
 
@@ -61,7 +65,7 @@ namespace DCL_PiXYZ
         }
 
         private static void CreateResourcesDirectory() =>
-            Directory.CreateDirectory(PiXYZConstants.RESOURCES_DIRECTORY);
+            Directory.CreateDirectory(PXYZConstants.RESOURCES_DIRECTORY);
 
 
         private static void InitializePiXYZ()
