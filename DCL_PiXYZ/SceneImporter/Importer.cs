@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -24,7 +25,7 @@ namespace SceneImporter
             this.baseURL = baseURL;
             this.sceneID = sceneID;
             this.webRequestsHandler = webRequestsHandler;
-            ignoreExtensions = new []{".mp3", ".js", ".lib", ".json", ".md"};
+            ignoreExtensions = new []{".mp3", ".js", ".lib", ".json", ".md", ".wav", ".bin"};
         }
 
         public async Task GenerateSceneContent()
@@ -58,8 +59,12 @@ namespace SceneImporter
                         continue;
                     }
                     Console.WriteLine($"Getting File {content.file}");
-                    string filePath = Path.Combine(PiXYZConstants.RESOURCES_DIRECTORY, content.file);
+                    string filePath = Path.Combine(PXYZConstants.RESOURCES_DIRECTORY, content.file);
                     await webRequestsHandler.DownloadFileAsync($"{baseURL}{content.hash}", filePath);
+                    if (filePath.Contains("https"))
+                    {
+                        Console.WriteLine("ASdQQ");
+                    }
                     contentDictionary.Add(content.file, filePath);
                     Console.WriteLine($"File {content.file} Success!");
                 }

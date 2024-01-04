@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using DCL_PiXYZ.SceneRepositioner.JsonParsing.Parsers;
 using Newtonsoft.Json;
 using UnityEngine.Pixyz.API;
@@ -43,9 +44,12 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
                     albedoTexture.tilling = point;
                     albedoTexture.image = image;
             
-                    albedoColorOrTexture = new ColorOrTexture();
                     albedoColorOrTexture._type = ColorOrTexture.Type.TEXTURE;
                     albedoColorOrTexture.texture = albedoTexture;
+                }
+                else
+                {
+                    //TODO: Download dynamic textures
                 }
             }
             else

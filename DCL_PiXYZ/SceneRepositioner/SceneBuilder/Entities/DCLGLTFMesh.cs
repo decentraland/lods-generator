@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using DCL_PiXYZ;
 using DCL_PiXYZ.SceneRepositioner.JsonParsing;
 using UnityEngine.Pixyz.API;
 
@@ -19,14 +20,23 @@ namespace AssetBundleConverter.LODs
         {
             if (sceneContent.TryGetValue(src, out string modelPath))
             {
-                uint importedFileOccurrence = pxz.IO.ImportScene(modelPath);
-                pxz.Scene.SetParent(importedFileOccurrence, parent);
-                return new PXZModel(true, importedFileOccurrence);
+                try
+                {
+                    uint importedFileOccurrence = pxz.IO.ImportScene(modelPath);
+                    pxz.Scene.SetParent(importedFileOccurrence, parent);
+                    return new PXZModel(true, importedFileOccurrence);
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine($"ERROR: Importing GLTF {src} failed with error {e}");
+                    return PXYZConstants.EMPTY_MODEL;
+                }
+
             }
             else
             {
                 Console.WriteLine($"ERROR: GLTF {src} file not found in sceneContent");
-                return new PXZModel(false, 500000);
+                return PXYZConstants.EMPTY_MODEL;
             }
         }
     }

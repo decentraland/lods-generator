@@ -5,7 +5,7 @@ using Vector3 = System.Numerics.Vector3;
 
 namespace DCL_PiXYZ
 {
-    public static class PiXYZMathUtils
+    public static class PXZMathUtils
     {
         public static void Init(this Matrix4 matrix4)
         {

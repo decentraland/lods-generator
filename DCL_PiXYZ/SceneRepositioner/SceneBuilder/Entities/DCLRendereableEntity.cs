@@ -50,7 +50,11 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
         public PXZModel PositionAndInstantiteMesh(Dictionary<string, string> contentTable, Dictionary<int, DCLRendereableEntity> renderableEntities)
         {
             InstantiateTransform(renderableEntities);
-            return rendereableMesh.InstantiateMesh(pxz, entityID.ToString(), instantiatedEntity, dclMaterial.GetMaterial(pxz, entityID.ToString(),contentTable) ,contentTable);
+            if (rendereableMesh != null)
+                return rendereableMesh.InstantiateMesh(pxz, entityID.ToString(), instantiatedEntity,
+                    dclMaterial.GetMaterial(pxz, entityID.ToString(), contentTable), contentTable);
+            else
+                return PXYZConstants.EMPTY_MODEL;
         }
 
         private void InstantiateTransform(Dictionary<int, DCLRendereableEntity> renderableEntities)
