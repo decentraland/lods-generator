@@ -1,16 +1,30 @@
 ﻿using System.IO;
 using System.Net.Http;
 using System.Reflection.PortableExecutable;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace DCL_PiXYZ
 {
     public class WebRequestsHandler
     {
-        public async Task<string> FetchStringAsync(string uri)
+        public async Task<string> GetRequest(string uri)
         {
             HttpClient client = new HttpClient();
             using (HttpResponseMessage response = await client.GetAsync(uri))
+            {
+                if (!response.IsSuccessStatusCode)
+                    throw new HttpRequestException($"Error: {response.StatusCode}");
+            
+                return await response.Content.ReadAsStringAsync();
+            }
+        }
+        
+        public async Task<string> PostRequest(string uri, string jsonData)
+        {
+            HttpClient client = new HttpClient();
+            var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+            using (HttpResponseMessage response = await client.PostAsync(uri, content))
             {
                 if (!response.IsSuccessStatusCode)
                     throw new HttpRequestException($"Error: {response.StatusCode}");

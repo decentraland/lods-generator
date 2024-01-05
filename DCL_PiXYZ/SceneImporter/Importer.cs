@@ -13,19 +13,27 @@ namespace SceneImporter
 {
     public class Importer
     {
-        private string baseURL;
-        private string sceneID;
+        private string contentsURL;
+        private string activeEntitiesURL;
+        private string sceneParam;
         private WebRequestsHandler webRequestsHandler;
         private SceneDefinition sceneDefinition;
         private string[] ignoreExtensions;
 
-        private bool debugLog;
-        public Importer(string sceneID, string baseURL, WebRequestsHandler webRequestsHandler)
+        private bool paramByHash;
+
+        private string sceneHash;
+        private string scenePointer;
+        public Importer(string paramType, string sceneParam, WebRequestsHandler webRequestsHandler)
         {
-            this.baseURL = baseURL;
-            this.sceneID = sceneID;
+            this.sceneParam = sceneParam;
             this.webRequestsHandler = webRequestsHandler;
+
+            paramByHash = paramType.Equals(PXYZConstants.HASH_PARAM);
+
             ignoreExtensions = new []{".mp3", ".js", ".lib", ".json", ".md", ".wav", ".bin"};
+            contentsURL = "https://peer.decentraland.org/content/contents/";
+            activeEntitiesURL = "https://peer.decentraland.org/content/entities/active";
         }
 
         public async Task GenerateSceneContent()
@@ -35,12 +43,25 @@ namespace SceneImporter
             Console.WriteLine("Getting Scene Definition");
             try
             {
-                string rawSceneDefinition = await webRequestsHandler.FetchStringAsync($"{baseURL}{sceneID}");
-                sceneDefinition = JsonConvert.DeserializeObject<SceneDefinition>(rawSceneDefinition);
+                if (paramByHash)
+                {
+                    sceneHash = sceneParam;
+                    string rawSceneDefinition = await webRequestsHandler.GetRequest($"{contentsURL}{sceneHash}");
+                    sceneDefinition = JsonConvert.DeserializeObject<SceneDefinition>(rawSceneDefinition);
+                    scenePointer = sceneDefinition.pointers[0];
+                }
+                else
+                {
+                    scenePointer = sceneParam;
+                    string rawSceneDefinition = await webRequestsHandler.PostRequest(activeEntitiesURL, "{\"pointers\":[\"" + sceneParam + "\"]}");
+                    sceneDefinition = JsonConvert.DeserializeObject<List<SceneDefinition>>(rawSceneDefinition)[0];
+                    sceneHash = sceneDefinition.id;
+                    scenePointer = sceneDefinition.pointers[0];
+                }
             }
             catch (HttpRequestException e)
             {
-                throw new Exception($"URL failed: {baseURL}{sceneID}");
+                throw new Exception($"Scene fetch failed: {e}");
             }
             Console.WriteLine("Scene Definition Success!");
         }
@@ -60,17 +81,13 @@ namespace SceneImporter
                     }
                     Console.WriteLine($"Getting File {content.file}");
                     string filePath = Path.Combine(PXYZConstants.RESOURCES_DIRECTORY, content.file);
-                    await webRequestsHandler.DownloadFileAsync($"{baseURL}{content.hash}", filePath);
-                    if (filePath.Contains("https"))
-                    {
-                        Console.WriteLine("ASdQQ");
-                    }
+                    await webRequestsHandler.DownloadFileAsync($"{contentsURL}{content.hash}", filePath);
                     contentDictionary.Add(content.file, filePath);
                     Console.WriteLine($"File {content.file} Success!");
                 }
                 catch (HttpRequestException e)
                 {
-                    throw new Exception($"URL failed: {baseURL}{sceneID}");
+                    throw new Exception($"URL failed: {contentsURL}{sceneParam}");
                 }
             }
             Console.WriteLine("File Content Success!");
@@ -79,5 +96,14 @@ namespace SceneImporter
         }
 
 
+        public string GetSceneHash()
+        {
+            return sceneHash;
+        }
+
+        public string GetScenePointer()
+        {
+            return scenePointer;
+        }
     }
 }

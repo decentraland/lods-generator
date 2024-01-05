@@ -28,39 +28,51 @@ namespace DCL_PiXYZ
                 args = new string[]
                 {
                     //MonsterScene
-                    "bafkreifaupi2ycrpneu7danakhxvhyjewv4ixcnryu5w25oqpvcnwtjohq",
+                    // "bafkreifaupi2ycrpneu7danakhxvhyjewv4ixcnryu5w25oqpvcnwtjohq",
                     //Geneisis Plaza
                     //"bafkreieifr7pyaofncd6o7vdptvqgreqxxtcn3goycmiz4cnwz7yewjldq",
+                    "coords",
+                    "0,0",
                     "C:/Users/juanm/Documents/Decentraland/PiXYZ/DCL_PiXYZ/SceneRepositioner/Resources/",
                 };
             }
 
-            Importer importer = new Importer(args[0],
-                "https://peer.decentraland.org/content/contents/",
-                webRequestsHandler);
-            await importer.GenerateSceneContent();
-            Dictionary<string,string> sceneContent = await importer.DownloadAllContent();
-            
-            SceneRepositioner.SceneRepositioner sceneRepositioner = 
-                 new SceneRepositioner.SceneRepositioner(webRequestsHandler,
-                     args[1],
-                     $"{args[0]}-lod-manifest.json", sceneContent, pxz);
-            List<PXZModel> models = await sceneRepositioner.SetupSceneInPiXYZ();
+            var paramType = args[0];
+            var sceneId = args[1];
+            var scenePositionJsonDirectory = args[2];
 
             
+            Importer importer = new Importer(paramType,sceneId,webRequestsHandler);
+            await importer.GenerateSceneContent();
+            Dictionary<string,string> sceneContent = await importer.DownloadAllContent();
+
+            SceneRepositioner.SceneRepositioner sceneRepositioner = 
+                 new SceneRepositioner.SceneRepositioner(webRequestsHandler,
+                     scenePositionJsonDirectory,
+                     $"{importer.GetSceneHash()}-lod-manifest.json", sceneContent, pxz);
+            List<PXZModel> models = await sceneRepositioner.SetupSceneInPiXYZ();
+
+            double ratio = 50;
+            string outputDirectory =
+                $"C:/Users/juanm/Documents/Decentraland/asset-bundle-converter/asset-bundle-converter/Assets/Resources/{importer.GetScenePointer()}/{ratio.ToString()}";
+            Directory.CreateDirectory(outputDirectory);
             List<IPXZModifier> modifiers = new List<IPXZModifier>();
             modifiers.Add(new PXZDeleteByName(".*collider.*"));
             modifiers.Add(new PXZRepairMesh(models));
-            modifiers.Add(new PXZDecimator(DecimateOptionsSelector.Type.RATIO, 100));
+            modifiers.Add(new PXZDecimator(DecimateOptionsSelector.Type.RATIO, ratio));
             modifiers.Add(new PXZMergeMeshes());
             //modifiers.Add(new PXZDecimateAndBake());
-            modifiers.Add(new PXZExporter("C:/Users/juanm/Documents/Decentraland/asset-bundle-converter/asset-bundle-converter/Assets/Resources",
-                $"0_Combined_Meshes_{DateTime.Now.ToString("yyyyMMdd_HHmmss")}", ".fbx"));
+            modifiers.Add(new PXZExporter(outputDirectory, $"0_{DateTime.Now.ToString("yyyyMMdd_HHmmss")}", ".fbx"));
 
-            OccurrenceList result = new OccurrenceList(new[] { pxz.Scene.GetRoot() });
-          
+            PXZStopwatch stopwatch = new PXZStopwatch();
+            
+            
             foreach (var pxzModifier in modifiers)
+            {
+                stopwatch.Start();
                 pxzModifier.ApplyModification(pxz);
+                stopwatch.StopAndPrint(pxzModifier.GetType().Name);
+            }
    
         }
 

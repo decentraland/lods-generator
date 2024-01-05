@@ -25,7 +25,7 @@ namespace DCL_PiXYZ
             Console.WriteLine("-------------------------");
             Console.WriteLine($"BEGIN PXZ EXPORT {filename}{extension}");
             //Use it to flatten the hierarchy
-            //pxz.Scene.MergeOccurrencesByTreeLevel(new OccurrenceList(new uint[]{pxz.Scene.GetRoot()}),1);
+            pxz.Scene.MergeOccurrencesByTreeLevel(new OccurrenceList(new[]{pxz.Scene.GetRoot()}),1);
             pxz.IO.ExportScene(Path.Combine(path, $"{filename}{extension}"), pxz.Scene.GetRoot());
             Console.WriteLine("END PXZ EXPORT ");
         }
