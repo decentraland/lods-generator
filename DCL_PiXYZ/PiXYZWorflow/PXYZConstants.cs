@@ -9,5 +9,9 @@ namespace DCL_PiXYZ
 
         public static PXZModel EMPTY_MODEL = new PXZModel(false, 500000);
 
+        public static string COORDS_PARAM = "coords";
+        
+        public static string HASH_PARAM = "hash";
+
     }
 }
