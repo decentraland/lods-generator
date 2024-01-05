@@ -19,30 +19,35 @@ namespace DCL_PiXYZ
         private static PiXYZAPI pxz;
         static async Task Main(string[] args)
         {
-            InitializePiXYZ();
-            CreateResourcesDirectory();
-            WebRequestsHandler webRequestsHandler = new WebRequestsHandler();
-
+            
+            
             if (args.Length == 0)
             {
                 args = new string[]
                 {
-                    //MonsterScene
-                    // "bafkreifaupi2ycrpneu7danakhxvhyjewv4ixcnryu5w25oqpvcnwtjohq",
+                    "coords",
                     //Geneisis Plaza
                     //"bafkreieifr7pyaofncd6o7vdptvqgreqxxtcn3goycmiz4cnwz7yewjldq",
-                    "coords",
-                    "0,0",
-                    "C:/Users/juanm/Documents/Decentraland/PiXYZ/DCL_PiXYZ/SceneRepositioner/Resources/",
+                    //"0,0",
+                    //MonsterScene
+                    // "bafkreifaupi2ycrpneu7danakhxvhyjewv4ixcnryu5w25oqpvcnwtjohq",
+                    "-129,-77",
+                    //"C:/Users/juanm/Documents/Decentraland/PiXYZ/DCL_PiXYZ/SceneRepositioner/Resources/"
+                    "C:/Users/juanm/Documents/Decentraland/PiXYZ/scene-lod-entities-manifest-builder/",
                 };
             }
 
             var paramType = args[0];
-            var sceneId = args[1];
-            var scenePositionJsonDirectory = args[2];
-
+            var sceneParam = args[1];
+            var sceneManifestDirectory = args[2];
+            var scenePositionJsonDirectory = Path.Combine(sceneManifestDirectory, "output-manifests");
             
-            Importer importer = new Importer(paramType,sceneId,webRequestsHandler);
+            GenerateSceneManifest(sceneManifestDirectory, sceneParam);
+            InitializePiXYZ();
+            CreateResourcesDirectory();
+            WebRequestsHandler webRequestsHandler = new WebRequestsHandler();
+            
+            Importer importer = new Importer(paramType,sceneParam,webRequestsHandler);
             await importer.GenerateSceneContent();
             Dictionary<string,string> sceneContent = await importer.DownloadAllContent();
 
@@ -52,7 +57,7 @@ namespace DCL_PiXYZ
                      $"{importer.GetSceneHash()}-lod-manifest.json", sceneContent, pxz);
             List<PXZModel> models = await sceneRepositioner.SetupSceneInPiXYZ();
 
-            double ratio = 50;
+            double ratio = 5;
             string outputDirectory =
                 $"C:/Users/juanm/Documents/Decentraland/asset-bundle-converter/asset-bundle-converter/Assets/Resources/{importer.GetScenePointer()}/{ratio.ToString()}";
             Directory.CreateDirectory(outputDirectory);
@@ -74,6 +79,89 @@ namespace DCL_PiXYZ
                 stopwatch.StopAndPrint(pxzModifier.GetType().Name);
             }
    
+        }
+
+        private static void GenerateSceneManifest(string sceneManifestProjectDirectory, string coords)
+        {
+            DoNPMInstall(sceneManifestProjectDirectory);
+            RunNPMTool(sceneManifestProjectDirectory, coords);
+        }
+
+        private static void RunNPMTool(string sceneManifestProjectDirectory, string coords)
+        {
+            // Set up the process start information
+            ProcessStartInfo install = new ProcessStartInfo
+            {
+                FileName = "npm", // or the full path to npm if not in PATH
+                Arguments = "run start --coords=" + coords, // replace with your npm command
+                WorkingDirectory = sceneManifestProjectDirectory,
+                RedirectStandardOutput = true, // if you want to read output
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            // Start the process
+            using (Process process = Process.Start(install))
+            {
+                // Read the output (if needed)
+                using (StreamReader reader = process.StandardOutput)
+                {
+                    string result = reader.ReadToEnd();
+                    Console.WriteLine(result);
+                }
+
+                process.WaitForExit(); // Wait for the process to complete
+            }
+        }
+
+        private static void DoNPMInstall(string sceneManifestProjectDirectory)
+        {
+            // Set up the process start information
+            ProcessStartInfo install = new ProcessStartInfo
+            {
+                FileName = "npm", // or the full path to npm if not in PATH
+                Arguments = "i", // replace with your npm command
+                WorkingDirectory = sceneManifestProjectDirectory,
+                RedirectStandardOutput = true, // if you want to read output
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            // Start the process
+            using (Process process = Process.Start(install))
+            {
+                // Read the output (if needed)
+                using (StreamReader reader = process.StandardOutput)
+                {
+                    string result = reader.ReadToEnd();
+                    Console.WriteLine(result);
+                }
+
+                process.WaitForExit(); // Wait for the process to complete
+            }
+            
+            ProcessStartInfo build = new ProcessStartInfo
+            {
+                FileName = "npm", // or the full path to npm if not in PATH
+                Arguments = "run build", // replace with your npm command
+                WorkingDirectory = sceneManifestProjectDirectory,
+                RedirectStandardOutput = true, // if you want to read output
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            // Start the process
+            using (Process process = Process.Start(build))
+            {
+                // Read the output (if needed)
+                using (StreamReader reader = process.StandardOutput)
+                {
+                    string result = reader.ReadToEnd();
+                    Console.WriteLine(result);
+                }
+
+                process.WaitForExit(); // Wait for the process to complete
+            }
         }
 
         private static void CreateResourcesDirectory() =>
