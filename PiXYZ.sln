@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DCL_PiXYZ", "DCL_PiXYZ\DCL_PiXYZ.csproj", "{23ACD36E-968B-4B64-A97E-07CD2DDFEF5B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FC302205-F88E-4739-AA92-F5EA5B45341E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC302205-F88E-4739-AA92-F5EA5B45341E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC302205-F88E-4739-AA92-F5EA5B45341E}.Debug|Any CPU.ActiveCfg = Release|Any CPU
+		{FC302205-F88E-4739-AA92-F5EA5B45341E}.Debug|Any CPU.Build.0 = Release|Any CPU
+		{BB35840F-31D9-4114-ADCB-B7C8451E9A9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB35840F-31D9-4114-ADCB-B7C8451E9A9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB35840F-31D9-4114-ADCB-B7C8451E9A9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB35840F-31D9-4114-ADCB-B7C8451E9A9D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D99F4E2F-B1DD-4697-8AC6-8D814B049F4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D99F4E2F-B1DD-4697-8AC6-8D814B049F4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D99F4E2F-B1DD-4697-8AC6-8D814B049F4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D99F4E2F-B1DD-4697-8AC6-8D814B049F4E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{23ACD36E-968B-4B64-A97E-07CD2DDFEF5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23ACD36E-968B-4B64-A97E-07CD2DDFEF5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23ACD36E-968B-4B64-A97E-07CD2DDFEF5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23ACD36E-968B-4B64-A97E-07CD2DDFEF5B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

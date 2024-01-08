@@ -1,0 +1,48 @@
+name: Build LOD
+
+on:
+  workflow_dispatch:
+    inputs:
+      sceneType:
+        description: 'Hash or coords'
+        required: true
+        default: 'coords'
+      sceneDescription:
+        description: 'Scene description'
+        required: true
+        default: '-129,-77'
+      decimationRatio:
+        description: 'Decimation Ratio'
+        required: true
+        default: '50'
+
+jobs:
+  build-and-run:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        lfs: true  # This ensures LFS is initialized
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '3.1.x'
+
+    - name: Build with dotnet
+      run: dotnet build --configuration Release --output ./build_output
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18.14.2'
+
+    - name: Run the application
+      run: .\build_output\DCL_PiXYZ.exe "${{ github.event.inputs.sceneType }}" "${{ github.event.inputs.sceneDescription }}" "${{ github.event.inputs.decimationRatio }}" "scene-lod-entities-manifest-builder/" "OutputDirectoryPath/"
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: output-artifacts
+        path: OutputDirectoryPath/
