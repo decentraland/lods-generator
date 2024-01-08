@@ -25,6 +25,12 @@ jobs:
       with:
         lfs: true  # This ensures LFS is initialized
 
+    - name: Specify Chocolatey Source
+      run: choco source add -n=chocolatey -s=https://chocolatey.org/api/v2/
+
+    - name: Install Visual C++ Redistributable
+      run: choco install vcredist-all -y
+
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
@@ -32,6 +38,21 @@ jobs:
 
     - name: Publish with dotnet
       run:  dotnet publish -c Release -r win10-x64 -o ./publish --self-contained true 
+
+    - name: Install Vulkan SDK
+      uses: jakoch/install-vulkan-sdk-action@v1.0.0
+      with:
+        vulkan_version: 1.3.268.0
+        optional_components: com.lunarg.vulkan.vma
+        install_runtime: true
+        cache: true
+        destination: ${{ github.workspace }}/publish
+
+    - name: Move Vulkan DLL to output directory
+      run: |
+        # Move files from source to destination
+        mv ./publish/1.3.268.0/runtime/x64/vulkan-1.dll ./publish/
+      shell: bash
 
     - name: Setup Node.js
       uses: actions/setup-node@v2
