@@ -2,15 +2,11 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Numerics;
 using System.Threading.Tasks;
 using DCL_PiXYZ.SceneRepositioner.JsonParsing;
 using SceneImporter;
 using UnityEngine.Pixyz.Algo;
 using UnityEngine.Pixyz.API;
-using UnityEngine.Pixyz.Geom;
-using UnityEngine.Pixyz.Scene;
-using Vector3 = System.Numerics.Vector3;
 
 namespace DCL_PiXYZ
 {
