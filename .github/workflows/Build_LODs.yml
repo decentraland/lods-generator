@@ -39,11 +39,11 @@ jobs:
       with:
         node-version: '18.14.2'
 
-    - name: Run the application
-      run: .\build_output\DCL_PiXYZ.exe "${{ github.event.inputs.sceneType }}" "${{ github.event.inputs.sceneDescription }}" "${{ github.event.inputs.decimationRatio }}" "scene-lod-entities-manifest-builder/" "OutputDirectoryPath/"
+    #- name: Run the application
+    #  run: .\build_output\DCL_PiXYZ.exe "${{ github.event.inputs.sceneType }}" "${{ github.event.inputs.sceneDescription }}" "${{ github.event.inputs.decimationRatio }}" "scene-lod-entities-manifest-builder/" "OutputDirectoryPath/"
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
       with:
         name: output-artifacts
-        path: OutputDirectoryPath/
+        path: build_output/
