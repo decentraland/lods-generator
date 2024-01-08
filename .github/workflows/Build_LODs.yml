@@ -31,18 +31,18 @@ jobs:
         dotnet-version: '3.1.x'
 
     - name: Publish with dotnet
-      run: dotnet publish -c Release -o ./build_output
+      run: dotnet publish --configuration Release --output ./build_output
 
     - name: Setup Node.js
       uses: actions/setup-node@v2
       with:
         node-version: '18.14.2'
 
-    #- name: Run the application
-    #  run: .\build_output\DCL_PiXYZ.exe "${{ github.event.inputs.sceneType }}" "${{ github.event.inputs.sceneDescription }}" "${{ github.event.inputs.decimationRatio }}" "scene-lod-entities-manifest-builder/" "OutputDirectoryPath/"
+    - name: Run the application
+      run: .\build_output\DCL_PiXYZ.exe "${{ github.event.inputs.sceneType }}" "${{ github.event.inputs.sceneDescription }}" "${{ github.event.inputs.decimationRatio }}" "scene-lod-entities-manifest-builder/" "OutputDirectoryPath/"
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
       with:
         name: output-artifacts
-        path: build_output/
+        path: OutputDirectoryPath/
