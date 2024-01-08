@@ -19,28 +19,30 @@ namespace DCL_PiXYZ
         private static PiXYZAPI pxz;
         static async Task Main(string[] args)
         {
-            
-            
             if (args.Length == 0)
             {
                 args = new string[]
                 {
                     "coords",
+                    "-129,-77",
+                    "100",
+                    "../../../../scene-lod-entities-manifest-builder/",
+                    "C:/Users/juanm/Documents/Decentraland/asset-bundle-converter/asset-bundle-converter/Assets/Resources/",
                     //Geneisis Plaza
                     //"bafkreieifr7pyaofncd6o7vdptvqgreqxxtcn3goycmiz4cnwz7yewjldq",
                     //"0,0",
                     //MonsterScene
                     // "bafkreifaupi2ycrpneu7danakhxvhyjewv4ixcnryu5w25oqpvcnwtjohq",
-                    "-129,-77",
-                    //"C:/Users/juanm/Documents/Decentraland/PiXYZ/DCL_PiXYZ/SceneRepositioner/Resources/"
-                    "C:/Users/juanm/Documents/Decentraland/PiXYZ/scene-lod-entities-manifest-builder/",
+                    //"-129,-77",
                 };
             }
 
             var paramType = args[0];
             var sceneParam = args[1];
-            var sceneManifestDirectory = args[2];
-            var scenePositionJsonDirectory = Path.Combine(sceneManifestDirectory, "output-manifests");
+            var decimationRatio = args[2];
+            var sceneManifestDirectory = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), args[3]));
+            var scenePositionJsonDirectory = Path.Combine(sceneManifestDirectory, "output-manifests/");
+            var outputDirectory = args[4];
             
             GenerateSceneManifest(sceneManifestDirectory, sceneParam);
             InitializePiXYZ();
@@ -57,20 +59,19 @@ namespace DCL_PiXYZ
                      $"{importer.GetSceneHash()}-lod-manifest.json", sceneContent, pxz);
             List<PXZModel> models = await sceneRepositioner.SetupSceneInPiXYZ();
 
-            double ratio = 5;
-            string outputDirectory =
-                $"C:/Users/juanm/Documents/Decentraland/asset-bundle-converter/asset-bundle-converter/Assets/Resources/{importer.GetScenePointer()}/{ratio.ToString()}";
-            Directory.CreateDirectory(outputDirectory);
+            double ratio = double.Parse(decimationRatio);
+            //string finalOutputDirectory = Path.Combine(outputDirectory, $"{importer.GetScenePointer()}/{ratio.ToString()}");
+            string finalOutputDirectory = outputDirectory;
+            Directory.CreateDirectory(finalOutputDirectory);
             List<IPXZModifier> modifiers = new List<IPXZModifier>();
             modifiers.Add(new PXZDeleteByName(".*collider.*"));
             modifiers.Add(new PXZRepairMesh(models));
             modifiers.Add(new PXZDecimator(DecimateOptionsSelector.Type.RATIO, ratio));
             modifiers.Add(new PXZMergeMeshes());
             //modifiers.Add(new PXZDecimateAndBake());
-            modifiers.Add(new PXZExporter(outputDirectory, $"0_{DateTime.Now.ToString("yyyyMMdd_HHmmss")}", ".fbx"));
+            modifiers.Add(new PXZExporter(finalOutputDirectory, $"0_{DateTime.Now.ToString("yyyyMMdd_HHmmss")}", ".fbx"));
 
             PXZStopwatch stopwatch = new PXZStopwatch();
-            
             
             foreach (var pxzModifier in modifiers)
             {
@@ -83,8 +84,11 @@ namespace DCL_PiXYZ
 
         private static void GenerateSceneManifest(string sceneManifestProjectDirectory, string coords)
         {
+            Console.WriteLine("Scene manifest directory " + sceneManifestProjectDirectory);
             DoNPMInstall(sceneManifestProjectDirectory);
+            Console.WriteLine("Finish installation " + sceneManifestProjectDirectory);
             RunNPMTool(sceneManifestProjectDirectory, coords);
+            Console.WriteLine("Finish building manifest " + sceneManifestProjectDirectory);
         }
 
         private static void RunNPMTool(string sceneManifestProjectDirectory, string coords)
@@ -92,8 +96,8 @@ namespace DCL_PiXYZ
             // Set up the process start information
             ProcessStartInfo install = new ProcessStartInfo
             {
-                FileName = "npm", // or the full path to npm if not in PATH
-                Arguments = "run start --coords=" + coords, // replace with your npm command
+                FileName = "powershell", // or the full path to npm if not in PATH
+                Arguments = "npm run start --coords=" + coords, // replace with your npm command
                 WorkingDirectory = sceneManifestProjectDirectory,
                 RedirectStandardOutput = true, // if you want to read output
                 UseShellExecute = false,
@@ -119,14 +123,14 @@ namespace DCL_PiXYZ
             // Set up the process start information
             ProcessStartInfo install = new ProcessStartInfo
             {
-                FileName = "npm", // or the full path to npm if not in PATH
-                Arguments = "i", // replace with your npm command
+                FileName = "powershell", // or the full path to npm if not in PATH
+                Arguments = "npm i", // replace with your npm command
                 WorkingDirectory = sceneManifestProjectDirectory,
                 RedirectStandardOutput = true, // if you want to read output
                 UseShellExecute = false,
                 CreateNoWindow = true
             };
-
+            
             // Start the process
             using (Process process = Process.Start(install))
             {
@@ -142,8 +146,8 @@ namespace DCL_PiXYZ
             
             ProcessStartInfo build = new ProcessStartInfo
             {
-                FileName = "npm", // or the full path to npm if not in PATH
-                Arguments = "run build", // replace with your npm command
+                FileName = "powershell", // or the full path to npm if not in PATH
+                Arguments = "npm run build", // replace with your npm command
                 WorkingDirectory = sceneManifestProjectDirectory,
                 RedirectStandardOutput = true, // if you want to read output
                 UseShellExecute = false,
@@ -175,7 +179,7 @@ namespace DCL_PiXYZ
                     "204dda67aa3ea8bcb22a76bff9aa1224823b253144396405300e235e434c4711591892c19069c7");
             // if no license is found, try to configure a license server
             if (!pxz.Core.CheckLicense())
-                pxz.Core.InstallLicense("C:/Users/juanm/Documents/Decentraland/PiXYZ/pixyzsdk-29022024.lic");
+                pxz.Core.InstallLicense("pixyzsdk-29022024.lic");
         }
     }
 }

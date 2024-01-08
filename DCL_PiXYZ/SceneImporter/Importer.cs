@@ -87,7 +87,7 @@ namespace SceneImporter
                 }
                 catch (HttpRequestException e)
                 {
-                    throw new Exception($"URL failed: {contentsURL}{sceneParam}");
+                    throw new Exception($"URL failed: {contentsURL}{sceneParam} with error {e}");
                 }
             }
             Console.WriteLine("File Content Success!");
