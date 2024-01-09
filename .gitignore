@@ -18,3 +18,45 @@ ExportedObj/
 DCL_PiXYZ/bin/
 DCL_PiXYZ/obj/
 CLI_Tool/
+
+old
+*.sw[a-z]
+/deploy/node_modules
+/deploy/dist
+**/node_modules/**
+
+tsconfig.tsbuildinfo
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# production
+/build
+*/dist
+/tmp
+
+# misc
+.DS_Store
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+log.txt
+error.txt
+
+.vscode
+
+*.js
+
+validation-errors.json
