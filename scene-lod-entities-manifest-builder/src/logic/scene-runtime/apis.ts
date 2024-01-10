@@ -7,42 +7,42 @@ export const manifestFileNameEnd = '-lod-manifest.json'
 let savedManifest = false
 
 export const LoadableApis = {
-  
+
   // Emulating old EnvironmentAPI from browser-interface/kernel at https://github.com/decentraland/unity-renderer/blob/dev/browser-interface/packages/shared/apis/host/EnvironmentAPI.ts#L29%60L77
   // to avoid compilation errors on very old sdk6 scenes when running their eval to generate the manifest.
   EnvironmentApi: {
     isPreviewMode: async () => ({ isPreview: false }),
-    
+
     getBootstrapData: async () => ({ }),
-    
+
     getPlatform: async () => ({ }),
-    
+
     areUnsafeRequestAllowed: async () => ({ }),
-    
+
     getCurrentRealm: async () => ({ }),
-    
+
     getExplorerConfiguration: async () => ({ }),
-    
+
     getDecentralandTime: async () => ({ })
   },
   EngineApi: {
     sendBatch: async () => ({ events: [] }),
-    
+
     crdtGetState: async () => ({ hasEntities: mainCrdt !== undefined, data: [mainCrdt] }),
-    
+
     crdtSendToRenderer: async ({ data }: { data: Uint8Array }) => {
       if (mainCrdt) {
         data = joinBuffers(mainCrdt, data)
       }
-      
+
       if (savedManifest || data.length == 0) return
       savedManifest = true
-      
+
       const outputJSONManifest = JSON.stringify([...serializeCrdtMessages('[msg]: ', data)], null, 2)
-      
+
       mkdir(manifestFileDir, { recursive: true },
-            err => { if (err) console.log(err) })
-      
+          err => { if (err) console.log(err) })
+
       writeFile(`${manifestFileDir}/${sceneId}${manifestFileNameEnd}`, outputJSONManifest,
           err => { if (err) console.log(err) })
       console.log(outputJSONManifest)
@@ -67,6 +67,42 @@ export const LoadableApis = {
       return {
         content: await res.arrayBuffer()
       }
+    },
+    async getSceneInformation() {
+      return {
+        urn: "",
+        baseUrl: "",
+        content: "",
+        metadataJson: ""
+      }
+    },
+  },
+  RestrictedActions: {
+    async triggerEmote() {},
+    async movePlayerTo() {},
+    async changeRealm() {},
+    async openExternalUrl() {},
+    async openNftDialog() {},
+    async setCommunicationsAdapter() {},
+    async teleportTo() {},
+    async triggerSceneEmote() {}
+  },
+  UserActionModule: {
+    async requestTeleport() {}
+  },
+  Players: {
+    async getPlayerData(body: any) {
+      return {
+        avatar: null,
+        displayName: "ManifestBuilder",
+        hasConnectedWeb3: false,
+        publicKey: null,
+        userId: 123,
+        version: 123
+      }
+    },
+    async getConnectedPlayers() {
+      return [{userId: 123}]
     }
   }
 }
