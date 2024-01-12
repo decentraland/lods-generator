@@ -100,6 +100,16 @@ export const LoadableApis = {
     async teleportTo() {},
     async triggerSceneEmote() {}
   },
+  CommunicationsController: {
+    async send() {},
+    async sendBinary() {}
+  },
+  PortableExperiences: {
+    async exit() {},
+    async getPortableExperiencesLoaded() {},
+    async kill() {},
+    async spawn() {}
+  },
   UserActionModule: {
     async requestTeleport() {}
   },
