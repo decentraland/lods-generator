@@ -8,6 +8,7 @@ namespace SceneImporter
         public Content[] content;
         public string[] pointers;
         public string id;
+        public Metadata metadata;
     }
     
     [Serializable]
@@ -15,5 +16,11 @@ namespace SceneImporter
     {
         public string file;
         public string hash;
+    }
+    
+    [Serializable]
+    public class Metadata
+    {
+        public string runtimeVersion;
     }
 }
