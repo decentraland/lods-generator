@@ -27,16 +27,15 @@ namespace DCL_PiXYZ.Utils
             List<SceneDefinition> filteredScenes = await BuildSceneArray();
             Console.WriteLine("ARRAY BUILT PROCESSING " + filteredScenes.Count);
             
+            SaveSceneFilteredToFile(filteredScenes, Path.Combine(PXYZConstants.RESOURCES_DIRECTORY, "non-empty-scenes.txt"));
+            
             //UNCOMMENT IF YOU NEED TO INSTALL
             //NPMUtils.DoNPMInstall(sceneManifestDirectory);
             foreach (var sceneDefinition in filteredScenes)
             {
                 bool isSDK7 = false;
                 if (!string.IsNullOrEmpty(sceneDefinition.metadata.runtimeVersion))
-                {
                     isSDK7  = sceneDefinition.metadata.runtimeVersion.Equals("7");
-                }
-                Console.WriteLine("ANALYZING COORD " + sceneDefinition.pointers[0]);
                 string possibleException  = NPMUtils.RunNPMToolAndReturnExceptionIfPresent(sceneManifestDirectory, sceneDefinition.pointers[0]);
                 Console.WriteLine("FINISHED ANALYZING COORD " + sceneDefinition.pointers[0]);
                 results.Add(new ManifestWorldBuilderResult(sceneDefinition.pointers[0], !string.IsNullOrEmpty(possibleException), !string.IsNullOrEmpty(possibleException) ? possibleException : "NO ERROR", isSDK7));
@@ -53,6 +52,12 @@ namespace DCL_PiXYZ.Utils
             WebRequestsHandler webRequestsHandler = new WebRequestsHandler();
 
             List<string> allCoords = new List<string>();
+            //allCoords.Add($"0,0");
+            //allCoords.Add($"-9,-9");
+            //allCoords.Add($"100,100");
+            //allCoords.Add($"-147,100");
+
+
             for (int i = -150; i <= 150; i++)
                 for (int j = -150; j <= 150; j++)
                     allCoords.Add($"{i},{j}");
@@ -65,13 +70,14 @@ namespace DCL_PiXYZ.Utils
             {
                 if (ignoreScene.Contains(coord))
                     continue;
-                
                 string rawSceneDefinition = 
                     await webRequestsHandler.PostRequest(activeEntitiesURL, "{\"pointers\":[\"" + coord + "\"]}");
+                Console.WriteLine("FINISHED PROCESSING COORD " + coord);
+
                 List<SceneDefinition> sceneDefinitions
                     = JsonConvert.DeserializeObject<List<SceneDefinition>>(rawSceneDefinition);
 
-                if (sceneDefinitions.Count > 1)
+                if (sceneDefinitions.Count >= 1)
                 {
                     filteredScenes.Add(sceneDefinitions[0]);
                     foreach (var sceneDefinitionPointer in sceneDefinitions[0].pointers)
@@ -91,6 +97,15 @@ namespace DCL_PiXYZ.Utils
                 {
                     writer.WriteLine(result.ToString());
                 }
+            }
+        }
+        
+        private void SaveSceneFilteredToFile(List<SceneDefinition> results, string filePath)
+        {
+            using (StreamWriter writer = new StreamWriter(filePath))
+            {
+                foreach (var result in results)
+                    writer.WriteLine(result.pointers[0]);
             }
         }
 
