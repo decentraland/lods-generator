@@ -7,8 +7,8 @@ import type {
   IMetricsComponent
 } from '@well-known-components/interfaces'
 import { metricDeclarations } from './metrics'
-import { ITaskQueue } from './adapters/sqs'
-import { IRunnerComponent } from './logic/job-runner'
+
+import { Message } from '@aws-sdk/client-sqs'
 
 export type GlobalContext = {
   components: BaseComponents
@@ -19,8 +19,9 @@ export type BaseComponents = {
   logs: ILoggerComponent
   server: IHttpServerComponent<GlobalContext>
   metrics: IMetricsComponent<keyof typeof metricDeclarations>
-  queue: ITaskQueue<any>
-  jobRunner: IRunnerComponent
+  awsConfig: AwsConfig | undefined
+  queue: QueueService
+  messageConsumer: QueueWorker
 }
 
 // components used in runtime
@@ -46,3 +47,21 @@ export type HandlerContextWithPath<
 >
 
 export type Context<Path extends string = any> = IHttpServerComponent.PathAwareContext<GlobalContext, Path>
+
+export type QueueMessage = {
+  id: string
+}
+
+export type QueueService = {
+  send(message: QueueMessage): Promise<void>
+  receiveSingleMessage(): Promise<Message[]>
+  deleteMessage(receiptHandle: string): Promise<void>
+}
+
+export type AwsConfig = {
+  region: string
+  credentials?: { accessKeyId: string; secretAccessKey: string }
+  sqsUrl?: string
+}
+
+export type QueueWorker = IBaseComponent

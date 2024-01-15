@@ -60,3 +60,5 @@ error.txt
 *.js
 
 validation-errors.json
+
+*code-workspace

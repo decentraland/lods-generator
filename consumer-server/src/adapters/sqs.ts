@@ -1,75 +1,48 @@
-import { SQS } from 'aws-sdk'
+import {
+  DeleteMessageCommand,
+  Message,
+  ReceiveMessageCommand,
+  SQSClient,
+  SendMessageCommand
+} from '@aws-sdk/client-sqs'
 
-import { AppComponents } from '../types'
-import { sleep, timeout } from '../utils/timer'
+import { AppComponents, QueueMessage, QueueService } from '../types'
 
-export interface TaskQueueMessage {
-  id: string
-}
+export async function createSqsAdapter({
+  awsConfig
+}: Pick<AppComponents, 'awsConfig' | 'logs'>): Promise<QueueService> {
+  const client = new SQSClient({ endpoint: awsConfig!.sqsUrl })
 
-export interface ITaskQueue<T> {
-  /**
-   * Pulls a message from a queue and executes the taskRunner function
-   *
-   * @template R
-   * @param {(job: T, message: TaskQueueMessage) => Promise<R>} taskRunner
-   * @return {*}  {(Promise<{ result: R | undefined }>)}
-   * @memberof ITaskQueue
-   */
-  pullMessage<R>(taskRunner: (job: T, message: TaskQueueMessage) => Promise<R>): Promise<{ result: R | undefined }>
-}
+  async function send(message: QueueMessage): Promise<void> {
+    const sendCommand = new SendMessageCommand({
+      QueueUrl: awsConfig!.sqsUrl,
+      MessageBody: JSON.stringify(message)
+    })
+    await client.send(sendCommand)
+  }
 
-export function createSqsAdapter<T>(
-  components: Pick<AppComponents, 'logs' | 'metrics'>,
-  options: { queueUrl: string; queueRegion?: string }
-): any {
-  const { logs } = components
+  async function receiveSingleMessage(): Promise<Message[]> {
+    const receiveCommand = new ReceiveMessageCommand({
+      QueueUrl: awsConfig!.sqsUrl,
+      MaxNumberOfMessages: 1,
+      WaitTimeSeconds: 15
+    })
+    const { Messages = [] } = await client.send(receiveCommand)
 
-  const logger = logs.getLogger('sqs-adapter')
+    return Messages
+  }
 
-  const sqs = new SQS({ apiVersion: 'latest', region: options.queueRegion })
+  async function deleteMessage(receiptHandle: string) {
+    const deleteCommand = new DeleteMessageCommand({
+      QueueUrl: awsConfig!.sqsUrl,
+      ReceiptHandle: receiptHandle
+    })
+    await client.send(deleteCommand)
+  }
 
   return {
-    async pullMessage(jobToExecute: any) {
-      const params: AWS.SQS.ReceiveMessageRequest = {
-        AttributeNames: ['SentTimestamp'],
-        MaxNumberOfMessages: 1,
-        MessageAttributeNames: ['All'],
-        QueueUrl: options.queueUrl,
-        WaitTimeSeconds: 15,
-        VisibilityTimeout: 3 * 3600 // 3 hours
-      }
-
-      while (true) {
-        const response = await Promise.race([
-          sqs.receiveMessage(params).promise(),
-          timeout(30 * 60 * 1000, 'Timed-out while pulling SQS message')
-        ]).catch((error: any) => {
-          logger.error('Failed while pulling a message from SQS', error)
-          return { Messages: [] }
-        })
-
-        if (response.Messages && !!response.Messages.length) {
-          const { MessageId, Body } = response.Messages[0]
-
-          try {
-            const parsedMessage: { Message: string } = JSON.parse(Body!)
-            logger.info('Handling message from queue', { id: MessageId!, message: parsedMessage.Message })
-            const result = await jobToExecute(JSON.parse(parsedMessage.Message), MessageId!)
-            return { result, id: MessageId! }
-          } catch (error: any) {
-            logger.error('Failed while handling a message from SQS', error)
-            return { result: undefined, id: MessageId! }
-          } finally {
-            await sqs
-              .deleteMessage({ QueueUrl: options.queueUrl, ReceiptHandle: response.Messages[0].ReceiptHandle! })
-              .promise()
-          }
-        } else {
-          logger.info('No new messages in queue. Retrying for 15 seconds')
-          await sleep(15 * 1000)
-        }
-      }
-    }
+    send,
+    receiveSingleMessage,
+    deleteMessage
   }
 }

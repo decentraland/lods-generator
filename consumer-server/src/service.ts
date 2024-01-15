@@ -17,12 +17,4 @@ export async function main(program: Lifecycle.EntryPointParameters<AppComponents
   components.server.setContext(globalContext)
 
   await startComponents()
-
-  components.jobRunner.runTask(async ({ isRunning }) => {
-    while (isRunning) {
-      await components.queue.pullMessage(async (message, messageId): Promise<void> => {
-        console.log('Message received: ', message, messageId)
-      })
-    }
-  })
 }
