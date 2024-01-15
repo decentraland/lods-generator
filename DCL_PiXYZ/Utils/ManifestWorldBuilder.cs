@@ -53,10 +53,9 @@ namespace DCL_PiXYZ.Utils
             WebRequestsHandler webRequestsHandler = new WebRequestsHandler();
 
             List<string> allCoords = new List<string>();
-            allCoords.Add("-43,-8");
-            //for (int i = -150; i <= 150; i++)
-            //    for (int j = -150; j <= 150; j++)
-            //        allCoords.Add($"{i},{j}");
+            for (int i = -150; i <= 150; i++)
+                for (int j = -150; j <= 150; j++)
+                    allCoords.Add($"{i},{j}");
 
             List<SceneDefinition> filteredScenes = new List<SceneDefinition>();
             List<string> ignoreScene = new List<string>();
