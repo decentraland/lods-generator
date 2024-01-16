@@ -44,7 +44,7 @@ on:
 
 jobs:
   quay-build-push:
-    runs-on: windows-2019
+    runs-on: ubuntu-latest
     outputs:
       registry-path: ${{ steps.push-to-quay.outputs.registry-path }}
       registry-paths: ${{ steps.push-to-quay.outputs.registry-paths }}
