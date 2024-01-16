@@ -3,12 +3,84 @@ name: CI/CD on main branch
 on:
   push:
     branches:
-      - "main"
+      - feat/cd
+  # workflow_call:
+  #   inputs:
+  #     service-name:
+  #       required: true
+  #       type: string
+  #     image-name:
+  #       required: false
+  #       type: string
+  #     deployment-environment:
+  #       required: false
+  #       type: string
+  #     docker-tag:
+  #       required: false
+  #       type: string
+  #       default: next
+  #     build-args:
+  #       required: false
+  #       type: string
+  #     layers:
+  #       required: false
+  #       type: boolean
+  #       default: true
+  #     dockerfile-url:
+  #       required: false
+  #       type: string
+  #   secrets:
+  #     QUAY_USERNAME:
+  #       required: true
+  #     QUAY_TOKEN:
+  #       required: true
+    # outputs:
+    #   registry-path:
+    #     description: "Registry path"
+    #     value: ${{ jobs.quay-build-push.registry-path }}
+    #   registry-paths:
+    #     description: "Registry paths (JSON)"
+    #     value: ${{ jobs.quay-build-push.registry-paths }}
 
 jobs:
-  cd:
-    uses: decentraland/platform-actions/.github/workflows/apps-docker-next.yml@main
-    with:
-      service-name: lods-generator
-      deployment-environment: dev
-    secrets: inherit
+  quay-build-push:
+    runs-on: windows-2019
+    outputs:
+      registry-path: ${{ steps.push-to-quay.outputs.registry-path }}
+      registry-paths: ${{ steps.push-to-quay.outputs.registry-paths }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Vulkan SDK
+        uses: jakoch/install-vulkan-sdk-action@v1.0.0
+        with:
+          vulkan_version: 1.3.268.0
+          optional_components: com.lunarg.vulkan.vma
+          install_runtime: true
+          cache: true
+          destination: ${{ github.workspace }}/vulkan-sdt
+
+      - name: Build Image
+        id: build-image
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: lods-generator
+          tags: ${{ github.sha }} next
+          dockerfiles: |
+            ./Dockerfile
+          build-args: |
+            VULKAN_DLL_PATH=./vulkan-sdt/1.3.268.0/runtime/x64/vulkan-1.dll
+            COMMIT_HASH=${{ github.sha }}
+      # Podman Login action (https://github.com/redhat-actions/podman-login) also be used to log in,
+      # in which case 'username' and 'password' can be omitted.
+      - name: Push To quay.io
+        id: push-to-quay
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build-image.outputs.image }}
+          tags: ${{ steps.build-image.outputs.tags }}
+          registry: quay.io/decentraland
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_TOKEN }}
+
+      - name: Print image url
+        run: echo "Image pushed to ${{ steps.push-to-quay.outputs.registry-paths }}"
