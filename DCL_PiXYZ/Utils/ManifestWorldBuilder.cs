@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -13,25 +14,72 @@ namespace DCL_PiXYZ.Utils
         private string activeEntitiesURL;
         private string sceneManifestDirectory;
         private ManifestWorldBuilderResult result;
+        private string startAt;
 
         public ManifestWorldBuilder()
         {
+            this.startAt = startAt;
             sceneManifestDirectory = "../../../../scene-lod-entities-manifest-builder/";
             activeEntitiesURL = "https://peer.decentraland.org/content/entities/active";
         }
         
         public async Task Run()
         {
-            List<ManifestWorldBuilderResult> results = new List<ManifestWorldBuilderResult>();
-            Console.WriteLine("BUILDING ARRAY");
-            List<SceneDefinition> filteredScenes = await BuildSceneArray();
-            Console.WriteLine("ARRAY BUILT PROCESSING " + filteredScenes.Count);
-            
-            SaveSceneFilteredToFile(filteredScenes, Path.Combine(PXYZConstants.RESOURCES_DIRECTORY, "non-empty-scenes.txt"));
-            
             //UNCOMMENT IF YOU NEED TO INSTALL
             //NPMUtils.DoNPMInstall(sceneManifestDirectory);
-            foreach (var sceneDefinition in filteredScenes)
+            
+            string sourcePath = Path.Combine(PXYZConstants.RESOURCES_DIRECTORY, "non-empty-scenes.txt"); // Replace with the path to your source file
+            string destinationPath = Path.Combine(PXYZConstants.RESOURCES_DIRECTORY, "manifest-world-builder-results.txt"); // Replace with the path to your destination file
+            
+            if (!File.Exists(destinationPath))
+            {
+                File.Create(destinationPath).Close();
+            }
+
+            List<string> analyzedCoords = new List<string>();
+            using (StreamReader reader = new StreamReader(sourcePath))
+            {
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    analyzedCoords.Add(line);
+                }
+            }
+
+            string exception;
+            string result;
+            
+            Console.WriteLine("About to analyze " + analyzedCoords.Count);
+
+            RandomizeList(analyzedCoords, 12345);
+
+            for (var i = 0; i < analyzedCoords.Count; i++)
+            {
+                (string,bool) npmTask  = await NPMUtils.RunNPMToolAndReturnExceptionIfPresent(sceneManifestDirectory, analyzedCoords[i], 5000);
+
+                if (npmTask.Item2)
+                {
+                    result = $"{analyzedCoords[i]}\t{true}\tREADER TIMEOUT\tREADER TIMEOUT";
+                    Console.WriteLine("FINISHED ANALYZING COORD " + i + " READER TIMEOUT");
+                }
+                else
+                {
+                    exception = "NO ERROR";
+                    if (!string.IsNullOrEmpty(npmTask.Item1))
+                        exception = npmTask.Item1;
+                    result = $"{analyzedCoords[i]}\t{true}\t{!exception.Equals("NO ERROR")}\t{exception}";
+                    Console.WriteLine("FINISHED ANALYZING COORD " + i);
+                }
+
+                using (StreamWriter writer = new StreamWriter(destinationPath, true))
+                    writer.WriteLine(result);
+
+                //Lets collect garbage once in a while
+                if (i % 500 == 0)
+                    GC.Collect();
+            }
+
+            /*foreach (var sceneDefinition in filteredScenes)
             {
                 bool isSDK7 = false;
                 if (!string.IsNullOrEmpty(sceneDefinition.metadata.runtimeVersion))
@@ -41,9 +89,33 @@ namespace DCL_PiXYZ.Utils
                 results.Add(new ManifestWorldBuilderResult(sceneDefinition.pointers[0], !string.IsNullOrEmpty(possibleException), !string.IsNullOrEmpty(possibleException) ? possibleException : "NO ERROR", isSDK7));
             }
             Console.WriteLine($"RESULTS PROCESSED SAVING TO FILE {Path.Combine(PXYZConstants.RESOURCES_DIRECTORY, "manifest-world-builder-results.txt")}");
-            
+
             SaveResultsToFile(results, Path.Combine(PXYZConstants.RESOURCES_DIRECTORY, "manifest-world-builder-results.txt"));
-            Console.WriteLine($"RESULTS SAVED");
+            Console.WriteLine($"RESULTS SAVED");*/
+        }
+        
+        private void RandomizeList(List<string> list, int seed)
+        {
+            Random rng = new Random(seed);
+
+            int n = list.Count;
+            while (n > 1)
+            {
+                n--;
+                int k = rng.Next(n + 1);
+                (list[k], list[n]) = (list[n], list[k]);
+            }
+        }
+
+        public async Task<List<SceneDefinition>> BuildManifestWorldBuilderResult()
+        {
+            return new List<SceneDefinition>();
+            //UNCOMMENT IF YOU NEED TO GENERATE THE LIST
+            /*List<ManifestWorldBuilderResult> results = new List<ManifestWorldBuilderResult>();
+            Console.WriteLine("BUILDING ARRAY");
+            List<SceneDefinition> filteredScenes = await BuildSceneArray();
+            Console.WriteLine("ARRAY BUILT PROCESSING " + filteredScenes.Count);
+            SaveSceneFilteredToFile(filteredScenes, Path.Combine(PXYZConstants.RESOURCES_DIRECTORY, "non-empty-scenes.txt"));*/
         }
         
         
@@ -56,7 +128,6 @@ namespace DCL_PiXYZ.Utils
             //allCoords.Add($"-9,-9");
             //allCoords.Add($"100,100");
             //allCoords.Add($"-147,100");
-
 
             for (int i = -150; i <= 150; i++)
                 for (int j = -150; j <= 150; j++)
@@ -81,9 +152,7 @@ namespace DCL_PiXYZ.Utils
                 {
                     filteredScenes.Add(sceneDefinitions[0]);
                     foreach (var sceneDefinitionPointer in sceneDefinitions[0].pointers)
-                    {
                         ignoreScene.Add(sceneDefinitionPointer);
-                    }
                 }
             }
             return filteredScenes;
