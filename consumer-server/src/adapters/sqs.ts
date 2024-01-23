@@ -9,13 +9,15 @@ import {
 import { AppComponents, QueueMessage, QueueService } from '../types'
 
 export async function createSqsAdapter({
-  awsConfig
-}: Pick<AppComponents, 'awsConfig' | 'logs'>): Promise<QueueService> {
-  const client = new SQSClient({ endpoint: awsConfig!.sqsUrl })
+  config
+}: Pick<AppComponents, | 'config'>): Promise<QueueService> {
+  const endpoint = await config.getString('QUEUE_URL')
+  console.log({ endpoint })
+  const client = new SQSClient({ endpoint })
 
   async function send(message: QueueMessage): Promise<void> {
     const sendCommand = new SendMessageCommand({
-      QueueUrl: awsConfig!.sqsUrl,
+      QueueUrl: endpoint,
       MessageBody: JSON.stringify(message)
     })
     await client.send(sendCommand)
@@ -23,7 +25,7 @@ export async function createSqsAdapter({
 
   async function receiveSingleMessage(): Promise<Message[]> {
     const receiveCommand = new ReceiveMessageCommand({
-      QueueUrl: awsConfig!.sqsUrl,
+      QueueUrl: endpoint,
       MaxNumberOfMessages: 1,
       WaitTimeSeconds: 15
     })
@@ -34,7 +36,7 @@ export async function createSqsAdapter({
 
   async function deleteMessage(receiptHandle: string) {
     const deleteCommand = new DeleteMessageCommand({
-      QueueUrl: awsConfig!.sqsUrl,
+      QueueUrl: endpoint,
       ReceiptHandle: receiptHandle
     })
     await client.send(deleteCommand)

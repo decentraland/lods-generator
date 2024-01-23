@@ -8,6 +8,7 @@ import { metricDeclarations } from './metrics'
 import { createSqsAdapter } from './adapters/sqs'
 import { createMessagesConsumerComponent } from './logic/message-consumer'
 import { buildAWSConfiguration } from './utils/aws-config'
+import { buildLicense } from './utils/license-builder'
 
 export async function initComponents(): Promise<AppComponents> {
   const config = await createDotEnvConfigComponent({ path: ['.env.default', '.env'] })
@@ -20,8 +21,10 @@ export async function initComponents(): Promise<AppComponents> {
   await instrumentHttpServerWithMetrics({ metrics, server, config })
 
   const awsConfig = await buildAWSConfiguration({ config, logs })
-  const queue = await createSqsAdapter({ logs, awsConfig: awsConfig! })
+  const queue = await createSqsAdapter({ config })
   const messageConsumer = await createMessagesConsumerComponent({ logs, queue })
+
+  await buildLicense({ config, logs })
 
   return {
     config,
