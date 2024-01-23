@@ -14,14 +14,19 @@ namespace DCL_PiXYZ
         private string scenePointer;
         private ulong originalPolygonCount;
 
-        public PXZDecimator(string scenePointer, DecimateOptionsSelector.Type type, double decimationParam)
+        public PXZDecimator(string scenePointer, string decimationType, double decimationParam, int parcelAmount)
         {
             decimate = new DecimateOptionsSelector();
-            decimate._type = type;
-            if (type == DecimateOptionsSelector.Type.TRIANGLECOUNT)
-                decimate.triangleCount = (ulong)decimationParam;
+            if (decimationType.Equals("triangle"))
+            {
+                decimate._type = DecimateOptionsSelector.Type.TRIANGLECOUNT;
+                decimate.triangleCount = (ulong)(decimationParam * parcelAmount);
+            }
             else
+            {
+                decimate._type = DecimateOptionsSelector.Type.RATIO;
                 decimate.ratio = decimationParam;
+            }
             this.scenePointer = scenePointer;
         } 
         
@@ -34,6 +39,7 @@ namespace DCL_PiXYZ
             pxz.Algo.DecimateTarget(new OccurrenceList(new uint[]{pxz.Scene.GetRoot()}), decimate);
             WriteFinalVertexAmount(pxz.Scene.GetPolygonCount(new OccurrenceList(new uint[] { pxz.Scene.GetRoot() }),true));
             Console.WriteLine("END PXZ MODIFIER DECIMATOR");
+            Console.WriteLine("-------------------------");
         }
         
         private void WriteFinalVertexAmount(ulong polygonCount)

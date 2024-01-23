@@ -53,7 +53,7 @@ namespace DCL_PiXYZ.Utils
 
             for (var i = 0; i < analyzedCoords.Count; i++)
             {
-                (string,bool) npmTask  = await NPMUtils.RunNPMToolAndReturnExceptionIfPresent(sceneManifestDirectory, analyzedCoords[i], 5000);
+                /*(string,bool) npmTask  = await NPMUtils.RunNPMToolAndReturnExceptionIfPresent(sceneManifestDirectory, analyzedCoords[i], 5000);
 
                 if (npmTask.Item2)
                 {
@@ -75,6 +75,7 @@ namespace DCL_PiXYZ.Utils
                 //Lets collect garbage once in a while
                 if (i % 500 == 0)
                     GC.Collect();
+                    */
             }
 
             /*foreach (var sceneDefinition in filteredScenes)

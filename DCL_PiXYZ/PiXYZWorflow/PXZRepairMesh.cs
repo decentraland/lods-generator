@@ -25,6 +25,7 @@ namespace DCL_PiXYZ
                     pxz.Algo.RepairMesh(new OccurrenceList(new uint[]{pxzModel.modelOcurrence}), 0.1, true, false);
             }
             Console.WriteLine($"END PXZ MESH REPAIR");
+            Console.WriteLine("-------------------------");
         }
     }
 }

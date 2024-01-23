@@ -57,72 +57,15 @@ namespace DCL_PiXYZ.Utils
             }
         }
         
-        public static async Task<(string, bool)> RunNPMToolAndReturnExceptionIfPresent(string sceneManifestProjectDirectory, string coords, int timeoutInMilliseconds)
-        {
-            bool isSDK7 = false;
-            bool readTimeout = false;
-            string exception = "";
-            // Set up the process start information
-            ProcessStartInfo install = new ProcessStartInfo
-            {
-                FileName = "powershell",
-                Arguments = "npm run start --coords=" + coords, 
-                WorkingDirectory = sceneManifestProjectDirectory,
-                RedirectStandardError = true,
-                RedirectStandardOutput = true, 
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
-            
-            // Start the process
-            using (Process process = Process.Start(install))
-            {
-                //TODO: Not sure I have to wait after printing output for the process to end. Thats why it has this weird place
-                if (process.WaitForExit(timeoutInMilliseconds))
-                {
-                    //using (StreamReader reader = process.StandardOutput)
-                    //{
-                        //string result = reader.ReadToEnd();
-                        //Console.WriteLine(result);
-                        //isSDK7 = !result.Contains("sdk7? false");
-                    //}
-                    
-                    // Read the output (if needed)
-                    using (StreamReader reader = process.StandardError)
-                    {
-                        Task<string> readTask = reader.ReadLineAsync();
-                        if (await Task.WhenAny(readTask, Task.Delay(500)) == readTask)
-                            exception = readTask.Result;
-                        else
-                            readTimeout = true;
-                    }
-                    
-                    return (exception, readTimeout);
-                }
-
-                process.Kill();
-
-                using (StreamReader reader = process.StandardError)
-                {
-                    Task<string> readTask = reader.ReadLineAsync();
-                    if (await Task.WhenAny(readTask, Task.Delay(2000)) == readTask)
-                        exception = readTask.Result;
-                    else
-                        readTimeout = true;
-                }
-                    
-                return (exception, readTimeout);
-            }
-        }
-
-        public static void RunNPMTool(string sceneManifestProjectDirectory, string coords)
+        public static string RunNPMTool(string sceneManifestProjectDirectory, string sceneType, string sceneValue)
         {
             // Set up the process start information
             ProcessStartInfo install = new ProcessStartInfo
             {
                 FileName = "powershell", // or the full path to npm if not in PATH
-                Arguments = "npm run start --coords=" + coords, // replace with your npm command
+                Arguments = $"npm run start --{sceneType}={sceneValue}", // replace with your npm command
                 WorkingDirectory = sceneManifestProjectDirectory,
+                RedirectStandardError = true,
                 RedirectStandardOutput = true, // if you want to read output
                 UseShellExecute = false,
                 CreateNoWindow = true
@@ -135,11 +78,19 @@ namespace DCL_PiXYZ.Utils
                 using (StreamReader reader = process.StandardOutput)
                 {
                     string result = reader.ReadToEnd();
-                    Console.WriteLine(result);
+                }
+                
+                using (StreamReader reader = process.StandardError)
+                {
+                    string errorLine = reader.ReadLine();
+                    if (!string.IsNullOrEmpty(errorLine))
+                        return errorLine;
                 }
 
                 process.WaitForExit(); // Wait for the process to complete
             }
+
+            return "";
         }
     }
 }

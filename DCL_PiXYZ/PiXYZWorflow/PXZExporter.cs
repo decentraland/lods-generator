@@ -30,6 +30,7 @@ namespace DCL_PiXYZ
             pxz.Scene.MergeOccurrencesByTreeLevel(new OccurrenceList(new[]{pxz.Scene.GetRoot()}),1);
             pxz.IO.ExportScene(Path.Combine(path, $"{filename}{extension}"), pxz.Scene.GetRoot());
             Console.WriteLine("END PXZ EXPORT ");
+            Console.WriteLine("-------------------------");
         }
     }
 }

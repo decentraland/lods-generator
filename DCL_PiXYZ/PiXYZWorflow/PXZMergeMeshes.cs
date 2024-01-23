@@ -88,6 +88,7 @@ namespace DCL_PiXYZ
             
             //pxz.Algo.CombineMeshes(new OccurrenceList(new uint[]{}), bakeOption);
             Console.WriteLine("END PXZ MERGE MESHES");
+            Console.WriteLine("-------------------------");
         }
     }
 }

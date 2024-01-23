@@ -63,6 +63,7 @@ namespace SceneImporter
                     }
                 }
                 Console.WriteLine("END SCENE DEFINITION DOWNLOAD");
+                Console.WriteLine("-------------------------");
             }
             catch (Exception e)
             {
