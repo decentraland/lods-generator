@@ -12,7 +12,6 @@ export async function createSqsAdapter({
   config
 }: Pick<AppComponents, | 'config'>): Promise<QueueService> {
   const endpoint = await config.getString('QUEUE_URL')
-  console.log({ endpoint })
   const client = new SQSClient({ endpoint })
 
   async function send(message: QueueMessage): Promise<void> {

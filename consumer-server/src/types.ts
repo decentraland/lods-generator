@@ -19,7 +19,6 @@ export type BaseComponents = {
   logs: ILoggerComponent
   server: IHttpServerComponent<GlobalContext>
   metrics: IMetricsComponent<keyof typeof metricDeclarations>
-  awsConfig: AwsConfig | undefined
   queue: QueueService
   messageConsumer: QueueWorker
 }

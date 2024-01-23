@@ -7,7 +7,6 @@ import { AppComponents, GlobalContext } from './types'
 import { metricDeclarations } from './metrics'
 import { createSqsAdapter } from './adapters/sqs'
 import { createMessagesConsumerComponent } from './logic/message-consumer'
-import { buildAWSConfiguration } from './utils/aws-config'
 import { buildLicense } from './utils/license-builder'
 
 export async function initComponents(): Promise<AppComponents> {
@@ -20,7 +19,6 @@ export async function initComponents(): Promise<AppComponents> {
 
   await instrumentHttpServerWithMetrics({ metrics, server, config })
 
-  const awsConfig = await buildAWSConfiguration({ config, logs })
   const queue = await createSqsAdapter({ config })
   const messageConsumer = await createMessagesConsumerComponent({ logs, queue })
 
@@ -28,7 +26,6 @@ export async function initComponents(): Promise<AppComponents> {
 
   return {
     config,
-    awsConfig,
     logs,
     server,
     metrics,
