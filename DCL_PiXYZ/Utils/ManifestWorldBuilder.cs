@@ -14,11 +14,9 @@ namespace DCL_PiXYZ.Utils
         private string activeEntitiesURL;
         private string sceneManifestDirectory;
         private ManifestWorldBuilderResult result;
-        private string startAt;
 
         public ManifestWorldBuilder()
         {
-            this.startAt = startAt;
             sceneManifestDirectory = "../../../../scene-lod-entities-manifest-builder/";
             activeEntitiesURL = "https://peer.decentraland.org/content/entities/active";
         }

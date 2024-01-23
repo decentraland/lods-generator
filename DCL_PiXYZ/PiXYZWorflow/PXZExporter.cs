@@ -24,6 +24,7 @@ namespace DCL_PiXYZ
         {
             Console.WriteLine("-------------------------");
             Console.WriteLine($"BEGIN PXZ EXPORT {filename}{extension}");
+            Directory.CreateDirectory(path);
             //Use it to flatten the hierarchy
             //TODO: This will break all possible skinning. But do we care about it?
             pxz.Scene.MergeOccurrencesByTreeLevel(new OccurrenceList(new[]{pxz.Scene.GetRoot()}),1);

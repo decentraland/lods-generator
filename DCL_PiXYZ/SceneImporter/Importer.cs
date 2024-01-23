@@ -24,6 +24,8 @@ namespace SceneImporter
 
         private string sceneHash;
         private string scenePointer;
+
+        private string[] currentPointersList;
         public Importer(string paramType, string sceneParam, WebRequestsHandler webRequestsHandler)
         {
             this.sceneParam = sceneParam;
@@ -39,36 +41,50 @@ namespace SceneImporter
         public async Task GenerateSceneContent()
         {
             Console.WriteLine("-------------------------");
-            Console.WriteLine("BEGIN IMPORT");
-            Console.WriteLine("Getting Scene Definition");
+            Console.WriteLine("BEGIN SCENE DEFINITION DOWNLOAD");
+            currentPointersList = Array.Empty<string>();
             try
             {
                 if (paramByHash)
                 {
-                    sceneHash = sceneParam;
                     string rawSceneDefinition = await webRequestsHandler.GetRequest($"{contentsURL}{sceneHash}");
                     sceneDefinition = JsonConvert.DeserializeObject<SceneDefinition>(rawSceneDefinition);
-                    scenePointer = sceneDefinition.pointers[0];
+                    SetResult(sceneHash);
                 }
                 else
                 {
-                    scenePointer = sceneParam;
                     string rawSceneDefinition = await webRequestsHandler.PostRequest(activeEntitiesURL, "{\"pointers\":[\"" + sceneParam + "\"]}");
-                    sceneDefinition = JsonConvert.DeserializeObject<List<SceneDefinition>>(rawSceneDefinition)[0];
-                    sceneHash = sceneDefinition.id;
-                    scenePointer = sceneDefinition.pointers[0];
+                    List<SceneDefinition> sceneDefinitions =
+                        JsonConvert.DeserializeObject<List<SceneDefinition>>(rawSceneDefinition);
+                    if (sceneDefinitions.Count > 0)
+                    {
+                        sceneDefinition = sceneDefinitions[0];
+                        SetResult(sceneDefinitions[0].id);
+                    }
                 }
+                Console.WriteLine("END SCENE DEFINITION DOWNLOAD");
             }
-            catch (HttpRequestException e)
+            catch (Exception e)
             {
                 throw new Exception($"Scene fetch failed: {e}");
             }
-            Console.WriteLine("Scene Definition Success!");
+        }
+
+        private void SetResult(string setSceneHash)
+        {
+            this.sceneHash = setSceneHash;
+            scenePointer = sceneDefinition.pointers[0];
+            currentPointersList = sceneDefinition.pointers;
+        }
+
+        public string[] GetCurrentScenePointersList()
+        {
+            return currentPointersList;
         }
 
         public async Task<Dictionary<string,string>> DownloadAllContent()
         {
-            Console.WriteLine("Getting File Content");
+            Console.WriteLine("BEGIN FILE CONTENT DOWNLOAD");
             Dictionary<string, string> contentDictionary = new Dictionary<string, string>();
             foreach (var content in sceneDefinition.content)
             {
@@ -76,22 +92,21 @@ namespace SceneImporter
                 {
                     if (ignoreExtensions.Contains(Path.GetExtension(content.file)))
                     {
-                        Console.WriteLine($"File {content.file} ignored");
+                        //Console.WriteLine($"File {content.file} ignored");
                         continue;
                     }
-                    Console.WriteLine($"Getting File {content.file}");
+                    //Console.WriteLine($"Getting File {content.file}");
                     string filePath = Path.Combine(PXYZConstants.RESOURCES_DIRECTORY, content.file);
                     await webRequestsHandler.DownloadFileAsync($"{contentsURL}{content.hash}", filePath);
                     contentDictionary.Add(content.file, filePath);
-                    Console.WriteLine($"File {content.file} Success!");
+                    //Console.WriteLine($"File {content.file} Success!");
                 }
-                catch (HttpRequestException e)
+                catch (Exception e)
                 {
                     throw new Exception($"URL failed: {contentsURL}{sceneParam} with error {e}");
                 }
             }
-            Console.WriteLine("File Content Success!");
-            Console.WriteLine("END IMPORT");
+            Console.WriteLine("END FILE CONTENT DOWNLOAD");
             return contentDictionary;
         }
 
