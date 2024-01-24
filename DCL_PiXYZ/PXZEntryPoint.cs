@@ -33,29 +33,20 @@ namespace DCL_PiXYZ
                     //Are we doing single or bulk scenes?
                     //If its single, we pass as many scenes as we want to parse separated by ;
                     //If its bulk, a single number will represent a square to parse, going from -value to value
-                    "single",
+                    "bulk",
                     //Third param is single coordinates or bulk value. Single scenes are separated by ;
-                    "0,0",
+                    "20",
                     //Fourth param is decimation type (ratio or triangle)
                     "triangle",
                     //Fifth param is decimation value, separated by ;
                     "7000"
                 };
             }
-            
-            var sceneType = args[0];
-            var conversionType = args[1];
-            var scenes = args[2];
-            var decimationType = args[3];
-            var decimationValues = args[4];
-            var sceneManifestDirectory = Path.Combine(Directory.GetCurrentDirectory(), "scene-lod-entities-manifest-builder"); 
-            var scenePositionJsonDirectory = Path.Combine(sceneManifestDirectory, "output-manifests/");
-            var outputDirectory =  Path.Combine(Directory.GetCurrentDirectory(), "built-lods"); 
-            var scenesToAnalyze = GetScenesToAnalyzeList(conversionType, scenes);
-            List<double> decimationToAnalyze = GetDecimationValues(decimationType, decimationValues);
-            List<string> analyzedScenes = new List<string>();
 
-            FrameworkInitialization(sceneManifestDirectory);
+            SceneConversionInfo sceneConversionInfo = new SceneConversionInfo(args);
+            
+            List<string> analyzedScenes = new List<string>();
+            FrameworkInitialization(sceneConversionInfo.SceneManifestDirectory);
             CreateResourcesDirectory();
             
             WebRequestsHandler webRequestsHandler = new WebRequestsHandler();
@@ -66,8 +57,8 @@ namespace DCL_PiXYZ
             string successFile = "SuccessScenes.txt";
             string failFile = "FailScenes.txt";
 
-            Console.WriteLine($"About to convert {scenesToAnalyze.Count} scenes");
-            foreach (var scene in scenesToAnalyze)
+            Console.WriteLine($"About to convert {sceneConversionInfo.ScenesToAnalyze.Count} scenes");
+            foreach (var scene in sceneConversionInfo.ScenesToAnalyze)
             {
                 //Check if the scene has already been analyzed (for bulk conversion)
                 if (analyzedScenes.Contains(scene))
@@ -77,7 +68,7 @@ namespace DCL_PiXYZ
                 }
                 
                 //Try to import scene and generate scene content
-                Importer importer = new Importer(conversionType,scene,webRequestsHandler);
+                Importer importer = new Importer(sceneConversionInfo.ConversionType,scene,webRequestsHandler);
                 try
                 {
                     await importer.GenerateSceneContent();
@@ -97,7 +88,7 @@ namespace DCL_PiXYZ
                 }
                 
                 //Check if they were converted
-                if (Directory.Exists(Path.Combine(outputDirectory, currentPointersList[0])))
+                if (Directory.Exists(Path.Combine(sceneConversionInfo.OutputDirectory, currentPointersList[0])))
                 {
                     Console.WriteLine($"Skipping scene {scene} since its already converted");
                     continue;
@@ -114,17 +105,16 @@ namespace DCL_PiXYZ
                 }
                 
                 Console.WriteLine("BEGIN MANIFEST GENERATION FOR SCENE " + scene);
-                bool manifestGenerated =  GenerateManifest(sceneType, scene, sceneManifestDirectory, 
+                bool manifestGenerated =  await GenerateManifest(sceneConversionInfo.SceneType, scene, sceneConversionInfo.SceneManifestDirectory, 
                     new List<string>(){"manifest file already exists", "Failed to load script"}, failFile);
                 
                 if (!manifestGenerated)
                 {
-                    failedConversions += decimationValues.Length;
+                    failedConversions += sceneConversionInfo.DecimationValues.Length;
                     continue;
                 }
                 Console.WriteLine("END MANIFEST GENERATION FOR SCENE " + scene);
-
-                return;
+                continue;
                 Dictionary<string, string> sceneContent = new Dictionary<string, string>();
 
                 try
@@ -133,33 +123,33 @@ namespace DCL_PiXYZ
                 }
                 catch (Exception e)
                 {
-                    failedConversions += decimationValues.Length;
-                    foreach (var conversionValue in decimationValues)
+                    failedConversions += sceneConversionInfo.DecimationValues.Length;
+                    foreach (var conversionValue in sceneConversionInfo.DecimationValues)
                         WriteToFile($"{scene}\t{conversionValue}\tDOWNLOAD ERROR: {e.Message}", failFile);
                     continue;
                 }
 
                 Console.WriteLine("BEGIN SCENE CONVERSION FOR SCENE " + scene);
                 int currentLODLevel = 0;
-                foreach (var decimationValue in decimationToAnalyze)
+                foreach (var decimationValue in sceneConversionInfo.DecimationToAnalyze)
                 {
                     pxz.Core.ResetSession();
                     try
                     {
                         Console.WriteLine($"Converting {scene} with {decimationValue}");
-                        ConversionParams conversionParams = new ConversionParams()
+                        PXZParams pxzParams = new PXZParams()
                         {
-                            DecimationType = decimationType,
+                            DecimationType = sceneConversionInfo.DecimationType,
                             DecimationValue = decimationValue,
                             LodLevel = currentLODLevel,
-                            ManifestDirectory = sceneManifestDirectory,
-                            OutputDirectory = outputDirectory,
+                            ManifestDirectory = sceneConversionInfo.SceneManifestDirectory,
+                            OutputDirectory = sceneConversionInfo.OutputDirectory,
                             ParcelAmount = currentPointersList.Length,
                             SceneContent = sceneContent,
                             SceneHash = importer.GetSceneHash(),
                             ScenePointer = importer.GetScenePointer()
                         };
-                        await ConvertScene(webRequestsHandler, conversionParams);
+                        await ConvertScene(webRequestsHandler, pxzParams);
                         Console.WriteLine($"Finished Converting {scene} with {decimationValue}");
                         successConversions++;
                         WriteToFile($"{scene}\t{decimationValue}" , successFile);
@@ -177,10 +167,10 @@ namespace DCL_PiXYZ
             }
 
         }
-        private static bool GenerateManifest(string sceneType, string sceneValue,string sceneManifestDirectory, 
+        private static async Task<bool> GenerateManifest(string sceneType, string sceneValue,string sceneManifestDirectory, 
             List<string> errorsToIgnore, string failFile)
         {
-            string possibleError = NPMUtils.RunNPMTool(sceneManifestDirectory, sceneType, sceneValue);
+            string possibleError = await NPMUtils.RunNPMTool(sceneManifestDirectory, sceneType, sceneValue);
     
             if (!string.IsNullOrEmpty(possibleError))
             {
@@ -202,22 +192,22 @@ namespace DCL_PiXYZ
             return true;
         }
         
-        private static async Task ConvertScene(WebRequestsHandler webRequestsHandler, ConversionParams conversionParams)
+        private static async Task ConvertScene(WebRequestsHandler webRequestsHandler, PXZParams pxzParams)
         {
             SceneRepositioner.SceneRepositioner sceneRepositioner = 
                 new SceneRepositioner.SceneRepositioner(webRequestsHandler,
-                    conversionParams.ManifestDirectory,
-                    $"{conversionParams.SceneHash}-lod-manifest.json", conversionParams.SceneContent, pxz);
+                    pxzParams.ManifestDirectory,
+                    $"{pxzParams.SceneHash}-lod-manifest.json", pxzParams.SceneContent, pxz);
             List<PXZModel> models = await sceneRepositioner.SetupSceneInPiXYZ();
 
             List<IPXZModifier> modifiers = new List<IPXZModifier>();
             modifiers.Add(new PXZDeleteByName(".*collider.*"));
             modifiers.Add(new PXZRepairMesh(models));
-            modifiers.Add(new PXZDecimator(conversionParams.ScenePointer, conversionParams.DecimationType,
-                conversionParams.DecimationValue, conversionParams.ParcelAmount));
+            modifiers.Add(new PXZDecimator(pxzParams.ScenePointer, pxzParams.DecimationType,
+                pxzParams.DecimationValue, pxzParams.ParcelAmount));
             modifiers.Add(new PXZMergeMeshes());
-            string filename = $"{conversionParams.SceneHash}_{conversionParams.LodLevel}";
-            modifiers.Add(new PXZExporter(Path.Combine(conversionParams.OutputDirectory, $"{conversionParams.ScenePointer}/{conversionParams.DecimationValue}"), filename, ".fbx"));
+            string filename = $"{pxzParams.SceneHash}_{pxzParams.LodLevel}";
+            modifiers.Add(new PXZExporter(Path.Combine(pxzParams.OutputDirectory, $"{pxzParams.ScenePointer}/{pxzParams.DecimationValue}"), filename, ".fbx"));
 
             PXZStopwatch stopwatch = new PXZStopwatch();
             
@@ -258,50 +248,7 @@ namespace DCL_PiXYZ
                 file.WriteLine(message);
         }
         
-        private static List<double> GetDecimationValues(string decimationType, string decimationValues)
-        {
-            List<double> decimationValuesToReturn = new List<double>();
-
-            if (decimationType.Equals("triangle") || decimationType.Equals("ratio"))
-                try
-                {
-                    decimationValuesToReturn = decimationValues.Split(';').Select(double.Parse).ToList();
-                }catch(Exception e)
-                {
-                    CloseApplication($"Error: Wrong decimation value param {decimationValues}");
-                }
-            else 
-                CloseApplication($"Error: Wrong decimation type param {decimationType}");
-            return decimationValuesToReturn;
-        }
-        
-        private static List<string> GetScenesToAnalyzeList(string conversionType, string sceneParam)
-        {
-            List<string> scenes = new List<string>();
-
-            if (conversionType.Equals("single"))
-                scenes = sceneParam.Split(';').ToList();
-            else if(conversionType.Equals("bulk"))
-            {
-                if (int.TryParse(sceneParam, out int limitInt))
-                {
-                    for (int i = -limitInt; i <= limitInt; i++)
-                    {
-                        for(int j = -limitInt; j <= limitInt; j++)
-                        {
-                            scenes.Add($"{i},{j}");
-                        }
-                    }
-                }
-                else
-                    CloseApplication($"Error: Wrong scene type param {sceneParam}");
-            }
-            else
-                CloseApplication($"Error: Wrong conversion type param {conversionType}");
-            return scenes;
-        }
-
-        private static void CloseApplication(string errorMessage)
+        public static void CloseApplication(string errorMessage)
         {
             Console.Error.WriteLine(errorMessage);
             Environment.Exit(1);

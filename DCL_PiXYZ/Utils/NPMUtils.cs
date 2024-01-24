@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace DCL_PiXYZ.Utils
@@ -57,37 +58,46 @@ namespace DCL_PiXYZ.Utils
             }
         }
         
-        public static string RunNPMTool(string sceneManifestProjectDirectory, string sceneType, string sceneValue)
+        public static async Task<string> RunNPMTool(string sceneManifestProjectDirectory, string sceneType, string sceneValue)
         {
-            // Set up the process start information
-            ProcessStartInfo install = new ProcessStartInfo
+            //TODO: I need standard output for it to work. Why?
+            var process = new Process()
             {
-                FileName = "powershell", // or the full path to npm if not in PATH
-                Arguments = $"npm run start --{sceneType}={sceneValue}", // replace with your npm command
-                WorkingDirectory = sceneManifestProjectDirectory,
-                RedirectStandardError = true,
-                RedirectStandardOutput = true, // if you want to read output
-                UseShellExecute = false,
-                CreateNoWindow = true
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "powershell", // or the full path to npm if not in PATH
+                    Arguments = $"npm run start --{sceneType}={sceneValue}", // replace with your npm command
+                    WorkingDirectory = sceneManifestProjectDirectory,
+                    RedirectStandardError = true,
+                    RedirectStandardOutput = true, // if you want to read output
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }, 
+                EnableRaisingEvents = true
             };
-
-            // Start the process
-            using (Process process = Process.Start(install))
+            
+            var outputBuilder = new StringBuilder();
+            var errorBuilder = new StringBuilder();
+            string firstErrorLine = "";
+            using (process)
             {
-                // Read the output (if needed)
-                using (StreamReader reader = process.StandardOutput)
+                process.OutputDataReceived += (sender, args) => { outputBuilder.AppendLine(args.Data); };
+                process.ErrorDataReceived += (sender, args) =>
                 {
-                    string result = reader.ReadToEnd();
-                }
-                
-                using (StreamReader reader = process.StandardError)
-                {
-                    string errorLine = reader.ReadLine();
-                    if (!string.IsNullOrEmpty(errorLine))
-                        return errorLine;
-                }
+                    if (string.IsNullOrEmpty(firstErrorLine))
+                        firstErrorLine = args.Data;
+                    errorBuilder.AppendLine(args.Data);
+                };
 
-                process.WaitForExit(); // Wait for the process to complete
+                process.Start();
+            
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+            
+                await Task.Run(() => process.WaitForExit());
+
+                if (!string.IsNullOrEmpty(firstErrorLine))
+                    return firstErrorLine;
             }
 
             return "";
