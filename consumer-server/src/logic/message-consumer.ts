@@ -7,6 +7,7 @@ export async function createMessagesConsumerComponent({
   const logger = logs.getLogger('messages-consumer')
 
   async function start() {
+    logger.info('Starting to listen messages from queue')
     while (true) {
       const messages = await queue.receiveSingleMessage()
       for (const message of messages) {
