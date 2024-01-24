@@ -19,8 +19,6 @@ export type BaseComponents = {
   logs: ILoggerComponent
   server: IHttpServerComponent<GlobalContext>
   metrics: IMetricsComponent<keyof typeof metricDeclarations>
-  queue: QueueService
-  messageConsumer: QueueWorker
 }
 
 // components used in runtime

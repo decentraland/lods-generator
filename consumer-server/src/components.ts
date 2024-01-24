@@ -5,9 +5,11 @@ import { createMetricsComponent, instrumentHttpServerWithMetrics } from '@well-k
 
 import { AppComponents, GlobalContext } from './types'
 import { metricDeclarations } from './metrics'
-import { createSqsAdapter } from './adapters/sqs'
-import { createMessagesConsumerComponent } from './logic/message-consumer'
+// import { createSqsAdapter } from './adapters/sqs'
+// import { createMessagesConsumerComponent } from './logic/message-consumer'
 import { buildLicense } from './utils/license-builder'
+
+import { validate } from './logic/boot-validator'
 
 export async function initComponents(): Promise<AppComponents> {
   const config = await createDotEnvConfigComponent({ path: ['.env.default', '.env'] })
@@ -19,8 +21,9 @@ export async function initComponents(): Promise<AppComponents> {
 
   await instrumentHttpServerWithMetrics({ metrics, server, config })
 
-  const queue = await createSqsAdapter({ config })
-  const messageConsumer = await createMessagesConsumerComponent({ logs, queue })
+  // const queue = await createSqsAdapter({ config })
+  // const messageConsumer = await createMessagesConsumerComponent({ logs, queue })
+  const result = await validate({ logs })
 
   await buildLicense({ config, logs })
 
@@ -29,8 +32,8 @@ export async function initComponents(): Promise<AppComponents> {
     logs,
     server,
     metrics,
-    statusChecks,
-    queue,
-    messageConsumer
+    statusChecks
+    // queue,
+    // messageConsumer
   }
 }

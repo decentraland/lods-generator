@@ -1,5 +1,5 @@
 # prepare base image for TS projects
-FROM mcr.microsoft.com/windows/servercore:ltsc2019 as base
+FROM mcr.microsoft.com/windows/nanoserver:ltsc2019 as base
 
 ADD https://aka.ms/vs/16/release/vc_redist.x64.exe C:\\vc_redist.x64.exe
 RUN C:\\vc_redist.x64.exe /quiet /install
@@ -59,7 +59,7 @@ ARG VULKAN_DLL_PATH
 COPY ${VULKAN_DLL_PATH} ./publish/vulkan-1.dll
 
 # bundle all apps
-FROM mcr.microsoft.com/windows:ltsc2019
+FROM mcr.microsoft.com/windows/nanoserver:ltsc2019
 
 ADD https://aka.ms/vs/16/release/vc_redist.x64.exe C:\\vc_redist.x64.exe
 RUN C:\\vc_redist.x64.exe /quiet /install
