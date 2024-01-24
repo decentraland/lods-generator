@@ -1,22 +1,13 @@
 # prepare base image for TS projects
-FROM mcr.microsoft.com/windows/nanoserver:ltsc2019 as base
+FROM node:18 as base
 
-# ADD https://aka.ms/vs/16/release/vc_redist.x64.exe C:\\vc_redist.x64.exe
-# RUN C:\\vc_redist.x64.exe /quiet /install
+RUN apt-get update
+RUN apt-get -y -qq install build-essential
+RUN npm install -g yarn
 
-ADD https://nodejs.org/dist/v18.0.0/node-v18.0.0-win-x64.zip C:\\node.zip
-RUN powershell -Command \
-    Expand-Archive -Path C:\\node.zip -DestinationPath C:\\Node; \
-    Remove-Item -Force C:\\node.zip
-
-RUN setx /M PATH "C:\\Node/node-v18.0.0-win-x64;%PATH%"
-
-ADD https://classic.yarnpkg.com/latest.msi C:\\yarn.msi
-RUN powershell -Command \
-    Start-Process msiexec.exe -ArgumentList '/i', 'C:\\yarn.msi', '/quiet', '/norestart' -NoNewWindow -Wait; \
-    Remove-Item -Force C:\\yarn.msi
-
-WORKDIR /bin
+ENV TINI_VERSION v0.19.0
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
+RUN chmod +x /tini
 
 # build scene-lod
 FROM base as scene-lod-build
@@ -61,26 +52,34 @@ COPY ${VULKAN_DLL_PATH} ./publish/vulkan-1.dll
 # bundle all apps
 FROM unityci/editor:ubuntu-2023.2.6f1-windows-mono-3.0.1
 
-ADD https://aka.ms/vs/16/release/vc_redist.x64.exe C:\\vc_redist.x64.exe
-RUN C:\\vc_redist.x64.exe /quiet /install
+RUN    apt-get update -y \
+    && apt-get -y install \
+    xvfb \
+    && rm -rf /var/lib/apt/lists/* /var/cache/apt/*
 
-ADD https://nodejs.org/dist/v18.14.2/node-v18.14.2-win-x64.zip C:\\node.zip
-RUN powershell -Command \
-    Expand-Archive -Path C:\\node.zip -DestinationPath C:\\Node; \
-    Remove-Item -Force C:\\node.zip
+ENV NVM_DIR /root/.nvm
+ENV NODE_VERSION v18.14.2
 
-RUN setx /M PATH "%PATH%;C:/Node/node-v18.14.2-win-x64"
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash
+RUN /bin/bash -c "source $NVM_DIR/nvm.sh && nvm install $NODE_VERSION && nvm use --delete-prefix $NODE_VERSION"
+
+ENV NODE_PATH $NVM_DIR/versions/node/$NODE_VERSION/lib/node_modules
+ENV PATH $NVM_DIR/versions/node/$NODE_VERSION/bin:$PATH
+ENV NODE_ENV production
 
 WORKDIR /vulkan-sdt
 ARG VULKAN_DLL_PATH
 COPY ${VULKAN_DLL_PATH} .
 
-RUN setx /M PATH "%PATH%;C:/vulkan-sdt"
+# set path on linux to discover /vulkan-sdt dlls
+ENV LD_LIBRARY_PATH=/vulkan-sdt
 
 WORKDIR /app/api
 COPY --from=dotnet-build /build/publish/ .
 
 WORKDIR /app
+
+COPY --from=base /tini /tini
 
 COPY ./pixyzsdk-29022024.lic ./pixyzsdk-29022024.lic
 COPY --from=scene-lod-build /scene-lod/dist ./scene-lod/dist
@@ -93,4 +92,11 @@ COPY --from=consumer-server-build /consumer-server/package.json ./consumer-serve
 COPY --from=consumer-server-build /consumer-server/yarn.lock ./consumer-server/yarn.lock
 COPY --from=consumer-server-build /consumer-server/node_modules ./consumer-server/node_modules
 
-CMD ["node", "./consumer-server/dist/index.js"]
+# Please _DO NOT_ use a custom ENTRYPOINT because it may prevent signals
+# (i.e. SIGTERM) to reach the service
+# Read more here: https://aws.amazon.com/blogs/containers/graceful-shutdowns-with-ecs/
+#            and: https://www.ctl.io/developers/blog/post/gracefully-stopping-docker-containers/
+ENTRYPOINT ["/tini", "-g", "--", "xvfb-run", "--auto-servernum", "--error-file", "/dev/stdout" ]
+
+# Run the program under Tini+xvfb
+CMD [ "node", "--trace-warnings", "--abort-on-uncaught-exception", "--unhandled-rejections=strict", "./consumer-server/dist/index.js" ]
