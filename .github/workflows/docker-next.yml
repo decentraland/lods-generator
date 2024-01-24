@@ -7,7 +7,7 @@ on:
 
 jobs:
   quay-build-push:
-    runs-on: windows-2019
+    runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash
