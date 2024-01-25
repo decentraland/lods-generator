@@ -89,11 +89,18 @@ COPY --from=scene-lod-build /scene-lod/package-lock.json ./scene-lod/package-loc
 COPY --from=scene-lod-build /scene-lod/node_modules ./scene-lod/node_modules
 COPY --from=scene-lod-build /scene-lod/.env.default ./scene-lod/.env.default
 
+WORKDIR /app/scene-lod
+RUN dir
+
+WORKDIR /app
 
 COPY --from=consumer-server-build /consumer-server/dist ./consumer-server/dist
 COPY --from=consumer-server-build /consumer-server/package.json ./consumer-server/package.json
 COPY --from=consumer-server-build /consumer-server/yarn.lock ./consumer-server/yarn.lock
 COPY --from=consumer-server-build /consumer-server/node_modules ./consumer-server/node_modules
 COPY --from=consumer-server-build /consumer-server/.env.default ./consumer-server/.env.default
+
+WORKDIR /app/consumer-server
+RUN dir 
 
 CMD ["node", "./consumer-server/dist/index.js"]
