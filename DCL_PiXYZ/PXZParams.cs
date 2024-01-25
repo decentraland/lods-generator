@@ -11,7 +11,7 @@ namespace DCL_PiXYZ
         public string ScenePointer { get; set; }
         public Dictionary<string, string> SceneContent { get; set; }
         public int ParcelAmount { get; set; }
-        public string ManifestDirectory { get; set; }
+        public string ManifestOutputJSONDirectory { get; set; }
         public double DecimationValue { get; set; }
         public int LodLevel { get; set; }
         public string OutputDirectory { get; set; }
@@ -26,7 +26,7 @@ namespace DCL_PiXYZ
         public string DecimationType { get; }
         public string DecimationValues { get; }
         public string SceneManifestDirectory { get; }
-        public string ScenePositionJsonDirectory { get; }
+        public string ManifestOutputJsonDirectory { get; }
         public string OutputDirectory { get; }
         public List<string> ScenesToAnalyze { get; set; }
         public List<double> DecimationToAnalyze { get; set; }
@@ -38,8 +38,8 @@ namespace DCL_PiXYZ
             Scenes = args[2];
             DecimationType = args[3];
             DecimationValues = args[4];
-            SceneManifestDirectory = Path.Combine(Directory.GetCurrentDirectory(), "scene-lod-entities-manifest-builder");
-            ScenePositionJsonDirectory = Path.Combine(SceneManifestDirectory, "output-manifests/");
+            SceneManifestDirectory = Path.Combine(Directory.GetCurrentDirectory(), "scene-lod-entities-manifest-builder/");
+            ManifestOutputJsonDirectory = Path.Combine(SceneManifestDirectory, "output-manifests/");
             OutputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "built-lods");
             ScenesToAnalyze = new List<string>();
             DecimationToAnalyze = new List<double>();

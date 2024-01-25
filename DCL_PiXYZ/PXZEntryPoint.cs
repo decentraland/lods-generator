@@ -33,9 +33,9 @@ namespace DCL_PiXYZ
                     //Are we doing single or bulk scenes?
                     //If its single, we pass as many scenes as we want to parse separated by ;
                     //If its bulk, a single number will represent a square to parse, going from -value to value
-                    "bulk",
+                    "single",
                     //Third param is single coordinates or bulk value. Single scenes are separated by ;
-                    "20",
+                    "16,8;19,-1",
                     //Fourth param is decimation type (ratio or triangle)
                     "triangle",
                     //Fifth param is decimation value, separated by ;
@@ -114,7 +114,7 @@ namespace DCL_PiXYZ
                     continue;
                 }
                 Console.WriteLine("END MANIFEST GENERATION FOR SCENE " + scene);
-                continue;
+           
                 Dictionary<string, string> sceneContent = new Dictionary<string, string>();
 
                 try
@@ -142,7 +142,7 @@ namespace DCL_PiXYZ
                             DecimationType = sceneConversionInfo.DecimationType,
                             DecimationValue = decimationValue,
                             LodLevel = currentLODLevel,
-                            ManifestDirectory = sceneConversionInfo.SceneManifestDirectory,
+                            ManifestOutputJSONDirectory = sceneConversionInfo.ManifestOutputJsonDirectory,
                             OutputDirectory = sceneConversionInfo.OutputDirectory,
                             ParcelAmount = currentPointersList.Length,
                             SceneContent = sceneContent,
@@ -196,7 +196,7 @@ namespace DCL_PiXYZ
         {
             SceneRepositioner.SceneRepositioner sceneRepositioner = 
                 new SceneRepositioner.SceneRepositioner(webRequestsHandler,
-                    pxzParams.ManifestDirectory,
+                    pxzParams.ManifestOutputJSONDirectory,
                     $"{pxzParams.SceneHash}-lod-manifest.json", pxzParams.SceneContent, pxz);
             List<PXZModel> models = await sceneRepositioner.SetupSceneInPiXYZ();
 
@@ -205,7 +205,7 @@ namespace DCL_PiXYZ
             modifiers.Add(new PXZRepairMesh(models));
             modifiers.Add(new PXZDecimator(pxzParams.ScenePointer, pxzParams.DecimationType,
                 pxzParams.DecimationValue, pxzParams.ParcelAmount));
-            modifiers.Add(new PXZMergeMeshes());
+            //modifiers.Add(new PXZMergeMeshes());
             string filename = $"{pxzParams.SceneHash}_{pxzParams.LodLevel}";
             modifiers.Add(new PXZExporter(Path.Combine(pxzParams.OutputDirectory, $"{pxzParams.ScenePointer}/{pxzParams.DecimationValue}"), filename, ".fbx"));
 
