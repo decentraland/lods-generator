@@ -10,7 +10,10 @@ import { createMessagesConsumerComponent } from './logic/message-consumer'
 import { buildLicense } from './utils/license-builder'
 
 export async function initComponents(): Promise<AppComponents> {
-  const config = await createDotEnvConfigComponent({ path: ['.env.default', '.env'] })
+  const config = await createDotEnvConfigComponent({ path: ['.env.default', '.env'] }, {
+    HTTP_SERVER_PORT: '3000',
+    HTTP_SERVER_HOST: '0.0.0.0'
+  })
 
   const metrics = await createMetricsComponent(metricDeclarations, { config })
   const logs = await createLogComponent({ metrics })
