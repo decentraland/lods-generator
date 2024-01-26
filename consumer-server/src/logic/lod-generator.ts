@@ -14,7 +14,7 @@ export function createLodGeneratorComponent(): LodGeneratorService {
     const outputPath = path.join(os.tmpdir(), entityId)
 
     if (!fs.existsSync(outputPath)) {
-        fs.mkdirSync(outputPath, { recursive: true });
+      fs.mkdirSync(outputPath, { recursive: true })
     }
 
     const commandToExecute = `${lodGeneratorProgram} "coords" "${basePointer}" ${sceneLodEntitiesManifestBuilder} "${outputPath}"`

@@ -2,8 +2,9 @@ import { AppComponents, MessageHandler } from '../types'
 
 export function createMessageHandlerComponent({
   logs,
-  lodGenerator
-}: Pick<AppComponents, 'logs' | 'lodGenerator'>): MessageHandler {
+  lodGenerator,
+  storage
+}: Pick<AppComponents, 'logs' | 'lodGenerator' | 'storage'>): MessageHandler {
   const logger = logs.getLogger('message-handler')
 
   async function handle(message: { Message: string }): Promise<void> {
@@ -18,10 +19,11 @@ export function createMessageHandlerComponent({
     const base = parsedMessage.entity.metadata.scene.base
 
     try {
-      const result = await lodGenerator.generate(entityId, base)
-      logger.info('LODs correctly generated', { files: result.join(', '), entityId })
+      const filesToUpload = await lodGenerator.generate(entityId, base)
+      logger.info('LODs correctly generated', { files: filesToUpload.join(', '), entityId })
+      await storage.storeFiles(filesToUpload, base, parsedMessage.entity.entityTimestamp.toString())
     } catch (error: any) {
-      logger.error('Failed while generating LODs', { error: error.message, entityId })
+      logger.error('Failed while generating LODs', { error, entityId })
     }
   }
 
