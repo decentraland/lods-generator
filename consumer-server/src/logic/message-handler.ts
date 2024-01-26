@@ -9,11 +9,13 @@ export function createMessageHandlerComponent({
   async function handle(message: { Message: string }): Promise<void> {
     const parsedMessage = JSON.parse(message.Message)
 
-    if (parsedMessage.entityType !== 'scene') {
+    logger.info('Handling message', { parsedMessage })
+    if (parsedMessage.entity.entityType !== 'scene') {
       return
     }
 
-    const { base, entityId } = parsedMessage
+    const entityId = parsedMessage.entity.entityId
+    const base = parsedMessage.entity.metadata.scene.base
 
     try {
       const result = await lodGenerator.generate(entityId, base)
