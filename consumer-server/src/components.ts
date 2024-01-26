@@ -11,6 +11,7 @@ import { buildLicense } from './utils/license-builder'
 import { createMemoryQueueAdapter } from './adapters/memory-queue'
 import { createLodGeneratorComponent } from './logic/lod-generator'
 import { createMessageHandlerComponent } from './logic/message-handler'
+import { createStorageComponent } from './adapters/storage'
 
 export async function initComponents(): Promise<AppComponents> {
   const config = await createDotEnvConfigComponent(
@@ -31,7 +32,8 @@ export async function initComponents(): Promise<AppComponents> {
   const sqsEndpoint = await config.getString('QUEUE_URL')
   const queue = !sqsEndpoint ? createMemoryQueueAdapter({ logs }) : await createSqsAdapter(sqsEndpoint)
   const lodGenerator = createLodGeneratorComponent()
-  const messageHandler = createMessageHandlerComponent({ logs, lodGenerator })
+  const storage = await createStorageComponent({ logs, config })
+  const messageHandler = createMessageHandlerComponent({ logs, lodGenerator, storage })
 
   const messageConsumer = await createMessagesConsumerComponent({ logs, queue, messageHandler })
 
@@ -46,6 +48,7 @@ export async function initComponents(): Promise<AppComponents> {
     queue,
     messageConsumer,
     lodGenerator,
-    messageHandler
+    messageHandler,
+    storage
   }
 }

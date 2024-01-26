@@ -23,6 +23,7 @@ export type BaseComponents = {
   messageConsumer: QueueWorker
   lodGenerator: LodGeneratorService
   messageHandler: MessageHandler
+  storage: StorageComponent
 }
 
 // components used in runtime
@@ -73,4 +74,8 @@ export type LodGeneratorService = {
 
 export type MessageHandler = {
   handle(message: { Message: string }): Promise<void>
+}
+
+export type StorageComponent = {
+  storeFiles(filePaths: string[], basePointer: string, entityTimestamp: string): Promise<boolean>
 }
