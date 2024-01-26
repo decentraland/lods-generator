@@ -75,6 +75,9 @@ WORKDIR /vulkan-sdt
 ARG VULKAN_DLL_PATH
 COPY ${VULKAN_DLL_PATH} .
 
+ARG COMMIT_HASH
+RUN setx /M COMMIT_HASH ${COMMIT_HASH}
+
 RUN setx /M PATH "%PATH%;C:/vulkan-sdt"
 
 WORKDIR /app/api
