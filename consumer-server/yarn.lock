@@ -1760,6 +1760,13 @@
   dependencies:
     prom-client "^14.1.0"
 
+"@well-known-components/pushable-channel@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@well-known-components/pushable-channel/-/pushable-channel-1.0.3.tgz#b8a803c483bb52c03339a98813dd370857129059"
+  integrity sha512-8ibswJXQx7YfmUgzXp02xsIBTw6zrVXgNybV8asvEr1vE/0m/xmZi41+NwTcZmLCNRzsE/i+aRUzNO+oyq/g2g==
+  dependencies:
+    mitt "^3.0.0"
+
 "@well-known-components/test-helpers@^1.5.5":
   version "1.5.5"
   resolved "https://registry.yarnpkg.com/@well-known-components/test-helpers/-/test-helpers-1.5.5.tgz#73472e599a3e867889b03b226ea86c7aba1f4b6c"

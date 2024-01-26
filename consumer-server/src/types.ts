@@ -21,6 +21,8 @@ export type BaseComponents = {
   metrics: IMetricsComponent<keyof typeof metricDeclarations>
   queue: QueueService
   messageConsumer: QueueWorker
+  lodGenerator: LodGeneratorService
+  messageHandler: MessageHandler
 }
 
 // components used in runtime
@@ -64,3 +66,11 @@ export type AwsConfig = {
 }
 
 export type QueueWorker = IBaseComponent
+
+export type LodGeneratorService = {
+  generate(entityId: string, basePointer: string): Promise<string[]>
+}
+
+export type MessageHandler = {
+  handle(message: { Message: string }): Promise<void>
+}

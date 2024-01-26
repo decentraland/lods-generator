@@ -2,8 +2,9 @@ import { AppComponents, QueueWorker } from '../types'
 
 export async function createMessagesConsumerComponent({
   logs,
-  queue
-}: Pick<AppComponents, 'logs' | 'queue'>): Promise<QueueWorker> {
+  queue,
+  messageHandler
+}: Pick<AppComponents, 'logs' | 'queue' | 'messageHandler'>): Promise<QueueWorker> {
   const logger = logs.getLogger('messages-consumer')
 
   async function start() {
@@ -19,6 +20,7 @@ export async function createMessagesConsumerComponent({
             id: MessageId!,
             message: parsedMessage.Message
           })
+          await messageHandler.handle(parsedMessage)
         } catch (error: any) {
           logger.error('Failed while handling message from queue', {
             id: MessageId!,
