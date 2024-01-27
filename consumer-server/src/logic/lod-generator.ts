@@ -25,7 +25,7 @@ export function createLodGeneratorComponent(): LodGeneratorService {
         if (generatedFiles.length > 0) {
           resolve(generatedFiles)
         } else {
-          reject()
+          reject('Could not generate LODs')
         }
       })
     })
@@ -34,14 +34,5 @@ export function createLodGeneratorComponent(): LodGeneratorService {
     return files
   }
 
-  async function mockGenerate(entityId: string, basePointer: string): Promise<string[]> {
-
-    if (entityId === "test"){
-        return await generate('test', 'test')
-    } else {
-        return ['0.glb', '1.glb', '2.glb']
-    }
-  }
-
-  return { generate: mockGenerate }
+  return { generate }
 }
