@@ -20,11 +20,11 @@ export async function createMessagesConsumerComponent({
             id: MessageId!,
             message: parsedMessage.Message
           })
-          await messageHandler.handle(parsedMessage)
+          await messageHandler.handle(JSON.parse(parsedMessage.Message))
         } catch (error: any) {
+          console.log({ error })
           logger.error('Failed while handling message from queue', {
-            id: MessageId!,
-            error
+            id: MessageId!            
           })
         } finally {
           await queue.deleteMessage(ReceiptHandle!)
