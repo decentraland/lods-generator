@@ -7,21 +7,22 @@ export function createMessageHandlerComponent({
 }: Pick<AppComponents, 'logs' | 'lodGenerator' | 'storage'>): MessageHandler {
   const logger = logs.getLogger('message-handler')
 
-  async function handle(message: { Message: string }): Promise<void> {
-    const parsedMessage = JSON.parse(message.Message)
+  async function handle(message: any): Promise<void> {
+    console.log({ message })
+    logger.info('Handling', { type: message.type, id: message.entity.entityId })
 
-    logger.info('Handling message', { parsedMessage })
-    if (parsedMessage.entity.entityType !== 'scene') {
-      return
+    if (message.entity.entityType !== 'scene') {
+        return
     }
+    logger.info('Handling message', { message })
 
-    const entityId = parsedMessage.entity.entityId
-    const base = parsedMessage.entity.metadata.scene.base
+    const entityId = message.entity.entityId
+    const base = message.entity.metadata.scene.base
 
     try {
       const filesToUpload = await lodGenerator.generate(entityId, base)
       logger.info('LODs correctly generated', { files: filesToUpload.join(', '), entityId })
-      await storage.storeFiles(filesToUpload, base, parsedMessage.entity.entityTimestamp.toString())
+    //   await storage.storeFiles(filesToUpload, base, parsedMessage.entity.entityTimestamp.toString())
     } catch (error: any) {
       logger.error('Failed while generating LODs', { error, entityId })
     }
