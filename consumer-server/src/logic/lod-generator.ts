@@ -34,5 +34,14 @@ export function createLodGeneratorComponent(): LodGeneratorService {
     return files
   }
 
-  return { generate }
+  async function mockGenerate(entityId: string, basePointer: string): Promise<string[]> {
+
+    if (entityId === "test"){
+        return await generate('test', 'test')
+    } else {
+        return ['0.glb', '1.glb', '2.glb']
+    }
+  }
+
+  return { generate: mockGenerate }
 }
