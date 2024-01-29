@@ -74,6 +74,7 @@ namespace SceneImporter
         private void SetResult(string setSceneHash)
         {
             this.sceneHash = setSceneHash;
+            //TODO: Change to scene base
             scenePointer = sceneDefinition.pointers[0];
             currentPointersList = sceneDefinition.pointers;
         }

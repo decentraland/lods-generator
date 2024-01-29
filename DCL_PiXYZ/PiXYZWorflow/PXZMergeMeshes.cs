@@ -84,9 +84,7 @@ namespace DCL_PiXYZ
             mergedMesh++;
             // Merge any remaining submeshes if needed
             if (toMerge.list.Length > 0)
-            {
                 DoMerge(currentVertexCount, toMerge, isOpaque, mergedMesh);
-            }
         }
 
         private void DoMerge(ulong currentVertexCount, OccurrenceList toMerge, bool isOpaque, int index)
@@ -94,7 +92,7 @@ namespace DCL_PiXYZ
             if (toMerge.list.Length == 0)
                 return;
             
-            Console.WriteLine("Merging meshes " + toMerge.list.Length + " vertex count " + currentVertexCount);
+            Console.WriteLine($"Merging meshes {(isOpaque ? "OPAQUE" : "TRANSPARENT")} {toMerge.list.Length} vertex count {currentVertexCount}");
             uint combineMeshes = pxz.Algo.CombineMeshes(toMerge, bakeOption);
             pxz.Core.SetProperty(combineMeshes, "Name", $"MERGED MESH {index} {(isOpaque ? "OPAQUE" : "TRANSPARENT")}");
             Console.WriteLine("End merging meshes ");
@@ -125,20 +123,14 @@ namespace DCL_PiXYZ
                     if (pxz.Scene.HasComponent(packedTree.occurrences[i], ComponentType.Part))
                     {
                         MaterialList material = pxz.Scene.GetMaterialsFromSubtree(packedTree.occurrences[i]);
-                        bool isTransparent = false;
-                        for (var j = 0; j < material.list.Length; j++)
-                        {
-                            if(!pxz.Material.IsOpaque(material.list[j]))
-                            {
-                                isTransparent = true;
-                                break;
-                            }
-                        }
-                        if (isTransparent)
-                            transparentsToMerge.AddOccurrence(packedTree.occurrences[i]);
-                        else
+                        bool isOpaque = false;
+                        //TODO: Should we iterate the whole list of materials int he occurences?
+                        if (material.list.Length > 0)
+                            isOpaque = pxz.Material.IsOpaque(material.list[0]);
+                        if (isOpaque)
                             opaquesToMerge.AddOccurrence(packedTree.occurrences[i]);
-
+                        else
+                            transparentsToMerge.AddOccurrence(packedTree.occurrences[i]);
                     }
                 }
             }
