@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using DCL_PiXYZ.SceneRepositioner.JsonParsing;
 using UnityEngine.Pixyz.Algo;
 using UnityEngine.Pixyz.API;
@@ -30,7 +31,7 @@ namespace DCL_PiXYZ
             this.scenePointer = scenePointer;
         } 
         
-        public void ApplyModification(PiXYZAPI pxz)
+        public async Task ApplyModification(PiXYZAPI pxz)
         {
             Console.WriteLine("-------------------------");
             Console.WriteLine("BEGIN PXZ MODIFIER DECIMATOR");

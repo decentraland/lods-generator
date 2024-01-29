@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using DCL_PiXYZ.SceneRepositioner.JsonParsing;
 using UnityEngine.Pixyz.Algo;
 using UnityEngine.Pixyz.API;
@@ -10,85 +11,116 @@ namespace DCL_PiXYZ
 {
     public class PXZMergeMeshes : IPXZModifier
     {
-        public void ApplyModification(PiXYZAPI pxz)
+        
+        private OccurrenceList opaquesToMerge; 
+        private OccurrenceList transparentsToMerge;
+        private PiXYZAPI pxz;
+        private ulong maxVertexCountPerMerge;
+        private BakeOption bakeOption;
+
+
+        public PXZMergeMeshes()
         {
-            Console.WriteLine("-------------------------");
-            Console.WriteLine("BEGIN PXZ MERGE MESHES");
-            BakeOption bakeOption = new BakeOption();
+            opaquesToMerge = new OccurrenceList();
+            transparentsToMerge = new OccurrenceList();
+            maxVertexCountPerMerge = 200000;
+            
+            bakeOption = new BakeOption();
             BakeMaps bakeMaps = new BakeMaps();
             bakeMaps.diffuse = true;
+            bakeMaps.opacity = true;
             bakeOption.bakingMethod = BakingMethod.RayOnly;
             bakeOption.resolution = 1024;
             bakeOption.padding = 1;
             bakeOption.textures = bakeMaps;
-            OccurrenceList children = pxz.Scene.GetChildren(pxz.Scene.GetRoot());
-
-            /*int amountToMergeCandidate = 40;
-            int amountToMergeTogether = children.list.Length < amountToMergeCandidate ? children.list.Length : amountToMergeCandidate;
-            for (int i = 0; i < children.list.Length; i += amountToMergeTogether)
-            {
-                OccurrenceList childrenToMerge = new OccurrenceList();
-                for (int j = i; j < i + amountToMergeTogether && j < children.list.Length; j++)
-                {
-                    childrenToMerge.AddOccurrence(children.list[j]); 
-                }
-                Console.WriteLine("Merging meshes " + childrenToMerge.list.Length + " iteration " + i);
-                uint combineMeshes = pxz.Algo.CombineMeshes(childrenToMerge, bakeOption);
-                Console.WriteLine("End merging meshes ");
-
-                Console.WriteLine("Copying Material");
-                //Apply a copy of the material not to lose the reference
-                MaterialList material = pxz.Scene.GetMaterialsFromSubtree(combineMeshes);
-                uint copyMaterial = pxz.Material.CopyMaterial(material.list[0], false);
-                pxz.Core.SetProperty(copyMaterial, "Name", "MERGE MATERIAL ITERATION " + i);
-                pxz.Scene.SetOccurrenceMaterial(combineMeshes,copyMaterial);
-                Console.WriteLine("Setting Material");
-            }*/
-
+        }
+        
+        
+        public async Task ApplyModification(PiXYZAPI pxz)
+        {
+            this.pxz = pxz;
+            Console.WriteLine("-------------------------");
+            Console.WriteLine("BEGIN PXZ MERGE MESHES");
             try
             {
-                ulong maxVertexCountPerMerge = 200000;
-                ulong currentVertexCount = 0; 
-                for (int i = 0; i < children.list.Length;)
-                {
-                    OccurrenceList childrenToMerge = new OccurrenceList();
-                    for (int j = i; j < children.list.Length;)
-                    {
-                        ulong vertexCount = pxz.Scene.GetVertexCount(new OccurrenceList(new uint[] { children.list[j] }));
-                        if(currentVertexCount + vertexCount > maxVertexCountPerMerge)
-                            break;
-                    
-                        childrenToMerge.AddOccurrence(children.list[j]);
-                        currentVertexCount += vertexCount;
-                        i++;
-                        j = i;
-                    }
-                
-                    Console.WriteLine("Merging meshes " + childrenToMerge.list.Length + " vertex count " + currentVertexCount);
-                    uint combineMeshes = pxz.Algo.CombineMeshes(childrenToMerge, bakeOption);
-                    pxz.Core.SetProperty(combineMeshes, "Name", "MERGED MESH " + i);
-                
-                    Console.WriteLine("End merging meshes ");
-                    currentVertexCount = 0;
-                
-                    Console.WriteLine("Copying Material");
-                    //Apply a copy of the material not to lose the reference
-                    MaterialList material = pxz.Scene.GetMaterialsFromSubtree(combineMeshes);
-                    uint copyMaterial = pxz.Material.CopyMaterial(material.list[0], false);
-                    pxz.Core.SetProperty(copyMaterial, "Name", "MERGE MATERIAL " + i);
-                    pxz.Scene.SetOccurrenceMaterial(combineMeshes,copyMaterial);
-                    Console.WriteLine("Setting Material");
-                }           
+                AddOcurrences(pxz, pxz.Scene.GetSubTree(pxz.Scene.GetRoot()));
+                MergeSubMeshes(opaquesToMerge, true);
+                MergeSubMeshes(transparentsToMerge, false);
             }
             catch(Exception e)
             {
                 Console.WriteLine(e);
             }
-                 
-            
-            //pxz.Algo.CombineMeshes(new OccurrenceList(new uint[]{}), bakeOption);
             Console.WriteLine("END PXZ MERGE MESHES");
             Console.WriteLine("-------------------------");
+        }
+
+        private void MergeSubMeshes(OccurrenceList listToMerge, bool isOpaque)
+        {
+            OccurrenceList toMerge = new OccurrenceList();
+            ulong currentVertexCount = 0;
+
+            for (int i = 0; i < listToMerge.list.Length; i++)
+            {
+                ulong vertexCount = pxz.Scene.GetVertexCount(new OccurrenceList(new uint[] { listToMerge.list[i] }));
+                ulong currentCandidate = currentVertexCount + vertexCount;
+
+                if (currentCandidate > maxVertexCountPerMerge)
+                {
+                    DoMerge(currentVertexCount, toMerge, isOpaque);
+                    toMerge = new OccurrenceList();
+                    currentVertexCount = 0;
+                }
+                
+                toMerge.AddOccurrence(listToMerge.list[i]);
+                currentVertexCount += vertexCount;
+            }
+
+            // Merge any remaining submeshes if needed
+            if (toMerge.list.Length > 0)
+            {
+                DoMerge(currentVertexCount, toMerge, isOpaque);
+            }
+        }
+
+        private void DoMerge(ulong currentVertexCount, OccurrenceList toMerge, bool isOpaque)
+        {
+            Console.WriteLine("Merging meshes " + toMerge.list.Length + " vertex count " + currentVertexCount);
+            uint combineMeshes = pxz.Algo.CombineMeshes(toMerge, bakeOption);
+            pxz.Core.SetProperty(combineMeshes, "Name", $"MERGED MESH {(isOpaque ? "OPAQUE" : "TRANSPARENT")}");
+            Console.WriteLine("End merging meshes ");
+
+            Console.WriteLine("Copying Material");
+            //Apply a copy of the material not to lose the reference
+            MaterialList material = pxz.Scene.GetMaterialsFromSubtree(combineMeshes);
+            uint copyMaterial = pxz.Material.CopyMaterial(material.list[0], false);
+            pxz.Core.SetProperty(copyMaterial, "Name", $"MERGE MATERIAL {(isOpaque ? "OPAQUE" : "TRANSPARENT")}");
+            pxz.Scene.SetOccurrenceMaterial(combineMeshes,copyMaterial);
+            Console.WriteLine("Setting Material");
+        }
+
+
+        private void AddOcurrences(PiXYZAPI pxz, PackedTree packedTree)
+        {
+            if (packedTree.occurrences.list != null)
+            {
+                for (var i = 0; i < packedTree.occurrences.list.Length; i++)
+                {
+                    //Means it has a mesh component
+                    if (pxz.Scene.HasComponent(packedTree.occurrences[i], ComponentType.Part))
+                    {
+                        MaterialList material = pxz.Scene.GetMaterialsFromSubtree(packedTree.occurrences[i]);
+                        bool isOpaque = true;
+                        for (var j = 0; j < material.list.Length; j++)
+                            isOpaque = isOpaque && pxz.Material.IsOpaque(material.list[j]);
+                        if (isOpaque)
+                            opaquesToMerge.AddOccurrence(packedTree.occurrences[i]);
+                        else
+                            transparentsToMerge.AddOccurrence(packedTree.occurrences[i]);
+                    }
+                }
+            }
+            
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using DCL_PiXYZ.SceneRepositioner.JsonParsing;
 using UnityEngine.Pixyz.API;
 using UnityEngine.Pixyz.Scene;
@@ -9,18 +10,47 @@ namespace DCL_PiXYZ
 {
     public class PXZExporter : IPXZModifier
     {
-        private string extension;
+        private List<string> extensions;
         private string path;
         private string filename;
 
-        public PXZExporter(string path, string filename, string extension)
+        public PXZExporter(string path, string filename)
         {
-            this.extension = extension;
+            extensions = new List<string>() { ".fbx", ".glb" };
             this.path = path;
             this.filename = filename;
         }
+        
+        public async Task ApplyModification(PiXYZAPI pxz)
+        {
+            int currentExtensionTried = 0;
+            bool exportSucceeded = false;
 
-        public void ApplyModification(PiXYZAPI pxz)
+            while (currentExtensionTried < extensions.Count)
+            {
+                var exportTask = Task.Run(() => DoExportWithExtension(pxz, extensions[currentExtensionTried]));
+                var completedTask = await Task.WhenAny(exportTask, Task.Delay(TimeSpan.FromMinutes(5)));
+
+                if (completedTask == exportTask)
+                {
+                    // Export completed before the timeout
+                    exportSucceeded = true;
+                    break; // Break out of the loop if export succeeds
+                }
+                else
+                {
+                    // Handle the timeout case here
+                    PXZEntryPoint.WriteToFile($"Export for file {filename} timed out for extension {extensions[currentExtensionTried]}", "FailScenes.txt");
+                    currentExtensionTried++; // Move on to the next extension
+                }
+            }
+
+            if (!exportSucceeded)
+                PXZEntryPoint.WriteToFile($"All extensions failed for {filename}", "FailScenes.txt");
+        }
+
+
+        private void DoExportWithExtension(PiXYZAPI pxz, string extension)
         {
             Console.WriteLine("-------------------------");
             Console.WriteLine($"BEGIN PXZ EXPORT {filename}{extension}");

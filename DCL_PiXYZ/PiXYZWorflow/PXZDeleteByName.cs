@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using DCL_PiXYZ.SceneRepositioner.JsonParsing;
 using UnityEngine.Pixyz.API;
 using UnityEngine.Pixyz.Scene;
@@ -14,7 +15,7 @@ namespace DCL_PiXYZ
             this.regex = regex;
         }
 
-        public void ApplyModification(PiXYZAPI pxz)
+        public async Task ApplyModification(PiXYZAPI pxz)
         {
             Console.WriteLine("-------------------------");
             Console.WriteLine("BEGIN PXZ DELETE BY NAME FOR REGEX " + regex);

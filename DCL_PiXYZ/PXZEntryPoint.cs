@@ -35,7 +35,7 @@ namespace DCL_PiXYZ
                     //If its bulk, a single number will represent a square to parse, going from -value to value
                     "single",
                     //Third param is single coordinates or bulk value. Single scenes are separated by ;
-                    "16,8;19,-1",
+                    "-14,-12",
                     //Fourth param is decimation type (ratio or triangle)
                     "triangle",
                     //Fifth param is decimation value, separated by ;
@@ -88,11 +88,11 @@ namespace DCL_PiXYZ
                 }
                 
                 //Check if they were converted
-                if (Directory.Exists(Path.Combine(sceneConversionInfo.OutputDirectory, currentPointersList[0])))
-                {
-                    Console.WriteLine($"Skipping scene {scene} since its already converted");
-                    continue;
-                }
+                //if (Directory.Exists(Path.Combine(sceneConversionInfo.OutputDirectory, currentPointersList[0])))
+                //{
+                //    Console.WriteLine($"Skipping scene {scene} since its already converted");
+                //    continue;
+                //}
                 
                 //Add it to the analyzed scenes array
                 foreach (var pointer in currentPointersList)
@@ -202,19 +202,19 @@ namespace DCL_PiXYZ
 
             List<IPXZModifier> modifiers = new List<IPXZModifier>();
             modifiers.Add(new PXZDeleteByName(".*collider.*"));
-            modifiers.Add(new PXZRepairMesh(models));
-            modifiers.Add(new PXZDecimator(pxzParams.ScenePointer, pxzParams.DecimationType,
-                pxzParams.DecimationValue, pxzParams.ParcelAmount));
-            //modifiers.Add(new PXZMergeMeshes());
-            string filename = $"{pxzParams.SceneHash}_{pxzParams.LodLevel}";
-            modifiers.Add(new PXZExporter(Path.Combine(pxzParams.OutputDirectory, $"{pxzParams.ScenePointer}/{pxzParams.DecimationValue}"), filename, ".fbx"));
+            //modifiers.Add(new PXZRepairMesh(models));
+            //modifiers.Add(new PXZDecimator(pxzParams.ScenePointer, pxzParams.DecimationType,
+            //    pxzParams.DecimationValue, pxzParams.ParcelAmount));
+            modifiers.Add(new PXZMergeMeshes());
+            string filename = $"{DateTime.Now.ToString("yyyyMMddHHmmss")}_{pxzParams.SceneHash}_{pxzParams.LodLevel}";
+            modifiers.Add(new PXZExporter(Path.Combine(pxzParams.OutputDirectory, $"{pxzParams.ScenePointer}/{pxzParams.DecimationValue}"), filename));
 
             PXZStopwatch stopwatch = new PXZStopwatch();
             
             foreach (var pxzModifier in modifiers)
             {
                 stopwatch.Start();
-                pxzModifier.ApplyModification(pxz);
+                await pxzModifier.ApplyModification(pxz);
                 stopwatch.StopAndPrint(pxzModifier.GetType().Name);
             }
         }
@@ -241,8 +241,8 @@ namespace DCL_PiXYZ
         
         private static void CreateResourcesDirectory() =>
             Directory.CreateDirectory(PXYZConstants.RESOURCES_DIRECTORY);
-        
-        private static void WriteToFile(string message, string fileName)
+
+        public static void WriteToFile(string message, string fileName)
         {
             using (StreamWriter file = new StreamWriter(Path.Combine(Directory.GetCurrentDirectory(),fileName), true))
                 file.WriteLine(message);
