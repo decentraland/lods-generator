@@ -93,9 +93,15 @@ namespace DCL_PiXYZ.Utils
             
                 process.BeginOutputReadLine();
                 process.BeginErrorReadLine();
-            
-                await Task.Run(() => process.WaitForExit());
 
+                await Task.Run(() => 
+                {               
+                if (!process.WaitForExit(20_000))
+                    process.Kill();
+                });
+
+                
+                
                 if (!string.IsNullOrEmpty(firstErrorLine))
                     return firstErrorLine;
             }

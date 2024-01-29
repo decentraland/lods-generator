@@ -110,7 +110,7 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
         public int r = 1;
         public int g = 1;
         public int b = 1;
-        public int a = 1;
+        public int? a = 1;
     }
     
 }

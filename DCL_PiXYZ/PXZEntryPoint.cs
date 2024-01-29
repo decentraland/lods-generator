@@ -35,7 +35,7 @@ namespace DCL_PiXYZ
                     //If its bulk, a single number will represent a square to parse, going from -value to value
                     "single",
                     //Third param is single coordinates or bulk value. Single scenes are separated by ;
-                    "-14,-12",
+                    "-9,-9",
                     //Fourth param is decimation type (ratio or triangle)
                     "triangle",
                     //Fifth param is decimation value, separated by ;
@@ -202,11 +202,11 @@ namespace DCL_PiXYZ
 
             List<IPXZModifier> modifiers = new List<IPXZModifier>();
             modifiers.Add(new PXZDeleteByName(".*collider.*"));
-            //modifiers.Add(new PXZRepairMesh(models));
-            //modifiers.Add(new PXZDecimator(pxzParams.ScenePointer, pxzParams.DecimationType,
-            //    pxzParams.DecimationValue, pxzParams.ParcelAmount));
+            modifiers.Add(new PXZRepairMesh(models));
+            modifiers.Add(new PXZDecimator(pxzParams.ScenePointer, pxzParams.DecimationType,
+                pxzParams.DecimationValue, pxzParams.ParcelAmount));
             modifiers.Add(new PXZMergeMeshes());
-            string filename = $"{DateTime.Now.ToString("yyyyMMddHHmmss")}_{pxzParams.SceneHash}_{pxzParams.LodLevel}";
+            string filename = $"{pxzParams.SceneHash}_{pxzParams.LodLevel}";
             modifiers.Add(new PXZExporter(Path.Combine(pxzParams.OutputDirectory, $"{pxzParams.ScenePointer}/{pxzParams.DecimationValue}"), filename));
 
             PXZStopwatch stopwatch = new PXZStopwatch();
