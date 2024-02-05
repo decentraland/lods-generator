@@ -19,13 +19,13 @@ export function createLodGeneratorComponent(): LodGeneratorService {
 
     const commandToExecute = `${lodGeneratorProgram} "coords" "${basePointer}" ${sceneLodEntitiesManifestBuilder} "${outputPath}"`
     const files: string[] = await new Promise((resolve, reject) => {
-      exec(commandToExecute, (_error, _stdout, _stderr) => {
+      exec(commandToExecute, (error, _stdout, stderr) => {
         const generatedFiles = fs.readdirSync(outputPath)
         // if files exists return otherwise reject
         if (generatedFiles.length > 0) {
           resolve(generatedFiles)
         } else {
-          reject('Could not generate LODs')
+          reject(new Error(`No files were generated. Error: ${error?.message}, Stderr: ${stderr}`))
         }
       })
     })

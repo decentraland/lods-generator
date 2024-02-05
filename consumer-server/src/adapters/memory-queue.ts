@@ -3,7 +3,7 @@ import { AppComponents, QueueService } from '../types'
 
 export function createMemoryQueueAdapter({ logs }: Pick<AppComponents, 'logs'>): QueueService {
   const logger = logs.getLogger('memory-queue')
-  const queue = new AsyncQueue((action) => void 0)
+  const queue = new AsyncQueue((_) => void 0)
 
   logger.info('Initializing memory queue adapter')
 
