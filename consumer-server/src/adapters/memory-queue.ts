@@ -1,14 +1,14 @@
 import { AsyncQueue } from '@well-known-components/pushable-channel'
-import { AppComponents, QueueService } from '../types'
+import { AppComponents, QueueComponent } from '../types'
 
-export function createMemoryQueueAdapter({ logs }: Pick<AppComponents, 'logs'>): QueueService {
+export function createMemoryQueueAdapter({ logs }: Pick<AppComponents, 'logs'>): QueueComponent {
   const logger = logs.getLogger('memory-queue')
   const queue = new AsyncQueue((_) => void 0)
 
   logger.info('Initializing memory queue adapter')
 
   async function send(message: any) {
-    await queue.enqueue(message)
+    queue.enqueue(message)
   }
 
   async function receiveSingleMessage() {
