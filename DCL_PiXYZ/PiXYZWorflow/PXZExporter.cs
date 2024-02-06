@@ -57,7 +57,7 @@ namespace DCL_PiXYZ
             Directory.CreateDirectory(path);
             //Use it to flatten the hierarchy
             //TODO: This will break all possible skinning. But do we care about it?
-            pxz.Scene.MergeOccurrencesByTreeLevel(new OccurrenceList(new[]{pxz.Scene.GetRoot()}),1);
+            //pxz.Scene.MergeOccurrencesByTreeLevel(new OccurrenceList(new[]{pxz.Scene.GetRoot()}),1);
             pxz.IO.ExportScene(Path.Combine(path, $"{filename}{extension}"), pxz.Scene.GetRoot());
             Console.WriteLine("END PXZ EXPORT ");
             Console.WriteLine("-------------------------");

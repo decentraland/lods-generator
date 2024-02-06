@@ -1,24 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
+        <OutputType>WinExe</OutputType>
         <TargetFramework>netcoreapp3.1</TargetFramework>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
       <OutputPath>bin\Release\</OutputPath>
     </PropertyGroup>
-	
-
-	<Target Name="CopyCustomContent" AfterTargets="Build">
-	<ItemGroup>
-	  <CustomContent Include="..\scene-lod-entities-manifest-builder\**" />
-	  <ContentWithTargetPath Include="@(CustomContent->'%(FullPath)')" TargetPath="scene-lod-entities-manifest-builder\%(RecursiveDir)%(Filename)%(Extension)" />
-	</ItemGroup>
-	<Copy SourceFiles="@(ContentWithTargetPath)" DestinationFiles="@(ContentWithTargetPath->'$(OutputPath)%(TargetPath)')" SkipUnchangedFiles="true" />
-	</Target>
-
-
 
     <ItemGroup>
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />

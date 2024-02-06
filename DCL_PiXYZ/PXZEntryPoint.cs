@@ -35,7 +35,7 @@ namespace DCL_PiXYZ
                     //If its bulk, a single number will represent a square to parse, going from -value to value
                     "single",
                     //Third param is single coordinates or bulk value. Single scenes are separated by ;
-                    "-9,-9",
+                    "0,0",
                     //Fourth param is decimation type (ratio or triangle)
                     "triangle",
                     //Fifth param is decimation value, separated by ;
@@ -75,7 +75,10 @@ namespace DCL_PiXYZ
                 }
                 catch (Exception e)
                 {
-                    CloseApplication($"Error: Unable to generate scene content due to {e.Message}");
+                    foreach (var conversionValue in sceneConversionInfo.DecimationValues)
+                        WriteToFile($"{scene}\t{conversionValue}\tDOWNLOAD ERROR: {e.Message}", failFile);
+                    continue;
+                    //CloseApplication($"Error: Unable to generate scene content due to {e.Message}");
                 }
                 string[] currentPointersList = importer.GetCurrentScenePointersList();
                 
@@ -87,12 +90,7 @@ namespace DCL_PiXYZ
                     continue;
                 }
                 
-                //Check if they were converted
-                //if (Directory.Exists(Path.Combine(sceneConversionInfo.OutputDirectory, currentPointersList[0])))
-                //{
-                //    Console.WriteLine($"Skipping scene {scene} since its already converted");
-                //    continue;
-                //}
+
                 
                 //Add it to the analyzed scenes array
                 foreach (var pointer in currentPointersList)
@@ -136,6 +134,12 @@ namespace DCL_PiXYZ
                     pxz.Core.ResetSession();
                     try
                     {
+                        //Check if they were converted
+                        /*if (Directory.Exists(Path.Combine(sceneConversionInfo.OutputDirectory, Path.Combine(currentPointersList[0], decimationValue.ToString()))))
+                        {
+                            Console.WriteLine($"Skipping scene {scene} since its already converted");
+                            continue;
+                        }*/
                         Console.WriteLine($"Converting {scene} with {decimationValue}");
                         PXZParams pxzParams = new PXZParams()
                         {
@@ -201,11 +205,12 @@ namespace DCL_PiXYZ
             List<PXZModel> models = await sceneRepositioner.SetupSceneInPiXYZ();
 
             List<IPXZModifier> modifiers = new List<IPXZModifier>();
+            modifiers.Add(new PXZCleanRepeatedTextures());
             modifiers.Add(new PXZDeleteByName(".*collider.*"));
             modifiers.Add(new PXZRepairMesh(models));
             modifiers.Add(new PXZDecimator(pxzParams.ScenePointer, pxzParams.DecimationType,
                 pxzParams.DecimationValue, pxzParams.ParcelAmount));
-            modifiers.Add(new PXZMergeMeshes());
+            //modifiers.Add(new PXZMergeMeshes());
             string filename = $"{pxzParams.SceneHash}_{pxzParams.LodLevel}";
             modifiers.Add(new PXZExporter(Path.Combine(pxzParams.OutputDirectory, $"{pxzParams.ScenePointer}/{pxzParams.DecimationValue}"), filename));
 
