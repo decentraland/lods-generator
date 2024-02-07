@@ -2,15 +2,16 @@ import { IHttpServerComponent } from '@well-known-components/interfaces'
 import { HandlerContextWithPath } from '../../types'
 
 export async function reprocessHandler(
-  context: HandlerContextWithPath<'logs' | 'entityFetcher' | 'queue', '/reprocess'>
+  context: Pick<HandlerContextWithPath<'logs' | 'sceneFetcher' | 'queue', '/reprocess'>, 'components' | 'request'>
 ): Promise<IHttpServerComponent.IResponse> {
   const {
-    components: { logs, entityFetcher, queue }
+    components: { logs, sceneFetcher, queue },
+    request
   } = context
 
   const logger = logs.getLogger('reprocess-handler')
 
-  const body = await context.request.json()
+  const body = await request.json()
   const pointers = (body.pointers as string[]) || []
 
   if (!pointers.length) {
@@ -19,19 +20,37 @@ export async function reprocessHandler(
       body: { error: 'A scene pointer must be provided' }
     }
   }
+  try {
+    const entities = await sceneFetcher.fetchByPointers(pointers)
 
-  const entities = await entityFetcher.fetchEntities(pointers)
+    logger.info('Reprocessing pointers', { pointers: pointers.join(', '), entitiesAmount: entities.length })
 
-  logger.info('Reprocessing pointers', { pointers: pointers.join(', '), entitiesAmount: entities.length })
+    for (const entity of entities) {
+      const message = {
+        entity: {
+          entityType: entity.type,
+          entityId: entity.id,
+          entityTimestamp: entity.timestamp,
+          metadata: {
+            scene: {
+              base: entity.metadata.scene.base
+            }
+          }
+        }
+      }
+      logger.debug('Publishing message to queue', { message: JSON.stringify(message) })
+      await queue.send(message)
+    }
 
-  for (const entity of entities) {
-    const message = { ...entity, content: [], pointers: [], spawnPoints: [] }
-    logger.debug('Publishing message to queue', { message: JSON.stringify(message) })
-    await queue.send(message)
-  }
-
-  return {
-    status: 200,
-    body: { message: 'Scenes reprocessed', sceneAmount: entities.length, pointers }
+    return {
+      status: 200,
+      body: { message: 'Scenes reprocessed', sceneAmount: entities.length, pointers }
+    }
+  } catch (error: any) {
+    logger.error('Failed while republishing scenes to be reporcessed', { error })
+    return {
+      status: 500,
+      body: { error: 'Failed while republishing scenes to be reporcessed' }
+    }
   }
 }

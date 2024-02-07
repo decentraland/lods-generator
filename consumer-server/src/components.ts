@@ -9,11 +9,11 @@ import { metricDeclarations } from './metrics'
 import { createSqsAdapter } from './adapters/sqs'
 import { createMessagesConsumerComponent } from './logic/message-consumer'
 import { buildLicense } from './utils/license-builder'
-import { createMemoryQueueAdapter } from './adapters/memory-queue'
 import { createLodGeneratorComponent } from './logic/lod-generator'
 import { createMessageHandlerComponent } from './logic/message-handler'
 import { createCloudStorageAdapter } from './adapters/storage'
-import { createEntityFetcherComponent } from './logic/entity-fetcher'
+import { createEntityFetcherComponent } from './logic/scene-fetcher'
+import { createMemoryQueueAdapter } from './adapters/memory-queue'
 
 export async function initComponents(): Promise<AppComponents> {
   const config = await createDotEnvConfigComponent(
@@ -32,9 +32,9 @@ export async function initComponents(): Promise<AppComponents> {
 
   await instrumentHttpServerWithMetrics({ metrics, server, config })
 
-  const entityFetcher = await createEntityFetcherComponent({ logs, fetcher })
+  const sceneFetcher = await createEntityFetcherComponent({ fetcher })
   const sqsEndpoint = await config.getString('QUEUE_URL')
-  const queue = !sqsEndpoint ? createMemoryQueueAdapter({ logs }) : await createSqsAdapter(sqsEndpoint)
+  const queue = sqsEndpoint ? await createSqsAdapter(sqsEndpoint) : createMemoryQueueAdapter()
   const lodGenerator = createLodGeneratorComponent()
   const storage = await createCloudStorageAdapter({ logs, config })
   const messageHandler = createMessageHandlerComponent({ logs, lodGenerator, storage })
@@ -55,6 +55,6 @@ export async function initComponents(): Promise<AppComponents> {
     messageHandler,
     storage,
     fetcher,
-    entityFetcher
+    sceneFetcher
   }
 }

@@ -1,5 +1,4 @@
 import { IHttpServerComponent } from '@well-known-components/interfaces'
-
 import { HandlerContextWithPath } from '../../types'
 
 export async function healthHandler(

@@ -16,14 +16,9 @@ export function createMessageHandlerComponent({
     const entityId = message.entity.entityId
     const base = message.entity.metadata.scene.base
 
-    // try {
     const filesToUpload = await lodGenerator.generate(entityId, base)
     logger.info('LODs correctly generated', { files: filesToUpload.join(', '), entityId })
     await storage.storeFiles(filesToUpload, base, message.entity.entityTimestamp.toString())
-    // } catch (error: any) {
-    //   // TODO: dlq/retry queue
-    //   throw error
-    // }
   }
 
   return { handle }

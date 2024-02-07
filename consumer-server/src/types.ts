@@ -25,7 +25,7 @@ export type BaseComponents = {
   messageHandler: MessageHandlerComponent
   storage: StorageComponent
   fetcher: IFetchComponent
-  entityFetcher: EntityFetcherComponent
+  sceneFetcher: SceneFetcherComponent
 }
 
 // components used in runtime
@@ -85,6 +85,6 @@ export type StorageComponent = {
   storeFiles(filePaths: string[], basePointer: string, entityTimestamp: string): Promise<boolean>
 }
 
-export type EntityFetcherComponent = {
-  fetchEntities(entityIds: string[]): Promise<any>
+export type SceneFetcherComponent = {
+  fetchByPointers(scenePointers: string[]): Promise<any>
 }

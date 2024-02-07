@@ -4,7 +4,10 @@ import fs from 'fs/promises'
 
 import { AppComponents, StorageComponent } from '../types'
 
-export async function createCloudStorageAdapter({ config, logs }: Pick<AppComponents, 'config' | 'logs'>): Promise<StorageComponent> {
+export async function createCloudStorageAdapter({
+  config,
+  logs
+}: Pick<AppComponents, 'config' | 'logs'>): Promise<StorageComponent> {
   const logger = logs.getLogger('storage')
   const bucket = await config.getString('BUCKET')
   const region = (await config.getString('AWS_REGION')) || 'us-east-1'

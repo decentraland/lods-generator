@@ -14,7 +14,7 @@ export async function createSqsAdapter(endpoint: string): Promise<QueueComponent
   async function send(message: QueueMessage): Promise<void> {
     const sendCommand = new SendMessageCommand({
       QueueUrl: endpoint,
-      MessageBody: JSON.stringify(message)
+      MessageBody: JSON.stringify({ Message: JSON.stringify(message) })
     })
     await client.send(sendCommand)
   }
@@ -30,7 +30,7 @@ export async function createSqsAdapter(endpoint: string): Promise<QueueComponent
     return Messages
   }
 
-  async function deleteMessage(receiptHandle: string) {
+  async function deleteMessage(receiptHandle: string): Promise<void> {
     const deleteCommand = new DeleteMessageCommand({
       QueueUrl: endpoint,
       ReceiptHandle: receiptHandle

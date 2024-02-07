@@ -4,13 +4,12 @@ import { createLocalFetchCompoment, createRunner } from '@well-known-components/
 import { createInMemoryStorage } from '@dcl/catalyst-storage'
 
 import { main } from '../src/service'
-import { TestComponents } from '../src/types'
+import { SceneFetcherComponent, QueueComponent, QueueWorker, TestComponents, StorageComponent } from '../src/types'
 import { initComponents as originalInitComponents } from '../src/components'
 
 import { createTestMetricsComponent } from '@well-known-components/metrics'
 import { metricDeclarations } from '../src/metrics'
 import { createDotEnvConfigComponent } from '@well-known-components/env-config-provider'
-import { createInMemoryStorageAdapter } from './mocks/storage'
 
 /**
  * Behaves like Jest "describe" function, used to describe a test for a
@@ -38,14 +37,30 @@ async function initComponents(): Promise<TestComponents> {
 
   const metrics = createTestMetricsComponent(metricDeclarations)
 
-  const inMemoryStorage = createInMemoryStorage()
-  const storage = createInMemoryStorageAdapter(inMemoryStorage)
+  const storage: StorageComponent = {
+    storeFiles: jest.fn()
+  }
+  const queue: QueueComponent = {
+    deleteMessage: jest.fn(),
+    receiveSingleMessage: jest.fn(),
+    send: jest.fn()
+  }
+  const messageConsumer: QueueWorker = {
+    start: jest.fn(),
+    stop: jest.fn()
+  }
 
-  console.log('Test components')
+  const sceneFetcher: SceneFetcherComponent = {
+    fetchByPointers: jest.fn()
+  } 
+
   return {
     ...components,
     localFetch: await createLocalFetchCompoment(config),
     storage,
-    metrics
+    metrics,
+    queue,
+    messageConsumer,
+    sceneFetcher
   }
 }
