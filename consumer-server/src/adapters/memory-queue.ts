@@ -1,28 +1,29 @@
-import { AsyncQueue } from '@well-known-components/pushable-channel'
-import { AppComponents, QueueService } from '../types'
+import { Message } from '@aws-sdk/client-sqs'
+import { randomUUID } from 'node:crypto'
 
-export function createMemoryQueueAdapter({ logs }: Pick<AppComponents, 'logs'>): QueueService {
-  const logger = logs.getLogger('memory-queue')
-  const queue = new AsyncQueue((_) => void 0)
+import { QueueComponent, QueueMessage } from '../types'
 
-  logger.info('Initializing memory queue adapter')
+export function createMemoryQueueAdapter(): QueueComponent {
+  const queue: Map<string, Message> = new Map()
 
-  async function send(message: any) {
-    await queue.enqueue(message)
+  async function send(message: QueueMessage): Promise<void> {
+    const receiptHandle = randomUUID().toString()
+    queue.set(receiptHandle, {
+      MessageId: randomUUID().toString(),
+      ReceiptHandle: receiptHandle,
+      Body: JSON.stringify({ Message: JSON.stringify(message) })
+    })
+
+    return
   }
 
-  async function receiveSingleMessage() {
-    const message = (await queue.next()).value
-    return message ? [message] : []
+  async function receiveSingleMessage(): Promise<Message[]> {
+    return queue.size > 0 ? [queue.values().next().value] : []
   }
 
-  async function deleteMessage() {
-    // noop
+  async function deleteMessage(receiptHandle: string): Promise<void> {
+    queue.delete(receiptHandle)
   }
 
-  return {
-    send,
-    receiveSingleMessage,
-    deleteMessage
-  }
+  return { send, receiveSingleMessage, deleteMessage }
 }

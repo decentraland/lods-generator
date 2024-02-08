@@ -15,8 +15,8 @@ export async function buildLicense({ config, logs }: Pick<AppComponents, 'config
 
     fs.writeFileSync(licenseKeyPath, replacedLicenseKey, 'utf8')
     logger.info('PiXYZ license built correctly')
-  } catch (err: any) {
-    logger.error('Could not build PiXYZ license', { err: err.message.replace(licenseKey, '****') || '' })
-    throw err
+  } catch (error: any) {
+    logger.error('Could not build PiXYZ license', { error: error.message.replace(licenseKey, '****') || '' })
+    throw error
   }
 }

@@ -2,9 +2,12 @@ import { S3Client } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
 import fs from 'fs/promises'
 
-import { AppComponents } from '../types'
+import { AppComponents, StorageComponent } from '../types'
 
-export async function createStorageComponent({ config, logs }: Pick<AppComponents, 'config' | 'logs'>) {
+export async function createCloudStorageAdapter({
+  config,
+  logs
+}: Pick<AppComponents, 'config' | 'logs'>): Promise<StorageComponent> {
   const logger = logs.getLogger('storage')
   const bucket = await config.getString('BUCKET')
   const region = (await config.getString('AWS_REGION')) || 'us-east-1'
@@ -33,7 +36,7 @@ export async function createStorageComponent({ config, logs }: Pick<AppComponent
       )
       return true
     } catch (error: any) {
-      logger.error('Failed while storing files', { error })
+      logger.error('Failed while storing files', { error: error.message })
       return false
     }
   }
