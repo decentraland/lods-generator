@@ -19,11 +19,13 @@ export type BaseComponents = {
   logs: ILoggerComponent
   server: IHttpServerComponent<GlobalContext>
   metrics: IMetricsComponent<keyof typeof metricDeclarations>
-  queue: QueueService
+  queue: QueueComponent
   messageConsumer: QueueWorker
-  lodGenerator: LodGeneratorService
-  messageHandler: MessageHandler
+  lodGenerator: LodGeneratorComponent
+  messageHandler: MessageHandlerComponent
   storage: StorageComponent
+  fetcher: IFetchComponent
+  sceneFetcher: SceneFetcherComponent
 }
 
 // components used in runtime
@@ -51,31 +53,38 @@ export type HandlerContextWithPath<
 export type Context<Path extends string = any> = IHttpServerComponent.PathAwareContext<GlobalContext, Path>
 
 export type QueueMessage = {
-  id: string
+  entity: {
+    entityType: string
+    entityId: string
+    entityTimestamp: number
+    metadata: {
+      scene: {
+        base: string
+      }
+    }
+  }
 }
 
-export type QueueService = {
+export type QueueComponent = {
   send(message: QueueMessage): Promise<void>
   receiveSingleMessage(): Promise<Message[]>
   deleteMessage(receiptHandle: string): Promise<void>
 }
 
-export type AwsConfig = {
-  region: string
-  credentials?: { accessKeyId: string; secretAccessKey: string }
-  sqsUrl?: string
-}
-
 export type QueueWorker = IBaseComponent
 
-export type LodGeneratorService = {
+export type LodGeneratorComponent = {
   generate(entityId: string, basePointer: string): Promise<string[]>
 }
 
-export type MessageHandler = {
-  handle(message: { Message: string }): Promise<void>
+export type MessageHandlerComponent = {
+  handle(message: QueueMessage): Promise<void>
 }
 
 export type StorageComponent = {
   storeFiles(filePaths: string[], basePointer: string, entityTimestamp: string): Promise<boolean>
+}
+
+export type SceneFetcherComponent = {
+  fetchByPointers(scenePointers: string[]): Promise<any>
 }

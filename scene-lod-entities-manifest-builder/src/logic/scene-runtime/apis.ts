@@ -83,12 +83,28 @@ export const LoadableApis = {
     },
     async getSceneInformation() {
       return {
-        urn: "",
-        baseUrl: "",
-        content: "",
-        metadataJson: ""
+        urn: "https://none",
+        baseUrl: "https://none",
+        content: "https://none",
+        metadataJson: JSON.stringify({
+          "display":{
+            "title":"",
+            "favicon":""
+          },
+          "owner":"",
+          "contact":{
+            "name":"",
+            "email":""
+          },
+          "main":"bin/game.js",
+          "tags":[],
+          "scene":{
+            "parcels":["-,-"],
+            "base":"-,-"
+          }
+        })
       }
-    },
+    }
   },
   RestrictedActions: {
     async triggerEmote() {},
