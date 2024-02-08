@@ -28,18 +28,16 @@ namespace DCL_PiXYZ
                 defaultScene = args[1];
                 defaultOutputPath = args[2];
             }
-            
-            
 
             //Conversion type can be single or bulk
             //If its single, we pass as many scenes as we want to parse separated by ;
             //If its bulk, a single number will represent a square to parse, going from -value to value
 
             //Scenes param is single coordinates or bulk value. Single scenes are separated by 
-            var sceneConversionInfo = new SceneConversionInfo("7000;3000;1000", "triangle", "coords", "single", defaultScene, defaultOutputPath);
-            var debugInfo = new SceneConversionDebugInfo(defaultOutputPath, "SuccessScenes.txt", "FailScenes.txt" , false);
+            var sceneConversionInfo = new SceneConversionInfo("7000;3000;1000", "triangle", "coords", "bulk", "20", defaultOutputPath);
+            var debugInfo = new SceneConversionDebugInfo(defaultOutputPath, "SuccessScenes.txt", "FailScenes.txt", "EmptyScenes.txt", "PolygonCount.txt" , true);
 
-            CreateResourcesDirectory();
+            CreateDirectories(sceneConversionInfo);
 
             FrameworkInitialization(sceneConversionInfo.SceneManifestDirectory);
 
@@ -50,7 +48,7 @@ namespace DCL_PiXYZ
                 sceneConversionInfo.SceneImporter = new Importer(sceneConversionInfo.ConversionType, scene, sceneConversionInfo.WebRequestsHandler);
                 if (!await SceneDefinitionDownloadSuccesfully(sceneConversionInfo, scene, debugInfo)) continue;
 
-                if (CheckEmptyScene(sceneConversionInfo.SceneImporter.GetCurrentScenePointersList(), scene)) continue;
+                if (CheckEmptyScene(sceneConversionInfo.SceneImporter.GetCurrentScenePointersList(), scene, debugInfo)) continue;
 
                 //Add it to the analyzed scenes array
                 foreach (string pointer in sceneConversionInfo.SceneImporter.GetCurrentScenePointersList())
@@ -94,7 +92,7 @@ namespace DCL_PiXYZ
 
                 stopwatch.Restart();
                 Console.WriteLine($"BEGIN CONVERTING {scene} WITH {pxzParams.DecimationValue}");
-                await ConvertScene(sceneConversionInfo.WebRequestsHandler, pxzParams, debugInfo.IsDebug);
+                await ConvertScene(sceneConversionInfo.WebRequestsHandler, pxzParams, debugInfo);
                 Console.WriteLine($"END CONVERTING {scene} WITH {pxzParams.DecimationValue}");
                 stopwatch.Stop();
 
@@ -155,13 +153,13 @@ namespace DCL_PiXYZ
             return false;
         }
 
-        private static bool CheckEmptyScene(string[] currentPointersList, string scene)
+        private static bool CheckEmptyScene(string[] currentPointersList, string scene, SceneConversionDebugInfo debugInfo)
         {
             //Check empty scenes
             if (currentPointersList.Length == 0)
             {
                 Console.WriteLine($"Scene {scene} is empty. Ignoring");
-                WriteToFile($"{scene}", "EmptyScenes.txt");
+                WriteToFile($"{scene}", debugInfo.EmptyScenesFile);
                 return true;
             }
 
@@ -202,7 +200,7 @@ namespace DCL_PiXYZ
             return true; // Return true as default, indicating success if no unignorable error was found.
         }
 
-        private static async Task ConvertScene(WebRequestsHandler webRequestsHandler, PXZParams pxzParams, bool isDebug)
+        private static async Task ConvertScene(WebRequestsHandler webRequestsHandler, PXZParams pxzParams, SceneConversionDebugInfo debugInfo)
         {
             SceneRepositioner.SceneRepositioner sceneRepositioner = 
                 new SceneRepositioner.SceneRepositioner(webRequestsHandler,
@@ -218,11 +216,11 @@ namespace DCL_PiXYZ
             {
                 modifiers.Add(new PXZDeleteByName(".*collider.*"));
                 modifiers.Add(new PXZDecimator(pxzParams.ScenePointer, pxzParams.DecimationType,
-                    pxzParams.DecimationValue, pxzParams.ParcelAmount));
+                    pxzParams.DecimationValue, pxzParams.ParcelAmount, debugInfo));
                 modifiers.Add(new PXZMergeMeshes(pxzParams.LodLevel));
             }
 
-            modifiers.Add(new PXZExporter(pxzParams, isDebug));
+            modifiers.Add(new PXZExporter(pxzParams, debugInfo.IsDebug));
 
             PXZStopwatch stopwatch = new PXZStopwatch();
             foreach (var pxzModifier in modifiers)
@@ -235,8 +233,9 @@ namespace DCL_PiXYZ
         
         private static void FrameworkInitialization(string sceneManifestDirectory)
         {
+            //TODO: Check if build path is correctly copying the scene lod manifest project
             Console.WriteLine("INSTALLING AND BUILDING NPM");
-           // NPMUtils.DoNPMInstall(sceneManifestDirectory);
+            NPMUtils.DoNPMInstall(sceneManifestDirectory);
             Console.WriteLine("END INSTALLING AND BUILDING NPM");
             Console.WriteLine("INITIALIZING PIXYZ");
             InitializePiXYZ();
@@ -252,9 +251,12 @@ namespace DCL_PiXYZ
             if (!pxz.Core.CheckLicense())
                 pxz.Core.InstallLicense("pixyzsdk-29022024.lic");
         }
-        
-        private static void CreateResourcesDirectory() =>
+
+        private static void CreateDirectories(SceneConversionInfo sceneConversionInfo)
+        {
             Directory.CreateDirectory(PXYZConstants.RESOURCES_DIRECTORY);
+            Directory.CreateDirectory(sceneConversionInfo.OutputDirectory);
+        }
 
         public static void WriteToFile(string message, string fileName)
         {

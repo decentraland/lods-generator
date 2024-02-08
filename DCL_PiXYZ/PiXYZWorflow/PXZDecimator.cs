@@ -14,8 +14,9 @@ namespace DCL_PiXYZ
         private DecimateOptionsSelector decimate;
         private string scenePointer;
         private ulong originalPolygonCount;
+        private SceneConversionDebugInfo debugInfo;
 
-        public PXZDecimator(string scenePointer, string decimationType, double decimationParam, int parcelAmount)
+        public PXZDecimator(string scenePointer, string decimationType, double decimationParam, int parcelAmount, SceneConversionDebugInfo debugInfo)
         {
             decimate = new DecimateOptionsSelector();
             if (decimationType.Equals("triangle"))
@@ -28,6 +29,8 @@ namespace DCL_PiXYZ
                 decimate._type = DecimateOptionsSelector.Type.RATIO;
                 decimate.ratio = decimationParam;
             }
+
+            this.debugInfo = debugInfo;
             this.scenePointer = scenePointer;
         } 
         
@@ -37,13 +40,13 @@ namespace DCL_PiXYZ
             originalPolygonCount =
                 pxz.Scene.GetPolygonCount(new OccurrenceList(new uint[] { pxz.Scene.GetRoot() }), true);
             pxz.Algo.DecimateTarget(new OccurrenceList(new uint[]{pxz.Scene.GetRoot()}), decimate);
-            WriteFinalVertexAmount(pxz.Scene.GetPolygonCount(new OccurrenceList(new uint[] { pxz.Scene.GetRoot() }),true));
+            WriteFinalVertexAmount(pxz.Scene.GetPolygonCount(new OccurrenceList(new uint[] { pxz.Scene.GetRoot() }),true), debugInfo);
             Console.WriteLine("END PXZ MODIFIER DECIMATOR");
         }
         
-        private void WriteFinalVertexAmount(ulong polygonCount)
+        private void WriteFinalVertexAmount(ulong polygonCount, SceneConversionDebugInfo debugInfo)
         {
-            using (StreamWriter file = new StreamWriter(Path.Combine(Directory.GetCurrentDirectory(),"FinalCountVertex.txt"), true))
+            using (StreamWriter file = new StreamWriter(Path.Combine(Directory.GetCurrentDirectory(),debugInfo.PolygonCountFile), true))
                 if (decimate._type == DecimateOptionsSelector.Type.TRIANGLECOUNT)
                     file.WriteLine($"{scenePointer}\t{decimate._type}\t{decimate.triangleCount}\t{originalPolygonCount}\t{polygonCount}");
                 else
