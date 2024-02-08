@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine.Pixyz.API;
 using UnityEngine.Pixyz.Material;
@@ -9,7 +11,6 @@ namespace DCL_PiXYZ
 {
     public class PXZCleanRepeatedTextures : IPXZModifier
     {
-
 
         private Dictionary<string, uint> materialDictionary;
 
@@ -23,22 +24,34 @@ namespace DCL_PiXYZ
             PackedTree packedTree = pxz.Scene.GetSubTree(pxz.Scene.GetRoot());
             for (var i = 0; i < packedTree.occurrences.list.Length; i++)
             {
-                //Means it has a mesh component
-                if (pxz.Scene.HasComponent(packedTree.occurrences[i], ComponentType.Part))
+                if (pxz.Scene.HasComponent(packedTree.occurrences[i], ComponentType.Part) && !packedTree.names[i].Contains("collider"))
                 {
                     MaterialList material = pxz.Scene.GetMaterialsFromSubtree(packedTree.occurrences[i]);
                     for (var j = 0; j < material.list.Length; j++)
                     {
                         PBRMaterialInfos materialInfos = pxz.Material.GetPBRMaterialInfos(material.list[j]);
                         string materialName = materialInfos.name;
-                        if(materialDictionary.ContainsKey(materialInfos.name))
-                            pxz.Scene.SetOccurrenceMaterial(packedTree.occurrences[i], materialDictionary[materialName]);
-                        else
-                            materialDictionary.Add(materialName, material.list[j]);
-                    }                    
+                        if (materialName.Contains(PXYZConstants.CUSTOM_MATERIAL_CONVERTED))
+                            continue;
+                        if (!materialDictionary.ContainsKey(materialName))
+                        {
+                            uint copyMaterial 
+                                = pxz.Material.CopyMaterial(material.list[j], true);
+                            pxz.Core.SetProperty(copyMaterial, "Name", $"{PXYZConstants.CUSTOM_MATERIAL_CONVERTED}_{materialName}");
+                            materialDictionary.Add(materialName, copyMaterial);
+                        }
+                        //TODO: When I modify it, does it change for all references with the same name?
+                        pxz.Scene.ReplaceMaterial(material[j], materialDictionary[materialName],
+                            new OccurrenceList(new uint[]
+                            {
+                                packedTree.occurrences[i]
+                            }));
+                    }
+                    pxz.Scene.CleanUnusedImages();
+                    pxz.Scene.CleanUnusedMaterials(true);
                 }
             }
-            pxz.Scene.CleanUnusedMaterials(true);
+
         }
     }
 }

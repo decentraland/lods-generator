@@ -18,6 +18,7 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
         private DCLMaterial dclMaterial = new EmptyMaterial();
         private PiXYZAPI pxz;
 
+
         private uint instantiatedEntity;
 
         public void SetComponentData(RenderableEntity renderableEntity)
@@ -47,12 +48,14 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
             this.pxz = pxz;
         }
 
-        public PXZModel PositionAndInstantiteMesh(Dictionary<string, string> contentTable, Dictionary<int, DCLRendereableEntity> renderableEntities)
+        public PXZModel PositionAndInstantiteMesh(Dictionary<string, string> contentTable, Dictionary<int, DCLRendereableEntity> renderableEntities, Dictionary<string, uint> importedMaterials)
         {
             InstantiateTransform(renderableEntities);
             if (rendereableMesh != null)
-                return rendereableMesh.InstantiateMesh(pxz, entityID.ToString(), instantiatedEntity,
-                    dclMaterial.GetMaterial(pxz, entityID.ToString(), contentTable), contentTable);
+            {
+                uint material = dclMaterial.GetMaterial(pxz, entityID.ToString(), contentTable, importedMaterials);
+                return rendereableMesh.InstantiateMesh(pxz, entityID.ToString(), instantiatedEntity, material, contentTable);
+            }
             else
                 return PXYZConstants.EMPTY_MODEL;
         }

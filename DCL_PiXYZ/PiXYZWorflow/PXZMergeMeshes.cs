@@ -101,7 +101,6 @@ namespace DCL_PiXYZ
             //Apply a copy of the material not to lose the reference
             MaterialList material = pxz.Scene.GetMaterialsFromSubtree(combineMeshes);
 
-            //TODO: Fix this issue. It has to do with transparencies and isOpaque. Use scene -10,-8 as reference
             if (material.list?.Length > 0)
             {
                 uint copyMaterial = pxz.Material.CopyMaterial(material.list[0], false);
@@ -124,7 +123,7 @@ namespace DCL_PiXYZ
                     {
                         MaterialList material = pxz.Scene.GetMaterialsFromSubtree(packedTree.occurrences[i]);
                         bool isOpaque = false;
-                        //TODO: Should we iterate the whole list of materials int he occurences?
+                        //TODO: This is not going to work for, for example, garden in genesis city
                         if (material.list.Length > 0)
                             isOpaque = pxz.Material.IsOpaque(material.list[0]);
                         if (isOpaque)

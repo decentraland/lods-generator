@@ -90,8 +90,6 @@ namespace DCL_PiXYZ
                     continue;
                 }
                 
-
-                
                 //Add it to the analyzed scenes array
                 foreach (var pointer in currentPointersList)
                     analyzedScenes.Add(pointer);
@@ -103,15 +101,15 @@ namespace DCL_PiXYZ
                 }
                 
                 Console.WriteLine("BEGIN MANIFEST GENERATION FOR SCENE " + scene);
-                bool manifestGenerated =  await GenerateManifest(sceneConversionInfo.SceneType, scene, sceneConversionInfo.SceneManifestDirectory, 
-                    new List<string>(){"manifest file already exists", "Failed to load script"}, failFile);
+                //bool manifestGenerated =  await GenerateManifest(sceneConversionInfo.SceneType, scene, sceneConversionInfo.SceneManifestDirectory, 
+                //    new List<string>(){"manifest file already exists", "Failed to load script"}, failFile);
                 
-                if (!manifestGenerated)
-                {
-                    failedConversions += sceneConversionInfo.DecimationValues.Length;
-                    continue;
-                }
-                Console.WriteLine("END MANIFEST GENERATION FOR SCENE " + scene);
+                //if (!manifestGenerated)
+                //{
+                //    failedConversions += sceneConversionInfo.DecimationValues.Length;
+                //    continue;
+                //}
+                //Console.WriteLine("END MANIFEST GENERATION FOR SCENE " + scene);
            
                 Dictionary<string, string> sceneContent = new Dictionary<string, string>();
 
@@ -208,9 +206,9 @@ namespace DCL_PiXYZ
             modifiers.Add(new PXZCleanRepeatedTextures());
             modifiers.Add(new PXZDeleteByName(".*collider.*"));
             modifiers.Add(new PXZRepairMesh(models));
-            modifiers.Add(new PXZDecimator(pxzParams.ScenePointer, pxzParams.DecimationType,
-                pxzParams.DecimationValue, pxzParams.ParcelAmount));
-            //modifiers.Add(new PXZMergeMeshes());
+            //modifiers.Add(new PXZDecimator(pxzParams.ScenePointer, pxzParams.DecimationType,
+            //    pxzParams.DecimationValue, pxzParams.ParcelAmount));
+            modifiers.Add(new PXZMergeMeshes());
             string filename = $"{pxzParams.SceneHash}_{pxzParams.LodLevel}";
             modifiers.Add(new PXZExporter(Path.Combine(pxzParams.OutputDirectory, $"{pxzParams.ScenePointer}/{pxzParams.DecimationValue}"), filename));
 
@@ -227,7 +225,7 @@ namespace DCL_PiXYZ
         private static void FrameworkInitialization(string sceneManifestDirectory)
         {
             Console.WriteLine("INSTALLING AND BUILDING NPM");
-            NPMUtils.DoNPMInstall(sceneManifestDirectory);
+           // NPMUtils.DoNPMInstall(sceneManifestDirectory);
             Console.WriteLine("END INSTALLING AND BUILDING NPM");
             Console.WriteLine("INITIALIZING PIXYZ");
             InitializePiXYZ();
