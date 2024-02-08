@@ -13,12 +13,17 @@ namespace DCL_PiXYZ
         private List<string> extensions;
         private string path;
         private string filename;
+        private readonly int lodLevel;
 
-        public PXZExporter(string path, string filename)
+        public PXZExporter(PXZParams pxzParams, bool isDebug)
         {
             extensions = new List<string>() { ".fbx", ".glb" };
-            this.path = path;
-            this.filename = filename;
+            if (isDebug)
+                path = Path.Combine(pxzParams.OutputDirectory, $"{pxzParams.ScenePointer}/{pxzParams.DecimationValue}");
+            else
+                path = pxzParams.OutputDirectory;
+            filename = $"{pxzParams.SceneHash}_{pxzParams.LodLevel}";
+            lodLevel = pxzParams.LodLevel;
         }
         
         public async Task ApplyModification(PiXYZAPI pxz)
@@ -52,15 +57,17 @@ namespace DCL_PiXYZ
 
         private void DoExportWithExtension(PiXYZAPI pxz, string extension)
         {
-            Console.WriteLine("-------------------------");
             Console.WriteLine($"BEGIN PXZ EXPORT {filename}{extension}");
             Directory.CreateDirectory(path);
             //Use it to flatten the hierarchy
             //TODO: This will break all possible skinning. But do we care about it?
-            //pxz.Scene.MergeOccurrencesByTreeLevel(new OccurrenceList(new[]{pxz.Scene.GetRoot()}),1);
+            if (lodLevel != 0)
+                pxz.Scene.MergeOccurrencesByTreeLevel(new OccurrenceList(new[]
+                {
+                    pxz.Scene.GetRoot()
+                }), 1);
             pxz.IO.ExportScene(Path.Combine(path, $"{filename}{extension}"), pxz.Scene.GetRoot());
             Console.WriteLine("END PXZ EXPORT ");
-            Console.WriteLine("-------------------------");
         }
     }
 }

@@ -17,9 +17,9 @@ namespace DCL_PiXYZ
         private PiXYZAPI pxz;
         private ulong maxVertexCountPerMerge;
         private BakeOption bakeOption;
+        private readonly int lodLevel;
 
-
-        public PXZMergeMeshes()
+        public PXZMergeMeshes(int lodLevel)
         {
             opaquesToMerge = new OccurrenceList();
             opaquesToMerge.list = new uint[]{};
@@ -32,7 +32,7 @@ namespace DCL_PiXYZ
             bakeMaps.diffuse = true;
             bakeMaps.opacity = true;
             bakeOption.bakingMethod = BakingMethod.RayOnly;
-            bakeOption.resolution = 1024;
+            this.lodLevel = lodLevel;
             bakeOption.padding = 1;
             bakeOption.textures = bakeMaps;
         }
@@ -41,11 +41,11 @@ namespace DCL_PiXYZ
         public async Task ApplyModification(PiXYZAPI pxz)
         {
             this.pxz = pxz;
-            Console.WriteLine("-------------------------");
             Console.WriteLine("BEGIN PXZ MERGE MESHES");
             try
             {
                 AddOcurrences(pxz, pxz.Scene.GetSubTree(pxz.Scene.GetRoot()));
+                //TODO: Not everything gets merged, even if its added on the same occurrence list. Check Genesis City again
                 MergeSubMeshes(opaquesToMerge, true);
                 MergeSubMeshes(transparentsToMerge, false);
             }
@@ -54,7 +54,6 @@ namespace DCL_PiXYZ
                 Console.WriteLine(e);
             }
             Console.WriteLine("END PXZ MERGE MESHES");
-            Console.WriteLine("-------------------------");
         }
 
         private void MergeSubMeshes(OccurrenceList listToMerge, bool isOpaque)
@@ -71,6 +70,7 @@ namespace DCL_PiXYZ
 
                 if (currentCandidate > maxVertexCountPerMerge)
                 {
+                    
                     DoMerge(currentVertexCount, toMerge, isOpaque, mergedMesh);
                     toMerge = new OccurrenceList();
                     currentVertexCount = 0;
@@ -91,8 +91,17 @@ namespace DCL_PiXYZ
         {
             if (toMerge.list.Length == 0)
                 return;
+
+            //TODO: What would be the best option here?
+            bakeOption.resolution = 1024;
+            if (lodLevel == 1 && currentVertexCount < 150000)
+                bakeOption.resolution = 512;
+            else if (lodLevel == 2 && currentVertexCount < 150000)
+                bakeOption.resolution = 256;
             
             Console.WriteLine($"Merging meshes {(isOpaque ? "OPAQUE" : "TRANSPARENT")} {toMerge.list.Length} vertex count {currentVertexCount}");
+
+            
             uint combineMeshes = pxz.Algo.CombineMeshes(toMerge, bakeOption);
             pxz.Core.SetProperty(combineMeshes, "Name", $"MERGED MESH {index} {(isOpaque ? "OPAQUE" : "TRANSPARENT")}");
             Console.WriteLine("End merging meshes ");

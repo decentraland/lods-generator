@@ -18,7 +18,6 @@ namespace DCL_PiXYZ
         
         public async Task ApplyModification(PiXYZAPI pxz)
         {
-            Console.WriteLine("-------------------------");
             Console.WriteLine($"BEGIN PXZ MESH REPAIR");
             foreach (var pxzModel in PXZModels)
             {
@@ -26,7 +25,6 @@ namespace DCL_PiXYZ
                     pxz.Algo.RepairMesh(new OccurrenceList(new uint[]{pxzModel.modelOcurrence}), 0.1, true, false);
             }
             Console.WriteLine($"END PXZ MESH REPAIR");
-            Console.WriteLine("-------------------------");
         }
     }
 }

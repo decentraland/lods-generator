@@ -7,10 +7,7 @@ using System.Threading.Tasks;
 using DCL_PiXYZ.SceneRepositioner.JsonParsing;
 using DCL_PiXYZ.Utils;
 using SceneImporter;
-using UnityEngine.Pixyz.Algo;
 using UnityEngine.Pixyz.API;
-using UnityEngine.Pixyz.Geom;
-using Vector2 = System.Numerics.Vector2;
 
 namespace DCL_PiXYZ
 {
@@ -24,177 +21,186 @@ namespace DCL_PiXYZ
 
         private static async Task RunLODBuilder(string[] args)
         {
-            if (args.Length == 0)
+            string defaultScene = "0,0";
+            string defaultOutputPath = Path.Combine(Directory.GetCurrentDirectory(), "built-lods") ;
+            if (args != null)
             {
-                args = new string[]
-                {
-                    //Are we geting scenes by hash or coord?
-                    "coords",
-                    //Are we doing single or bulk scenes?
-                    //If its single, we pass as many scenes as we want to parse separated by ;
-                    //If its bulk, a single number will represent a square to parse, going from -value to value
-                    "single",
-                    //Third param is single coordinates or bulk value. Single scenes are separated by ;
-                    "0,0",
-                    //Fourth param is decimation type (ratio or triangle)
-                    "triangle",
-                    //Fifth param is decimation value, separated by ;
-                    "7000"
-                };
+                defaultScene = args[1];
+                defaultOutputPath = args[2];
             }
 
-            SceneConversionInfo sceneConversionInfo = new SceneConversionInfo(args);
-            
-            List<string> analyzedScenes = new List<string>();
-            FrameworkInitialization(sceneConversionInfo.SceneManifestDirectory);
-            CreateResourcesDirectory();
-            
-            WebRequestsHandler webRequestsHandler = new WebRequestsHandler();
-            
-            int failedConversions = 0;
-            int successConversions = 0;
-            int totalRetriesForManifestFile = 20;
-            string successFile = "SuccessScenes.txt";
-            string failFile = "FailScenes.txt";
+            //Conversion type can be single or bulk
+            //If its single, we pass as many scenes as we want to parse separated by ;
+            //If its bulk, a single number will represent a square to parse, going from -value to value
 
-            Console.WriteLine($"About to convert {sceneConversionInfo.ScenesToAnalyze.Count} scenes");
+            //Scenes param is single coordinates or bulk value. Single scenes are separated by 
+            var sceneConversionInfo = new SceneConversionInfo("7000;3000;1000", "triangle", "coords", "single", defaultScene, defaultOutputPath);
+            var debugInfo = new SceneConversionDebugInfo("SuccessScenes.txt", "FailScenes.txt", defaultOutputPath, false);
+            
+            CreateResourcesDirectory();
+
+            FrameworkInitialization(sceneConversionInfo.SceneManifestDirectory);
+
             foreach (var scene in sceneConversionInfo.ScenesToAnalyze)
             {
-                //Check if the scene has already been analyzed (for bulk conversion)
-                if (analyzedScenes.Contains(scene))
-                {
-                    Console.WriteLine($"Scene {scene} has already been analyzed");
-                    continue;
-                }
-                
-                //Try to import scene and generate scene content
-                Importer importer = new Importer(sceneConversionInfo.ConversionType,scene,webRequestsHandler);
-                try
-                {
-                    await importer.GenerateSceneContent();
-                }
-                catch (Exception e)
-                {
-                    foreach (var conversionValue in sceneConversionInfo.DecimationValues)
-                        WriteToFile($"{scene}\t{conversionValue}\tDOWNLOAD ERROR: {e.Message}", failFile);
-                    continue;
-                    //CloseApplication($"Error: Unable to generate scene content due to {e.Message}");
-                }
-                string[] currentPointersList = importer.GetCurrentScenePointersList();
-                
-                //Check empty scenes
-                if (currentPointersList.Length == 0)
-                {
-                    Console.WriteLine($"Scene {scene} is empty. Ignoring");
-                    WriteToFile($"{scene}", "EmptyScenes.txt");
-                    continue;
-                }
-                
+                if (HasSceneBeenAnalyzed(sceneConversionInfo.AnalyzedScenes, scene)) continue;
+
+                sceneConversionInfo.SceneImporter = new Importer(sceneConversionInfo.ConversionType, scene, sceneConversionInfo.WebRequestsHandler);
+                if (!await SceneDefinitionDownloadSuccesfully(sceneConversionInfo, scene, debugInfo)) continue;
+
+                if (CheckEmptyScene(sceneConversionInfo.SceneImporter.GetCurrentScenePointersList(), scene)) continue;
+
                 //Add it to the analyzed scenes array
-                foreach (var pointer in currentPointersList)
-                    analyzedScenes.Add(pointer);
+                foreach (string pointer in sceneConversionInfo.SceneImporter.GetCurrentScenePointersList())
+                    sceneConversionInfo.AnalyzedScenes.Add(pointer);
 
-                if (currentPointersList[0].Equals("-27,-17") || currentPointersList[0].Equals("-75,-9") || currentPointersList[0].Equals("-5,36") || currentPointersList[0].Equals("16,34"))
-                {
-                    Console.WriteLine($"Skipping scene {scene} because it was causing an exit without exception");
-                    continue;
-                }
-                
-                Console.WriteLine("BEGIN MANIFEST GENERATION FOR SCENE " + scene);
-                //bool manifestGenerated =  await GenerateManifest(sceneConversionInfo.SceneType, scene, sceneConversionInfo.SceneManifestDirectory, 
-                //    new List<string>(){"manifest file already exists", "Failed to load script"}, failFile);
-                
-                //if (!manifestGenerated)
-                //{
-                //    failedConversions += sceneConversionInfo.DecimationValues.Length;
-                //    continue;
-                //}
-                //Console.WriteLine("END MANIFEST GENERATION FOR SCENE " + scene);
-           
-                Dictionary<string, string> sceneContent = new Dictionary<string, string>();
+                if (CheckFaillingDebugScenes(sceneConversionInfo.SceneImporter.GetCurrentScenePointersList(), scene)) continue;
 
-                try
-                {
-                    sceneContent  = await importer.DownloadAllContent();
-                }
-                catch (Exception e)
-                {
-                    failedConversions += sceneConversionInfo.DecimationValues.Length;
-                    foreach (var conversionValue in sceneConversionInfo.DecimationValues)
-                        WriteToFile($"{scene}\t{conversionValue}\tDOWNLOAD ERROR: {e.Message}", failFile);
-                    continue;
-                }
+                if (!await ManifestGeneratedSuccesfully(sceneConversionInfo, debugInfo, scene)) continue;
+
+                if (!await sceneConversionInfo.SceneImporter.DownloadAllContent(debugInfo)) continue;
 
                 Console.WriteLine("BEGIN SCENE CONVERSION FOR SCENE " + scene);
-                int currentLODLevel = 0;
+                var pxzParams = new PXZParams
+                {
+                    DecimationType = sceneConversionInfo.DecimationType, ManifestOutputJSONDirectory = sceneConversionInfo.ManifestOutputJsonDirectory, OutputDirectory = sceneConversionInfo.OutputDirectory, ParcelAmount = sceneConversionInfo.SceneImporter.GetCurrentScenePointersList().Length,
+                    SceneContent = sceneConversionInfo.SceneImporter.sceneContent, SceneHash = sceneConversionInfo.SceneImporter.GetSceneHash(), ScenePointer = sceneConversionInfo.SceneImporter.GetScenePointer()
+                };
                 foreach (var decimationValue in sceneConversionInfo.DecimationToAnalyze)
                 {
                     pxz.Core.ResetSession();
-                    try
+                    if (!SceneHasBeenConverted(sceneConversionInfo, decimationValue, scene))
                     {
-                        //Check if they were converted
-                        /*if (Directory.Exists(Path.Combine(sceneConversionInfo.OutputDirectory, Path.Combine(currentPointersList[0], decimationValue.ToString()))))
-                        {
-                            Console.WriteLine($"Skipping scene {scene} since its already converted");
-                            continue;
-                        }*/
-                        Console.WriteLine($"Converting {scene} with {decimationValue}");
-                        PXZParams pxzParams = new PXZParams()
-                        {
-                            DecimationType = sceneConversionInfo.DecimationType,
-                            DecimationValue = decimationValue,
-                            LodLevel = currentLODLevel,
-                            ManifestOutputJSONDirectory = sceneConversionInfo.ManifestOutputJsonDirectory,
-                            OutputDirectory = sceneConversionInfo.OutputDirectory,
-                            ParcelAmount = currentPointersList.Length,
-                            SceneContent = sceneContent,
-                            SceneHash = importer.GetSceneHash(),
-                            ScenePointer = importer.GetScenePointer()
-                        };
-                        await ConvertScene(webRequestsHandler, pxzParams);
-                        Console.WriteLine($"Finished Converting {scene} with {decimationValue}");
-                        successConversions++;
-                        WriteToFile($"{scene}\t{decimationValue}" , successFile);
+                        pxzParams.DecimationValue = decimationValue;
+                        await DoConversion(pxzParams, sceneConversionInfo, scene, debugInfo);
                     }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine("CONVERSION ERROR: " + e.Message);
-                        failedConversions++;
-                        WriteToFile($"{scene}\t{decimationValue}\tCONVERSION ERROR: {e.Message}", failFile);
-                    }
-                    currentLODLevel++;
+
+                    pxzParams.LodLevel += 1;
                 }
                 GC.Collect();
                 Console.WriteLine("END SCENE CONVERSION FOR SCENE " + scene);
             }
-
         }
-        private static async Task<bool> GenerateManifest(string sceneType, string sceneValue,string sceneManifestDirectory, 
-            List<string> errorsToIgnore, string failFile)
+
+        private static async Task DoConversion(PXZParams pxzParams, SceneConversionInfo sceneConversionInfo, string scene, SceneConversionDebugInfo debugInfo)
         {
-            string possibleError = await NPMUtils.RunNPMTool(sceneManifestDirectory, sceneType, sceneValue);
-    
-            if (!string.IsNullOrEmpty(possibleError))
+            var stopwatch = new Stopwatch();
+
+            try
             {
-                // Check if the error can be ignored based on the provided error list.
-                foreach (var errorToIgnore in errorsToIgnore)
+                //Check if they were converted
+
+                stopwatch.Restart();
+                Console.WriteLine($"BEGIN CONVERTING {scene} WITH {pxzParams.DecimationValue}");
+                await ConvertScene(sceneConversionInfo.WebRequestsHandler, pxzParams, debugInfo.IsDebug);
+                Console.WriteLine($"END CONVERTING {scene} WITH {pxzParams.DecimationValue}");
+                stopwatch.Stop();
+
+                string elapsedTime = string.Format("{0:00}:{1:00}:{2:00}",
+                    stopwatch.Elapsed.Hours, stopwatch.Elapsed.Minutes, stopwatch.Elapsed.Seconds);
+
+                WriteToFile($"{scene}\t{pxzParams.DecimationValue}\t{elapsedTime}" , debugInfo.SuccessFile);
+            }
+            catch (Exception e)
+            {
+                WriteToFile($"{scene}\t{pxzParams.DecimationValue}\tCONVERSION ERROR: {e.Message}", debugInfo.FailFile);
+            }
+        }
+
+        private static bool SceneHasBeenConverted(SceneConversionInfo sceneConversionInfo, double decimationValue, string scene)
+        {
+            if (Directory.Exists(Path.Combine(sceneConversionInfo.OutputDirectory, Path.Combine(sceneConversionInfo.SceneImporter.GetCurrentScenePointersList()[0], decimationValue.ToString()))))
+            {
+                Console.WriteLine($"Skipping scene {scene} since its already converted");
+                return true;
+            }
+
+            return false;
+        }
+
+        private static async Task<bool> ManifestGeneratedSuccesfully(SceneConversionInfo sceneConversionInfo, SceneConversionDebugInfo debugInfo, string scene)
+        {
+            return await GenerateManifest(sceneConversionInfo.SceneType, scene, sceneConversionInfo.SceneManifestDirectory,
+                new List<string>
                 {
-                    if (possibleError.Contains(errorToIgnore))
-                    {
-                        // Return true if error is ignorable.
-                        return true;
-                    }
-                }
-                Console.WriteLine($"MANIFEST ERROR: {possibleError}");
-                WriteToFile($"{sceneValue}\tMANIFEST ERROR: {possibleError}", failFile);
-                // Return false as the error is not ignorable.
+                    "manifest file already exists", "Failed to load script"
+                }, debugInfo.FailFile);
+        }
+
+        private static async Task<bool> SceneDefinitionDownloadSuccesfully(SceneConversionInfo sceneConversionInfo, string scene, SceneConversionDebugInfo debugInfo)
+        {
+            try
+            {
+                await sceneConversionInfo.SceneImporter.DownloadSceneDefinition();
+            }
+            catch (Exception e)
+            {
+                WriteToFile($"{scene}\tSCENE DEFINITION DOWNLOAD ERROR: {e.Message}", debugInfo.FailFile);
                 return false;
             }
-            // Return true if there's no error in the NPM tool output.
+
             return true;
         }
-        
-        private static async Task ConvertScene(WebRequestsHandler webRequestsHandler, PXZParams pxzParams)
+
+        private static bool CheckFaillingDebugScenes(string[] currentPointersList, string scene)
+        {
+            if (currentPointersList[0].Equals("-27,-17") || currentPointersList[0].Equals("-75,-9") || currentPointersList[0].Equals("-5,36") || currentPointersList[0].Equals("16,34"))
+            {
+                Console.WriteLine($"Skipping scene {scene} because it was causing an exit without exception");
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool CheckEmptyScene(string[] currentPointersList, string scene)
+        {
+            //Check empty scenes
+            if (currentPointersList.Length == 0)
+            {
+                Console.WriteLine($"Scene {scene} is empty. Ignoring");
+                WriteToFile($"{scene}", "EmptyScenes.txt");
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool HasSceneBeenAnalyzed(List<string> analyzedScenes, string scene)
+        {
+            //Check if the scene has already been analyzed (for bulk conversion)
+            if (analyzedScenes.Contains(scene))
+            {
+                Console.WriteLine($"SCENE {scene} HAS ALREADY BEEN ANALYZED");
+                return true;
+            }
+
+            return false;
+        }
+
+
+        private static async Task<bool> GenerateManifest(string sceneType, string sceneValue, string sceneManifestDirectory, List<string> errorsToIgnore, string failFile)
+        {
+            Console.WriteLine($"BEGIN MANIFEST GENERATION FOR SCENE {sceneValue}");
+            string possibleError = await NPMUtils.RunNPMTool(sceneManifestDirectory, sceneType, sceneValue);
+
+            if (!string.IsNullOrEmpty(possibleError))
+            {
+                bool isIgnorableError = errorsToIgnore.Any(errorToIgnore => possibleError.Contains(errorToIgnore));
+                // If the error is not ignorable, log it and return false.
+                if (!isIgnorableError)
+                {
+                    Console.WriteLine($"MANIFEST ERROR: {possibleError}");
+                    WriteToFile($"{sceneValue}\tMANIFEST ERROR: {possibleError}", failFile);
+                    return false; // Early exit if the error cannot be ignored.
+                }
+            }
+
+            Console.WriteLine($"END MANIFEST GENERATION FOR SCENE {sceneValue}");
+            return true; // Return true as default, indicating success if no unignorable error was found.
+        }
+
+        private static async Task ConvertScene(WebRequestsHandler webRequestsHandler, PXZParams pxzParams, bool isDebug)
         {
             SceneRepositioner.SceneRepositioner sceneRepositioner = 
                 new SceneRepositioner.SceneRepositioner(webRequestsHandler,
@@ -202,18 +208,21 @@ namespace DCL_PiXYZ
                     $"{pxzParams.SceneHash}-lod-manifest.json", pxzParams.SceneContent, pxz);
             List<PXZModel> models = await sceneRepositioner.SetupSceneInPiXYZ();
 
+            
             List<IPXZModifier> modifiers = new List<IPXZModifier>();
-            modifiers.Add(new PXZCleanRepeatedTextures());
-            modifiers.Add(new PXZDeleteByName(".*collider.*"));
+            modifiers.Add(new PXZBeginCleanMaterials());
             modifiers.Add(new PXZRepairMesh(models));
-            //modifiers.Add(new PXZDecimator(pxzParams.ScenePointer, pxzParams.DecimationType,
-            //    pxzParams.DecimationValue, pxzParams.ParcelAmount));
-            modifiers.Add(new PXZMergeMeshes());
-            string filename = $"{pxzParams.SceneHash}_{pxzParams.LodLevel}";
-            modifiers.Add(new PXZExporter(Path.Combine(pxzParams.OutputDirectory, $"{pxzParams.ScenePointer}/{pxzParams.DecimationValue}"), filename));
+            if (pxzParams.LodLevel != 0)
+            {
+                modifiers.Add(new PXZDeleteByName(".*collider.*"));
+                modifiers.Add(new PXZDecimator(pxzParams.ScenePointer, pxzParams.DecimationType,
+                    pxzParams.DecimationValue, pxzParams.ParcelAmount));
+                modifiers.Add(new PXZMergeMeshes(pxzParams.LodLevel));
+            }
+
+            modifiers.Add(new PXZExporter(pxzParams, isDebug));
 
             PXZStopwatch stopwatch = new PXZStopwatch();
-            
             foreach (var pxzModifier in modifiers)
             {
                 stopwatch.Start();

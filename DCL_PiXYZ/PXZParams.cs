@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using SceneImporter;
 
 namespace DCL_PiXYZ
 {
@@ -29,20 +30,29 @@ namespace DCL_PiXYZ
         public string ManifestOutputJsonDirectory { get; }
         public string OutputDirectory { get; }
         public List<string> ScenesToAnalyze { get; set; }
+        public List<string> AnalyzedScenes { get; set; }
+
         public List<double> DecimationToAnalyze { get; set; }
 
-        public SceneConversionInfo(string[] args)
+        public Importer SceneImporter;
+
+        public WebRequestsHandler WebRequestsHandler;
+
+        public SceneConversionInfo(string decimationValues, string decimationType, string sceneType, string conversionType, string scenes, string outputPath)
         {
-            SceneType = args[0];
-            ConversionType = args[1];
-            Scenes = args[2];
-            DecimationType = args[3];
-            DecimationValues = args[4];
+            SceneType = sceneType;
+            ConversionType = conversionType;
+            Scenes = scenes;
+            DecimationType = decimationType;
+            DecimationValues = decimationValues;
             SceneManifestDirectory = Path.Combine(Directory.GetCurrentDirectory(), "scene-lod-entities-manifest-builder/");
             ManifestOutputJsonDirectory = Path.Combine(SceneManifestDirectory, "output-manifests/");
-            OutputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "built-lods");
+            OutputDirectory = outputPath;
             ScenesToAnalyze = new List<string>();
+            AnalyzedScenes = new List<string>();
             DecimationToAnalyze = new List<double>();
+            SceneImporter = null;
+            WebRequestsHandler = new WebRequestsHandler();
             
             GetScenesToAnalyzeList(ConversionType, Scenes);
             GetDecimationValues(DecimationType, DecimationValues);
@@ -83,6 +93,20 @@ namespace DCL_PiXYZ
             }
             else
                 PXZEntryPoint.CloseApplication($"Error: Wrong conversion type param {conversionType}");
+        }
+    }
+
+    public struct SceneConversionDebugInfo
+    {
+        public string SuccessFile;
+        public string FailFile;
+        public bool IsDebug;
+
+        public SceneConversionDebugInfo(string defaultOutputPath, string successFile, string failFile, bool isDebug)
+        {
+            SuccessFile = Path.Combine(defaultOutputPath, successFile);
+            FailFile = Path.Combine(defaultOutputPath, failFile);
+            IsDebug = isDebug;
         }
     }
 }

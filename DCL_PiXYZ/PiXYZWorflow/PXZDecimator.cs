@@ -33,14 +33,12 @@ namespace DCL_PiXYZ
         
         public async Task ApplyModification(PiXYZAPI pxz)
         {
-            Console.WriteLine("-------------------------");
             Console.WriteLine("BEGIN PXZ MODIFIER DECIMATOR");
             originalPolygonCount =
                 pxz.Scene.GetPolygonCount(new OccurrenceList(new uint[] { pxz.Scene.GetRoot() }), true);
             pxz.Algo.DecimateTarget(new OccurrenceList(new uint[]{pxz.Scene.GetRoot()}), decimate);
             WriteFinalVertexAmount(pxz.Scene.GetPolygonCount(new OccurrenceList(new uint[] { pxz.Scene.GetRoot() }),true));
             Console.WriteLine("END PXZ MODIFIER DECIMATOR");
-            Console.WriteLine("-------------------------");
         }
         
         private void WriteFinalVertexAmount(ulong polygonCount)

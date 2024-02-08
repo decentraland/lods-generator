@@ -31,7 +31,6 @@ namespace DCL_PiXYZ.SceneRepositioner
     
         public async Task<List<PXZModel>> SetupSceneInPiXYZ()
         {
-            Console.WriteLine("-------------------------");
             Console.WriteLine("BEGIN REPOSITIONING");
             List<PXZModel> models = new List<PXZModel>();
             List<RenderableEntity> renderableEntities = JsonConvert.DeserializeObject<List<RenderableEntity>>(File.ReadAllText($"{baseURL}{sceneID}"));

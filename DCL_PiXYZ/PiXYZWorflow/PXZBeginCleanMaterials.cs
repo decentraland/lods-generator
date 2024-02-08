@@ -9,18 +9,19 @@ using UnityEngine.Pixyz.Scene;
 
 namespace DCL_PiXYZ
 {
-    public class PXZCleanRepeatedTextures : IPXZModifier
+    public class PXZBeginCleanMaterials : IPXZModifier
     {
 
         private Dictionary<string, uint> materialDictionary;
 
-        public PXZCleanRepeatedTextures()
+        public PXZBeginCleanMaterials()
         {
             materialDictionary = new Dictionary<string, uint>();
         }
         
         public async Task ApplyModification(PiXYZAPI pxz)
         {
+            Console.WriteLine("BEGIN PXZ CLEAN MATERIALS");
             PackedTree packedTree = pxz.Scene.GetSubTree(pxz.Scene.GetRoot());
             for (var i = 0; i < packedTree.occurrences.list.Length; i++)
             {
@@ -52,6 +53,7 @@ namespace DCL_PiXYZ
                 }
             }
 
+            Console.WriteLine("END PXZ CLEAN MATERIALS");
         }
     }
 }

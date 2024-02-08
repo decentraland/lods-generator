@@ -17,12 +17,10 @@ namespace DCL_PiXYZ
 
         public async Task ApplyModification(PiXYZAPI pxz)
         {
-            Console.WriteLine("-------------------------");
             Console.WriteLine("BEGIN PXZ DELETE BY NAME FOR REGEX " + regex);
             OccurrenceList occurenceToDelete = pxz.Scene.FindOccurrencesByProperty("Name", regex);
             pxz.Scene.DeleteOccurrences(occurenceToDelete);
             Console.WriteLine("END PXZ DELETE BY NAME FOR REGEX " + regex);
-            Console.WriteLine("-------------------------");
         }
     }
 }
