@@ -1,54 +1,67 @@
 import { serializeCrdtMessages } from './logger'
-import {contentFetchBaseUrl, mainCrdt, sceneId, sdk6FetchComponent, sdk6SceneContent} from "../sceneFetcher";
+import { contentFetchBaseUrl, mainCrdt, sceneId, sdk6FetchComponent, sdk6SceneContent } from "../sceneFetcher";
 import { writeFile, mkdir } from 'fs'
+import { engine, Entity, PutComponentOperation, Transform } from '@dcl/ecs/dist-cjs'
+import { ReadWriteByteBuffer } from '@dcl/ecs/dist-cjs/serialization/ByteBuffer'
 
 export const manifestFileDir = 'output-manifests'
 export const manifestFileNameEnd = '-lod-manifest.json'
 let savedManifest = false
 
-export const LoadableApis = {
+function addPlayerEntityTransform() {
+  const buffer = new ReadWriteByteBuffer()
+  const transform = Transform.create(engine.PlayerEntity)
+  Transform.schema.serialize(transform, buffer)
+  const transformData = buffer.toCopiedBinary()
+  buffer.resetBuffer()
+  PutComponentOperation.write(1 as Entity, 1, Transform.componentId, transformData, buffer)
   
+  return buffer.toBinary()
+}
+
+export const LoadableApis = {
+
   // Emulating old EnvironmentAPI from browser-interface/kernel at https://github.com/decentraland/unity-renderer/blob/dev/browser-interface/packages/shared/apis/host/EnvironmentAPI.ts#L29%60L77
   // to avoid compilation errors on very old sdk6 scenes when running their eval to generate the manifest.
   EnvironmentApi: {
     isPreviewMode: async () => ({ isPreview: false }),
-    
+
     getBootstrapData: async () => ({ }),
-    
+
     getPlatform: async () => ({ }),
-    
+
     areUnsafeRequestAllowed: async () => ({ }),
-    
+
     getCurrentRealm: async () => ({ }),
-    
+
     getExplorerConfiguration: async () => ({ }),
-    
+
     getDecentralandTime: async () => ({ })
   },
   EngineApi: {
     sendBatch: async () => ({ events: [] }),
-    
-    crdtGetState: async () => ({ hasEntities: mainCrdt !== undefined, data: [mainCrdt] }),
-    
-    crdtSendToRenderer: async ({ data }: { data: Uint8Array }) => {
+
+    crdtGetState: async () => ({ hasEntities: mainCrdt !== undefined, data: [addPlayerEntityTransform(), mainCrdt] }),
+
+    crdtSendToRenderer: async ({ data }: { data: Uint8Array }) => {      
       if (mainCrdt) {
         data = joinBuffers(mainCrdt, data)
       }
-      
+
       if (savedManifest || data.length == 0) return
       savedManifest = true
-      
+
       const outputJSONManifest = JSON.stringify([...serializeCrdtMessages('[msg]: ', data)], null, 2)
-      
+
       mkdir(manifestFileDir, { recursive: true },
-            err => { if (err) console.log(err) })
-      
+          err => { if (err) console.log(err) })
+
       writeFile(`${manifestFileDir}/${sceneId}${manifestFileNameEnd}`, outputJSONManifest,
           err => { if (err) console.log(err) })
       console.log(outputJSONManifest)
       return { data: [] }
     },
-    isServer: async () => ({ isServer: true })
+    isServer: async () => ({ isServer: true }),
   },
   UserIdentity: {
     getUserData: async () => ({})
@@ -67,6 +80,68 @@ export const LoadableApis = {
       return {
         content: await res.arrayBuffer()
       }
+    },
+    async getSceneInformation() {
+      return {
+        urn: "https://none",
+        baseUrl: "https://none",
+        content: "https://none",
+        metadataJson: JSON.stringify({
+          "display":{
+            "title":"",
+            "favicon":""
+          },
+          "owner":"",
+          "contact":{
+            "name":"",
+            "email":""
+          },
+          "main":"bin/game.js",
+          "tags":[],
+          "scene":{
+            "parcels":["-,-"],
+            "base":"-,-"
+          }
+        })
+      }
+    }
+  },
+  RestrictedActions: {
+    async triggerEmote() {},
+    async movePlayerTo() {},
+    async changeRealm() {},
+    async openExternalUrl() {},
+    async openNftDialog() {},
+    async setCommunicationsAdapter() {},
+    async teleportTo() {},
+    async triggerSceneEmote() {}
+  },
+  CommunicationsController: {
+    async send() {},
+    async sendBinary() {}
+  },
+  PortableExperiences: {
+    async exit() {},
+    async getPortableExperiencesLoaded() {},
+    async kill() {},
+    async spawn() {}
+  },
+  UserActionModule: {
+    async requestTeleport() {}
+  },
+  Players: {
+    async getPlayerData(body: any) {
+      return {
+        avatar: null,
+        displayName: "ManifestBuilder",
+        hasConnectedWeb3: false,
+        publicKey: null,
+        userId: 123,
+        version: 123
+      }
+    },
+    async getConnectedPlayers() {
+      return [{userId: 123}]
     }
   }
 }
