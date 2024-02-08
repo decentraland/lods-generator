@@ -36,7 +36,7 @@ export async function createCloudStorageAdapter({
       )
       return true
     } catch (error: any) {
-      logger.error('Failed while storing files', { error })
+      logger.error('Failed while storing files', { error: error.message })
       return false
     }
   }

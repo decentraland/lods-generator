@@ -6,11 +6,61 @@ test('reprocess scenes handler /reprocess', function ({ components, stubComponen
     const { localFetch } = components
     const r = await localFetch.fetch(`/reprocess`, {
       method: 'POST',
+      headers: {
+        Authorization: 'Bearer SECRET'
+      },
       body: JSON.stringify({})
     })
 
     expect(r.status).toEqual(400)
-    expect(await r.json()).toEqual({ error: 'A scene pointer must be provided' })
+    expect(await r.json()).toEqual({ error: 'Bad request', message: 'No pointers provided' })
+  })
+
+  it('should fail if invalid pointers are provided', async () => {
+    const { localFetch } = components
+    const r = await localFetch.fetch(`/reprocess`, {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer SECRET'
+      },
+      body: JSON.stringify({ pointers: ['0,b'] })
+    })
+
+    expect(r.status).toEqual(400)
+    expect(await r.json()).toEqual({ error: 'Bad request', message: 'Invalid pointer: 0,b' })
+
+    const r2 = await localFetch.fetch(`/reprocess`, {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer SECRET'
+      },
+      body: JSON.stringify({ pointers: ['0'] })
+    })
+
+    expect(r2.status).toEqual(400)
+    expect(await r2.json()).toEqual({ error: 'Bad request', message: 'Invalid pointer: 0' })
+
+    const r3 = await localFetch.fetch(`/reprocess`, {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer SECRET'
+      },
+      body: JSON.stringify({ pointers: ['+1,-2'] })
+    })
+
+    expect(r3.status).toEqual(400)
+    expect(await r3.json()).toEqual({ error: 'Bad request', message: 'Invalid pointer: +1,-2' })
+  })
+
+  it('should fail if no Authorization header is provided', async () => {
+    const { localFetch } = components
+    const r = await localFetch.fetch(`/reprocess`, {
+      method: 'POST',
+      body: JSON.stringify({})
+    })
+
+    expect(r.status).toEqual(401)
+    expect(await r.json()).toEqual({ error: 'Not Authorized', message: 'Authorization header is missing' })
   })
 
   it('should publish a scene to be reprocessed when a pointer is provided', async () => {
@@ -22,6 +72,9 @@ test('reprocess scenes handler /reprocess', function ({ components, stubComponen
 
     const r = await localFetch.fetch(`/reprocess`, {
       method: 'POST',
+      headers: {
+        Authorization: 'Bearer SECRET'
+      },
       body: JSON.stringify({ pointers: [pointer] })
     })
 
@@ -59,6 +112,9 @@ test('reprocess scenes handler /reprocess', function ({ components, stubComponen
 
     const r = await localFetch.fetch(`/reprocess`, {
       method: 'POST',
+      headers: {
+        Authorization: 'Bearer SECRET'
+      },
       body: JSON.stringify({ pointers })
     })
 

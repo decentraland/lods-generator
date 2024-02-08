@@ -1,5 +1,19 @@
 import { IHttpServerComponent } from '@well-known-components/interfaces'
 import { HandlerContextWithPath } from '../../types'
+import { InvalidRequestError } from '@dcl/platform-server-commons'
+
+function validatePointers(pointers: string[]) {
+  if (!pointers.length) {
+    throw new InvalidRequestError('No pointers provided')
+  }
+
+  const pointerRegex = /^-?\d+,-?\d+$/
+  for (const pointer of pointers) {
+    if (!pointerRegex.test(pointer)) {
+      throw new InvalidRequestError(`Invalid pointer: ${pointer}`)
+    }
+  }
+}
 
 export async function reprocessHandler(
   context: Pick<HandlerContextWithPath<'logs' | 'sceneFetcher' | 'queue', '/reprocess'>, 'components' | 'request'>
@@ -14,12 +28,8 @@ export async function reprocessHandler(
   const body = await request.json()
   const pointers = (body.pointers as string[]) || []
 
-  if (!pointers.length) {
-    return {
-      status: 400,
-      body: { error: 'A scene pointer must be provided' }
-    }
-  }
+  validatePointers(pointers)
+
   try {
     const entities = await sceneFetcher.fetchByPointers(pointers)
 
@@ -47,10 +57,7 @@ export async function reprocessHandler(
       body: { message: 'Scenes reprocessed', sceneAmount: entities.length, pointers }
     }
   } catch (error: any) {
-    logger.error('Failed while republishing scenes to be reporcessed', { error })
-    return {
-      status: 500,
-      body: { error: 'Failed while republishing scenes to be reporcessed' }
-    }
+    logger.error('Failed while republishing scenes to be reprocessed', { error: error.message })
+    throw new Error('Failed while republishing scenes to be reprocessed')
   }
 }

@@ -32,7 +32,7 @@ export async function createMessagesConsumerComponent({
         } catch (error: any) {
           logger.error('Failed while handling message from queue', {
             id: MessageId!,
-            error
+            error: error.message
           })
         } finally {
           await queue.deleteMessage(ReceiptHandle!)

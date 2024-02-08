@@ -1307,6 +1307,15 @@
   resolved "https://registry.yarnpkg.com/@dcl/hashing/-/hashing-3.0.4.tgz#4df2a4cb3a8114765aed34cb57b91c93bf33bfb3"
   integrity sha512-Cg+MoIOn+BYmQV2q8zSFnNYY+GldlnUazwBnfgrq3i66ZxOaZ65h01btd8OUtSAlfWG4VTNIOHDjtKqmuwJNBg==
 
+"@dcl/platform-server-commons@^0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@dcl/platform-server-commons/-/platform-server-commons-0.0.4.tgz#c4aa7d2d18ff116edb06a23da7a13007aa5d5dd0"
+  integrity sha512-yaWumacDI6kt6LdGxkygzk+GHE9FuP1s3QTMdpq4BRWMP1u0BuFA/yUk4OgcR3pvwW3v07ZSQ/BeYvUx9P1hqw==
+  dependencies:
+    "@well-known-components/http-server" "^2.0.0"
+    "@well-known-components/interfaces" "^1.4.2"
+    node-fetch "^2.7.0"
+
 "@dcl/schemas@^9.0.0", "@dcl/schemas@^9.2.0":
   version "9.13.0"
   resolved "https://registry.yarnpkg.com/@dcl/schemas/-/schemas-9.13.0.tgz#5bde0a6827512bf92accc1543387b40164d16174"
@@ -4838,7 +4847,7 @@ nise@^5.1.5:
     just-extend "^4.0.2"
     path-to-regexp "^1.7.0"
 
-node-fetch@^2.6.12, node-fetch@^2.6.9:
+node-fetch@^2.6.12, node-fetch@^2.6.9, node-fetch@^2.7.0:
   version "2.7.0"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.7.0.tgz#d0f0fa6e3e2dc1d27efcd8ad99d550bda94d187d"
   integrity sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==

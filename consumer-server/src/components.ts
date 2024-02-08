@@ -32,7 +32,7 @@ export async function initComponents(): Promise<AppComponents> {
 
   await instrumentHttpServerWithMetrics({ metrics, server, config })
 
-  const sceneFetcher = await createEntityFetcherComponent({ fetcher })
+  const sceneFetcher = await createEntityFetcherComponent({ config, fetcher })
   const sqsEndpoint = await config.getString('QUEUE_URL')
   const queue = sqsEndpoint ? await createSqsAdapter(sqsEndpoint) : createMemoryQueueAdapter()
   const lodGenerator = createLodGeneratorComponent()
