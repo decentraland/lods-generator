@@ -23,11 +23,13 @@ namespace DCL_PiXYZ
         {
             string defaultScene = "0,0";
             string defaultOutputPath = Path.Combine(Directory.GetCurrentDirectory(), "built-lods") ;
-            if (args != null)
+            if (args.Length > 0)
             {
                 defaultScene = args[1];
                 defaultOutputPath = args[2];
             }
+            
+            
 
             //Conversion type can be single or bulk
             //If its single, we pass as many scenes as we want to parse separated by ;
@@ -35,8 +37,8 @@ namespace DCL_PiXYZ
 
             //Scenes param is single coordinates or bulk value. Single scenes are separated by 
             var sceneConversionInfo = new SceneConversionInfo("7000;3000;1000", "triangle", "coords", "single", defaultScene, defaultOutputPath);
-            var debugInfo = new SceneConversionDebugInfo("SuccessScenes.txt", "FailScenes.txt", defaultOutputPath, false);
-            
+            var debugInfo = new SceneConversionDebugInfo(defaultOutputPath, "SuccessScenes.txt", "FailScenes.txt" , false);
+
             CreateResourcesDirectory();
 
             FrameworkInitialization(sceneConversionInfo.SceneManifestDirectory);
