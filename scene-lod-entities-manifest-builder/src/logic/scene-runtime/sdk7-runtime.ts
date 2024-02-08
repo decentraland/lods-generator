@@ -1,7 +1,5 @@
 import { LoadableApis } from './apis'
 
-const sceneDebug = true
-
 type GenericRpcModule = Record<string, (...args: any) => Promise<unknown>>
 
 type SceneInterface = {
@@ -15,29 +13,8 @@ type SDK7Module = {
   runUpdate(deltaTime: number): Promise<void>
 }
 
-// TODO: are we going to provide a WS & Fetch connection for the server scene?
-export function createWsFetchRuntime(runtime: Record<string, any>) {
-  const restrictedWebSocket = () => {
-    throw new Error('No WS')
-  }
-
-  const restrictedFetch = () => {
-    throw new Error('No fetch')
-  }
-
-  Object.defineProperty(runtime, 'WebSocket', {
-    configurable: false,
-    value: restrictedWebSocket
-  })
-
-  Object.defineProperty(runtime, 'fetch', {
-    configurable: false,
-    value: restrictedFetch
-  })
-}
-
 export function createModuleRuntime(runtime: Record<string, any>): SDK7Module {
-  const exports: Partial<SceneInterface> = {}
+  const exports: Partial<SceneInterface> = {} 
 
   const module = { exports }
 
