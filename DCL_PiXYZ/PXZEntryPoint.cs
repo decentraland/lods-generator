@@ -21,7 +21,7 @@ namespace DCL_PiXYZ
 
         private static async Task RunLODBuilder(string[] args)
         {
-            string defaultScene = "0,0";
+            string defaultScene = "0,10";
             string defaultOutputPath = Path.Combine(Directory.GetCurrentDirectory(), "built-lods") ;
             if (args.Length > 0)
             {
