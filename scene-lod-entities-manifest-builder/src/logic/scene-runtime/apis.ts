@@ -77,7 +77,9 @@ export const LoadableApis = {
           hasConnectedWeb3: true,
           userId: "empty",
           version: 0,
-          avatar: undefined
+          avatar: {
+            wearables: [],
+          }
       }
     },
     getUserPublicKey: async () => ({})
@@ -146,6 +148,7 @@ export const LoadableApis = {
     async requestTeleport() {}
   },
   ParcelIdentity: {
+    registerParcelIdentityServiceServerImplementation: async () => ({}),
     async getParcel(_req: any, ctx: any) {
       return {
         land: {
