@@ -37,7 +37,6 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
         {
             string boxCreated = BoxFactory.Create(entityID, uvs);
             return pxz.IO.ImportScene(Path.Combine(PXYZConstants.RESOURCES_DIRECTORY, boxCreated));
-            //return pxz.Scene.CreateCube(PrimitivesSize.CUBE_SIZE, PrimitivesSize.CUBE_SIZE, PrimitivesSize.CUBE_SIZE);
         }
 
     }

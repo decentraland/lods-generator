@@ -15,6 +15,7 @@ namespace DCL_PiXYZ.SceneRepositioner
         private string baseURL;
         private string sceneID;
         private Dictionary<string, string> sceneContent;
+        private Dictionary<string, uint> importedMaterials;
         private PiXYZAPI pxz;
 
         public SceneRepositioner(WebRequestsHandler webRequestHandler, string baseUrl, string sceneID,
@@ -25,11 +26,11 @@ namespace DCL_PiXYZ.SceneRepositioner
             this.sceneID = sceneID;
             this.sceneContent = sceneContent;
             this.pxz = pxz;
+            importedMaterials = new Dictionary<string, uint>();
         }
     
         public async Task<List<PXZModel>> SetupSceneInPiXYZ()
         {
-            Console.WriteLine("-------------------------");
             Console.WriteLine("BEGIN REPOSITIONING");
             List<PXZModel> models = new List<PXZModel>();
             List<RenderableEntity> renderableEntities = JsonConvert.DeserializeObject<List<RenderableEntity>>(File.ReadAllText($"{baseURL}{sceneID}"));
@@ -37,10 +38,6 @@ namespace DCL_PiXYZ.SceneRepositioner
            
             foreach (var sceneDescriptorRenderableEntity in renderableEntities)
             {
-                //if (!sceneDescriptorRenderableEntity.entityId.Equals(644) 
-                //    && !sceneDescriptorRenderableEntity.entityId.Equals(648))
-                //    continue;
-                
                 if (!renderableEntitiesDictionary.TryGetValue(sceneDescriptorRenderableEntity.entityId, out var dclEntity))
                 {
                     dclEntity = new DCLRendereableEntity();
@@ -49,11 +46,13 @@ namespace DCL_PiXYZ.SceneRepositioner
                 dclEntity.SetComponentData(sceneDescriptorRenderableEntity);
             }
 
+            uint rootOccurrence = pxz.Scene.CreateOccurrence("DCL_SCENE", pxz.Scene.GetRoot());
+            
             foreach (var dclRendereableEntity in renderableEntitiesDictionary)
-                dclRendereableEntity.Value.InitEntity(pxz, pxz.Scene.GetRoot());
+                dclRendereableEntity.Value.InitEntity(pxz, rootOccurrence);
 
             foreach (KeyValuePair<int, DCLRendereableEntity> dclRendereableEntity in renderableEntitiesDictionary)
-                models.Add(dclRendereableEntity.Value.PositionAndInstantiteMesh(sceneContent, renderableEntitiesDictionary));
+                models.Add(dclRendereableEntity.Value.PositionAndInstantiteMesh(sceneContent, renderableEntitiesDictionary, importedMaterials));
 
             Console.WriteLine("END REPOSITIONING");
 

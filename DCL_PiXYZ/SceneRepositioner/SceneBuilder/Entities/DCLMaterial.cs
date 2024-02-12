@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using DCL_PiXYZ.SceneRepositioner.JsonParsing.Parsers;
 using Newtonsoft.Json;
 using UnityEngine.Pixyz.API;
@@ -27,14 +28,17 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
             return colorAlpha;
         }
 
-        public uint GetMaterial(PiXYZAPI pxz, string entityID, Dictionary<string, string> contentTable)
+        public uint GetMaterial(PiXYZAPI pxz, string entityID, Dictionary<string, string> contentTable, Dictionary<string, uint> importedTextures)
         {
-            uint material = pxz.Material.CreateMaterial($"Material_{entityID}" , "PBR");
+            uint material = pxz.Material.CreateMaterial($"{PXYZConstants.CUSTOM_MATERIAL_CONVERTED}_{entityID}" , "PBR");
             ColorOrTexture albedoColorOrTexture = new ColorOrTexture();
             if (texture?.tex?.src != null)
             {
                 if (contentTable.TryGetValue(texture.tex.src, out string texturePath))
                 {
+                    if(importedTextures.ContainsKey(texturePath))
+                        return importedTextures[texturePath];
+                    
                     uint image = pxz.Material.ImportImage(texturePath);
             
                     UnityEngine.Pixyz.Material.Texture albedoTexture = new UnityEngine.Pixyz.Material.Texture();
@@ -46,6 +50,11 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
             
                     albedoColorOrTexture._type = ColorOrTexture.Type.TEXTURE;
                     albedoColorOrTexture.texture = albedoTexture;
+                    PBRMaterialInfos materialInfos = pxz.Material.GetPBRMaterialInfos(material);
+                    materialInfos.albedo = albedoColorOrTexture;
+                    pxz.Material.SetPBRMaterialInfos(material, materialInfos);
+                    
+                    importedTextures.Add(texturePath, material);
                 }
                 else
                 {
@@ -56,10 +65,10 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
             {
                 albedoColorOrTexture._type = ColorOrTexture.Type.COLOR;
                 albedoColorOrTexture.color = GetColor();
+                PBRMaterialInfos materialInfos = pxz.Material.GetPBRMaterialInfos(material);
+                materialInfos.albedo = albedoColorOrTexture;
+                pxz.Material.SetPBRMaterialInfos(material, materialInfos);
             }
-            PBRMaterialInfos materialInfos = pxz.Material.GetPBRMaterialInfos(material);
-            materialInfos.albedo = albedoColorOrTexture;
-            pxz.Material.SetPBRMaterialInfos(material, materialInfos);
             return material;
         }
 
@@ -110,7 +119,7 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
         public int r = 1;
         public int g = 1;
         public int b = 1;
-        public int a = 1;
+        public int? a = 1;
     }
     
 }

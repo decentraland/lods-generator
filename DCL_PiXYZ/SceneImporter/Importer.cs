@@ -24,6 +24,11 @@ namespace SceneImporter
 
         private string sceneHash;
         private string scenePointer;
+
+        private string[] currentPointersList;
+
+        public Dictionary<string, string> sceneContent;
+
         public Importer(string paramType, string sceneParam, WebRequestsHandler webRequestsHandler)
         {
             this.sceneParam = sceneParam;
@@ -36,63 +41,74 @@ namespace SceneImporter
             activeEntitiesURL = "https://peer.decentraland.org/content/entities/active";
         }
 
-        public async Task GenerateSceneContent()
+        public async Task DownloadSceneDefinition()
         {
-            Console.WriteLine("-------------------------");
-            Console.WriteLine("BEGIN IMPORT");
-            Console.WriteLine("Getting Scene Definition");
+            Console.WriteLine("BEGIN SCENE DEFINITION DOWNLOAD");
+            currentPointersList = Array.Empty<string>();
             try
             {
                 if (paramByHash)
                 {
-                    sceneHash = sceneParam;
                     string rawSceneDefinition = await webRequestsHandler.GetRequest($"{contentsURL}{sceneHash}");
                     sceneDefinition = JsonConvert.DeserializeObject<SceneDefinition>(rawSceneDefinition);
-                    scenePointer = sceneDefinition.pointers[0];
+                    SetResult(sceneHash);
                 }
                 else
                 {
-                    scenePointer = sceneParam;
                     string rawSceneDefinition = await webRequestsHandler.PostRequest(activeEntitiesURL, "{\"pointers\":[\"" + sceneParam + "\"]}");
-                    sceneDefinition = JsonConvert.DeserializeObject<List<SceneDefinition>>(rawSceneDefinition)[0];
-                    sceneHash = sceneDefinition.id;
-                    scenePointer = sceneDefinition.pointers[0];
+                    List<SceneDefinition> sceneDefinitions =
+                        JsonConvert.DeserializeObject<List<SceneDefinition>>(rawSceneDefinition);
+                    if (sceneDefinitions.Count > 0)
+                    {
+                        sceneDefinition = sceneDefinitions[0];
+                        SetResult(sceneDefinitions[0].id);
+                    }
                 }
+                Console.WriteLine("END SCENE DEFINITION DOWNLOAD");
             }
-            catch (HttpRequestException e)
+            catch (Exception e)
             {
                 throw new Exception($"Scene fetch failed: {e}");
             }
-            Console.WriteLine("Scene Definition Success!");
         }
 
-        public async Task<Dictionary<string,string>> DownloadAllContent()
+        private void SetResult(string setSceneHash)
         {
-            Console.WriteLine("Getting File Content");
-            Dictionary<string, string> contentDictionary = new Dictionary<string, string>();
+            this.sceneHash = setSceneHash;
+            //TODO: Change to scene base
+            scenePointer = sceneDefinition.pointers[0];
+            currentPointersList = sceneDefinition.pointers;
+        }
+
+        public string[] GetCurrentScenePointersList()
+        {
+            return currentPointersList;
+        }
+
+        public async Task<bool> DownloadAllContent(SceneConversionDebugInfo debugInfo)
+        {
+            Console.WriteLine("BEGIN FILE CONTENT DOWNLOAD");
+            sceneContent = new Dictionary<string, string>();
             foreach (var content in sceneDefinition.content)
             {
                 try
                 {
                     if (ignoreExtensions.Contains(Path.GetExtension(content.file)))
                     {
-                        Console.WriteLine($"File {content.file} ignored");
                         continue;
                     }
-                    Console.WriteLine($"Getting File {content.file}");
                     string filePath = Path.Combine(PXYZConstants.RESOURCES_DIRECTORY, content.file);
                     await webRequestsHandler.DownloadFileAsync($"{contentsURL}{content.hash}", filePath);
-                    contentDictionary.Add(content.file, filePath);
-                    Console.WriteLine($"File {content.file} Success!");
+                    sceneContent.Add(content.file, filePath);
                 }
-                catch (HttpRequestException e)
+                catch (Exception e)
                 {
-                    throw new Exception($"URL failed: {contentsURL}{sceneParam} with error {e}");
+                    PXZEntryPoint.WriteToFile($"{scenePointer}\tDOWNLOAD ERROR: {e.Message}", debugInfo.FailFile);
+                    return false;
                 }
             }
-            Console.WriteLine("File Content Success!");
-            Console.WriteLine("END IMPORT");
-            return contentDictionary;
+            Console.WriteLine("END FILE CONTENT DOWNLOAD");
+            return true;
         }
 
 

@@ -12,6 +12,9 @@ namespace DCL_PiXYZ
         public static string COORDS_PARAM = "coords";
         
         public static string HASH_PARAM = "hash";
+        
+        public static string CUSTOM_MATERIAL_CONVERTED = "CUSTOM_MATERIAL";
+
 
     }
 }

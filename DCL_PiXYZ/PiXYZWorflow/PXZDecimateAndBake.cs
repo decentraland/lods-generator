@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using UnityEngine.Pixyz.Algo;
 using UnityEngine.Pixyz.API;
 using UnityEngine.Pixyz.Geom;
@@ -11,7 +12,7 @@ namespace DCL_PiXYZ
 {
     public class PXZDecimateAndBake : IPXZModifier
     {
-        public void ApplyModification(PiXYZAPI pxz)
+        public async Task ApplyModification(PiXYZAPI pxz)
         {
             Console.WriteLine("-------------------------");
             Console.WriteLine("BEGIN PXZ DECIMATE AND BAKE");
