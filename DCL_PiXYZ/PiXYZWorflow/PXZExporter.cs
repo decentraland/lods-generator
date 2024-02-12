@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using DCL_PiXYZ.SceneRepositioner.JsonParsing;
@@ -62,12 +63,14 @@ namespace DCL_PiXYZ
             //Use it to flatten the hierarchy
             //TODO: This will break all possible skinning. But do we care about it?
             if (lodLevel != 0)
+            {
                 pxz.Scene.MergeOccurrencesByTreeLevel(new OccurrenceList(new[]
                 {
                     pxz.Scene.GetRoot()
                 }), 1);
+            }
             pxz.IO.ExportScene(Path.Combine(path, $"{filename}{extension}"), pxz.Scene.GetRoot());
             Console.WriteLine("END PXZ EXPORT ");
-        }
+       }
     }
 }

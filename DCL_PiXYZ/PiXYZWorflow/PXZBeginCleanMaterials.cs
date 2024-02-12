@@ -22,7 +22,10 @@ namespace DCL_PiXYZ
         public async Task ApplyModification(PiXYZAPI pxz)
         {
             Console.WriteLine("BEGIN PXZ CLEAN MATERIALS");
-            PackedTree packedTree = pxz.Scene.GetSubTree(pxz.Scene.GetRoot());
+            pxz.Scene.MergeImages();
+            /*
+             Merge images seems to solve the issue. Leaving the code here until MergeImages() its 100% proven and fail proof
+             PackedTree packedTree = pxz.Scene.GetSubTree(pxz.Scene.GetRoot());
             for (var i = 0; i < packedTree.occurrences.list.Length; i++)
             {
                 if (pxz.Scene.HasComponent(packedTree.occurrences[i], ComponentType.Part) && !packedTree.names[i].Contains("collider"))
@@ -51,7 +54,7 @@ namespace DCL_PiXYZ
                     pxz.Scene.CleanUnusedImages();
                     pxz.Scene.CleanUnusedMaterials(true);
                 }
-            }
+            }*/
 
             Console.WriteLine("END PXZ CLEAN MATERIALS");
         }

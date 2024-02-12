@@ -21,7 +21,7 @@ namespace DCL_PiXYZ
 
         private static async Task RunLODBuilder(string[] args)
         {
-            string defaultScene = "0,0";
+            string defaultScene = "-3,10";
             string defaultOutputPath = Path.Combine(Directory.GetCurrentDirectory(), "built-lods") ;
             if (args.Length > 0)
             {
@@ -34,7 +34,7 @@ namespace DCL_PiXYZ
             //If its bulk, a single number will represent a square to parse, going from -value to value
 
             //Scenes param is single coordinates or bulk value. Single scenes are separated by 
-            var sceneConversionInfo = new SceneConversionInfo("7000;3000;1000", "triangle", "coords", "bulk", "20", defaultOutputPath);
+            var sceneConversionInfo = new SceneConversionInfo("7000;3000;1000", "triangle", "coords", "single", defaultScene, defaultOutputPath);
             var debugInfo = new SceneConversionDebugInfo(defaultOutputPath, "SuccessScenes.txt", "FailScenes.txt", "EmptyScenes.txt", "PolygonCount.txt" , true);
 
             CreateDirectories(sceneConversionInfo);
@@ -212,6 +212,8 @@ namespace DCL_PiXYZ
             List<IPXZModifier> modifiers = new List<IPXZModifier>();
             modifiers.Add(new PXZBeginCleanMaterials());
             modifiers.Add(new PXZRepairMesh(models));
+
+            
             if (pxzParams.LodLevel != 0)
             {
                 modifiers.Add(new PXZDeleteByName(".*collider.*"));

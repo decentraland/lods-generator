@@ -19,7 +19,7 @@
 
     <ItemGroup>
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-      <PackageReference Include="PiXYZCSharpAPI" Version="2024.1.0.15-win64" />
+      <PackageReference Include="PiXYZCSharpAPI" Version="2024.1.0.17-win64" />
       <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
     </ItemGroup>
 

@@ -38,6 +38,12 @@ export const LoadableApis = {
 
     getDecentralandTime: async () => ({ })
   },
+  CommsApi: {
+    registerCommsApiServiceServerImplementation: async () => ({})
+  },
+  EthereumController: {
+    registerEthereumControllerServiceServerImplementation: async () => ({})
+  },
   EngineApi: {
     sendBatch: async () => ({ events: [] }),
 
@@ -64,7 +70,17 @@ export const LoadableApis = {
     isServer: async () => ({ isServer: true }),
   },
   UserIdentity: {
-    getUserData: async () => ({})
+    async getUserData()   {
+      return {
+          displayName: "empty",
+          publicKey: "empty",
+          hasConnectedWeb3: true,
+          userId: "empty",
+          version: 0,
+          avatar: undefined
+      }
+    },
+    getUserPublicKey: async () => ({})
   },
   SignedFetch: {
     getHeaders: async () => ({})
@@ -128,6 +144,24 @@ export const LoadableApis = {
   },
   UserActionModule: {
     async requestTeleport() {}
+  },
+  ParcelIdentity: {
+    async getParcel(_req: any, ctx: any) {
+      return {
+        land: {
+          sceneId: '',
+          sceneJsonData: '{}',
+          baseUrl: '',
+          baseUrlBundles: '',
+          mappingsResponse: {
+            parcelId: '',
+            rootCid: '',
+            contents: []
+          }
+        },
+        cid: ''
+      }
+    }
   },
   Players: {
     async getPlayerData(body: any) {
