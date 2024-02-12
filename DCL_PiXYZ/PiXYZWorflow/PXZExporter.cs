@@ -18,7 +18,7 @@ namespace DCL_PiXYZ
 
         public PXZExporter(PXZParams pxzParams, bool isDebug)
         {
-            extensions = new List<string>() { ".glb", ".fbx" };
+            extensions = new List<string>() { ".fbx", ".glb" };
             if (isDebug)
                 path = Path.Combine(pxzParams.OutputDirectory, $"{pxzParams.ScenePointer}/{pxzParams.DecimationValue}");
             else
