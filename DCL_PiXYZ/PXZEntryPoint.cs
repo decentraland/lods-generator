@@ -63,7 +63,7 @@ namespace DCL_PiXYZ
                 Console.WriteLine("BEGIN SCENE CONVERSION FOR SCENE " + scene);
                 var pxzParams = new PXZParams
                 {
-                    DecimationType = sceneConversionInfo.DecimationType, ManifestOutputJSONDirectory = sceneConversionInfo.ManifestOutputJsonDirectory, OutputDirectory = sceneConversionInfo.OutputDirectory, ParcelAmount = sceneConversionInfo.SceneImporter.GetCurrentScenePointersList().Length,
+                    DecimationType = sceneConversionInfo.DecimationType, ManifestOutputJSONDirectory = sceneConversionInfo.ManifestOutputJsonDirectory, OutputDirectory = Path.Combine(sceneConversionInfo.OutputDirectory, sceneConversionInfo.SceneImporter.GetScenePointer()), ParcelAmount = sceneConversionInfo.SceneImporter.GetCurrentScenePointersList().Length,
                     SceneContent = sceneConversionInfo.SceneImporter.sceneContent, SceneHash = sceneConversionInfo.SceneImporter.GetSceneHash(), ScenePointer = sceneConversionInfo.SceneImporter.GetScenePointer()
                 };
                 foreach (var decimationValue in sceneConversionInfo.DecimationToAnalyze)

@@ -20,7 +20,7 @@ namespace DCL_PiXYZ
         {
             extensions = new List<string>() { ".fbx", ".glb" };
             if (isDebug)
-                path = Path.Combine(pxzParams.OutputDirectory, $"{pxzParams.ScenePointer}/{pxzParams.DecimationValue}");
+                path = Path.Combine(pxzParams.OutputDirectory, $"/{pxzParams.DecimationValue}");
             else
                 path = pxzParams.OutputDirectory;
             filename = $"{pxzParams.SceneHash}_{pxzParams.LodLevel}";

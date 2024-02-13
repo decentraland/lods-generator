@@ -1,4 +1,5 @@
 ﻿using System;
+using Newtonsoft.Json;
 
 namespace SceneImporter
 {
@@ -22,5 +23,16 @@ namespace SceneImporter
     public class Metadata
     {
         public string runtimeVersion;
+        public Scene scene;
+
+    }
+
+    [Serializable]
+    public class Scene
+    {
+        public string[] parcels;
+
+        [JsonProperty("base")]
+        public string baseParcel;
     }
 }
