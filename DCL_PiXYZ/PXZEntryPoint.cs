@@ -16,7 +16,8 @@ namespace DCL_PiXYZ
         private static PiXYZAPI pxz;
         static async Task Main(string[] args)
         {
-            await RunLODBuilder(args);
+            await RoadWorldBuilder.BuildRoadsFile();
+            //await RunLODBuilder(args);
         }
 
         private static async Task RunLODBuilder(string[] args)
