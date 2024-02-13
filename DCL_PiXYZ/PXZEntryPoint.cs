@@ -69,7 +69,8 @@ namespace DCL_PiXYZ
                 foreach (var decimationValue in sceneConversionInfo.DecimationToAnalyze)
                 {
                     pxz.Core.ResetSession();
-                    if (!SceneHasBeenConverted(sceneConversionInfo, decimationValue, scene))
+
+                    if (!SceneHasBeenConverted(sceneConversionInfo, decimationValue, scene, debugInfo))
                     {
                         pxzParams.DecimationValue = decimationValue;
                         await DoConversion(pxzParams, sceneConversionInfo, scene, debugInfo);
@@ -107,9 +108,9 @@ namespace DCL_PiXYZ
             }
         }
 
-        private static bool SceneHasBeenConverted(SceneConversionInfo sceneConversionInfo, double decimationValue, string scene)
+        private static bool SceneHasBeenConverted(SceneConversionInfo sceneConversionInfo, double decimationValue, string scene, SceneConversionDebugInfo debugInfo)
         {
-            if (Directory.Exists(Path.Combine(sceneConversionInfo.OutputDirectory, Path.Combine(sceneConversionInfo.SceneImporter.GetCurrentScenePointersList()[0], decimationValue.ToString()))))
+            if (debugInfo.IsDebug && Directory.Exists(Path.Combine(sceneConversionInfo.OutputDirectory, Path.Combine(sceneConversionInfo.SceneImporter.GetCurrentScenePointersList()[0], decimationValue.ToString()))))
             {
                 Console.WriteLine($"Skipping scene {scene} since its already converted");
                 return true;
