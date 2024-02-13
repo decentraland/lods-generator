@@ -19,6 +19,9 @@ export function createLodGeneratorComponent(): LodGeneratorComponent {
     const commandToExecute = `${lodGeneratorProgram} "coords" "${basePointer}" "${outputPath}"`
     const files: string[] = await new Promise((resolve, reject) => {
       exec(commandToExecute, (error, _stdout, stderr) => {
+        const debugFiles = fs.readdirSync(outputPath)
+        console.log('debugFiles', debugFiles)
+
         const generatedFiles = fs.readdirSync(`${outputPath}/${basePointer}`)
         // if files exists return otherwise reject
         if (generatedFiles.length > 0) {
