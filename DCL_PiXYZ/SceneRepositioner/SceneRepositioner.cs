@@ -15,7 +15,6 @@ namespace DCL_PiXYZ.SceneRepositioner
         private string baseURL;
         private string sceneID;
         private Dictionary<string, string> sceneContent;
-        private Dictionary<string, uint> importedMaterials;
         private PiXYZAPI pxz;
 
         public SceneRepositioner(WebRequestsHandler webRequestHandler, string baseUrl, string sceneID,
@@ -26,7 +25,6 @@ namespace DCL_PiXYZ.SceneRepositioner
             this.sceneID = sceneID;
             this.sceneContent = sceneContent;
             this.pxz = pxz;
-            importedMaterials = new Dictionary<string, uint>();
         }
     
         public async Task<List<PXZModel>> SetupSceneInPiXYZ()
@@ -52,7 +50,7 @@ namespace DCL_PiXYZ.SceneRepositioner
                 dclRendereableEntity.Value.InitEntity(pxz, rootOccurrence);
 
             foreach (KeyValuePair<int, DCLRendereableEntity> dclRendereableEntity in renderableEntitiesDictionary)
-                models.Add(dclRendereableEntity.Value.PositionAndInstantiteMesh(sceneContent, renderableEntitiesDictionary, importedMaterials));
+                models.Add(dclRendereableEntity.Value.PositionAndInstantiteMesh(sceneContent, renderableEntitiesDictionary));
 
             Console.WriteLine("END REPOSITIONING");
 

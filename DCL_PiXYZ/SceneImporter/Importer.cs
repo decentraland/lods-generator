@@ -94,9 +94,7 @@ namespace SceneImporter
                 try
                 {
                     if (ignoreExtensions.Contains(Path.GetExtension(content.file)))
-                    {
                         continue;
-                    }
                     string filePath = Path.Combine(PXYZConstants.RESOURCES_DIRECTORY, content.file);
                     await webRequestsHandler.DownloadFileAsync($"{contentsURL}{content.hash}", filePath);
                     sceneContent.Add(content.file.ToLower(), filePath);
