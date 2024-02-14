@@ -38,14 +38,14 @@ namespace DCL_PiXYZ
 
         public WebRequestsHandler WebRequestsHandler;
 
-        public SceneConversionInfo(string decimationValues, string decimationType, string sceneType, string conversionType, string scenes, string outputPath)
+        public SceneConversionInfo(string decimationValues, string decimationType, string sceneType, string conversionType, string scenes, string outputPath, string defaultSceneLodManifestDirectory)
         {
             SceneType = sceneType;
             ConversionType = conversionType;
             Scenes = scenes;
             DecimationType = decimationType;
             DecimationValues = decimationValues;
-            SceneManifestDirectory = Path.Combine(Directory.GetCurrentDirectory(), "scene-lod-entities-manifest-builder/");
+            SceneManifestDirectory = defaultSceneLodManifestDirectory;
             ManifestOutputJsonDirectory = Path.Combine(SceneManifestDirectory, "output-manifests/");
             OutputDirectory = outputPath;
             ScenesToAnalyze = new List<string>();
