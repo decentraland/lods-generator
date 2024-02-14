@@ -9,6 +9,7 @@ export function createLodGeneratorComponent({ logs }: Pick<AppComponents, 'logs'
   const logger = logs.getLogger('lod-generator')
   const projectRoot = path.resolve(__dirname, '..', '..', '..') // project root according to Dockerfile bundling
   const lodGeneratorProgram = path.join(projectRoot, 'api', 'DCL_PiXYZ.exe') // path to the lod generator program
+  const sceneLodEntitiesManifestBuilder = path.join(projectRoot, 'scene-lod') // path to the scene lod entities manifest builder
   const outputPath = path.join(os.tmpdir(), "built-lods")
 
   async function generate(basePointer: string): Promise<string[]> {
@@ -17,7 +18,7 @@ export function createLodGeneratorComponent({ logs }: Pick<AppComponents, 'logs'
       fs.mkdirSync(outputPath, { recursive: true })
     }
 
-    const commandToExecute = `${lodGeneratorProgram} "coords" "${basePointer}" "${outputPath}"`
+    const commandToExecute = `${lodGeneratorProgram} "coords" "${basePointer}" "${outputPath}" "${sceneLodEntitiesManifestBuilder}"`
     const files: string[] = await new Promise((resolve, reject) => {
       exec(commandToExecute, (error, _stdout, stderr) => {
         const processOutput = `${outputPath}/${basePointer}`
