@@ -74,7 +74,7 @@ export type QueueComponent = {
 export type QueueWorker = IBaseComponent
 
 export type LodGeneratorComponent = {
-  generate(entityId: string, basePointer: string): Promise<string[]>
+  generate(basePointer: string): Promise<string[]>
 }
 
 export type MessageHandlerComponent = {

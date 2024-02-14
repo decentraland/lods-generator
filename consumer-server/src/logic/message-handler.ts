@@ -16,7 +16,7 @@ export function createMessageHandlerComponent({
     const entityId = message.entity.entityId
     const base = message.entity.metadata.scene.base
 
-    const filesToUpload = await lodGenerator.generate(entityId, base)
+    const filesToUpload = await lodGenerator.generate(base)
     logger.info('LODs correctly generated', { files: filesToUpload.join(', '), entityId })
     await storage.storeFiles(filesToUpload, base, message.entity.entityTimestamp.toString())
   }
