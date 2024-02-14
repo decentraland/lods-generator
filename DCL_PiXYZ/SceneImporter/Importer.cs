@@ -99,7 +99,7 @@ namespace SceneImporter
                     }
                     string filePath = Path.Combine(PXYZConstants.RESOURCES_DIRECTORY, content.file);
                     await webRequestsHandler.DownloadFileAsync($"{contentsURL}{content.hash}", filePath);
-                    sceneContent.Add(content.file, filePath);
+                    sceneContent.Add(content.file.ToLower(), filePath);
                 }
                 catch (Exception e)
                 {

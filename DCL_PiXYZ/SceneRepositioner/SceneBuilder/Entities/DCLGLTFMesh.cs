@@ -18,7 +18,7 @@ namespace AssetBundleConverter.LODs
 
         public override PXZModel InstantiateMesh(PiXYZAPI pxz, string entityID ,uint parent, uint material,Dictionary<string, string> sceneContent)
         {
-            if (sceneContent.TryGetValue(src, out string modelPath))
+            if (sceneContent.TryGetValue(src.ToLower(), out string modelPath))
             {
                 try
                 {
