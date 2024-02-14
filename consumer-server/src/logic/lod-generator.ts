@@ -20,10 +20,13 @@ export function createLodGeneratorComponent({ logs }: Pick<AppComponents, 'logs'
     const commandToExecute = `${lodGeneratorProgram} "coords" "${basePointer}" "${outputPath}"`
     const files: string[] = await new Promise((resolve, reject) => {
       exec(commandToExecute, (error, _stdout, stderr) => {
-        const debugFiles = fs.readdirSync(outputPath)
-        logger.debug('Read files', { debugFiles: debugFiles.join(', ')})
+        const processOutput = `${outputPath}/${basePointer}`
+        if(!fs.existsSync(processOutput)) {
+          logger.error(`No files were generated. Error: ${stderr}`)
+          reject(new Error(`No files were generated. Error: ${error?.message}`))
+        }
 
-        const generatedFiles = fs.readdirSync(`${outputPath}/${basePointer}`)
+        const generatedFiles = fs.readdirSync(processOutput)
         // if files exists return otherwise reject
         if (generatedFiles.length > 0) {
           resolve(generatedFiles)
