@@ -36,7 +36,7 @@ namespace DCL_PiXYZ
             //If its bulk, a single number will represent a square to parse, going from -value to value
 
             //Scenes param is single coordinates or bulk value. Single scenes are separated by 
-            var sceneConversionInfo = new SceneConversionInfo("7000", "triangle", "coords", "single", defaultScene, defaultOutputPath, defaultSceneLodManifestDirectory);
+            var sceneConversionInfo = new SceneConversionInfo("7000;3000;1000", "triangle", "coords", "single", defaultScene, defaultOutputPath, defaultSceneLodManifestDirectory);
             var debugInfo = new SceneConversionDebugInfo(defaultOutputPath, "SuccessScenes.txt", "FailScenes.txt", "EmptyScenes.txt", "PolygonCount.txt" , false);
 
             CreateDirectories(sceneConversionInfo);
