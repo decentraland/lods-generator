@@ -17,7 +17,7 @@ export function createMessageHandlerComponent({
     const base = message.entity.metadata.scene.base
 
     const filesToUpload = await lodGenerator.generate(base)
-    if (!filesToUpload || filesToUpload.length === 0) {
+    if (filesToUpload.length === 0) {
       return
     }
 
