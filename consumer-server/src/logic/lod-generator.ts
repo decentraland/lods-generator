@@ -3,45 +3,33 @@ import path from 'path'
 import os from 'os'
 import fs from 'fs'
 
-import { AppComponents, LodGeneratorComponent } from '../types'
+import { LodGeneratorComponent } from '../types'
 
-export function createLodGeneratorComponent({ logs }: Pick<AppComponents, 'logs'>): LodGeneratorComponent {
-  const logger = logs.getLogger('lod-generator')
+export function createLodGeneratorComponent(): LodGeneratorComponent {
   const projectRoot = path.resolve(__dirname, '..', '..', '..') // project root according to Dockerfile bundling
   const lodGeneratorProgram = path.join(projectRoot, 'api', 'DCL_PiXYZ.exe') // path to the lod generator program
   const sceneLodEntitiesManifestBuilder = path.join(projectRoot, 'scene-lod') // path to the scene lod entities manifest builder
   const outputPath = path.join(os.tmpdir(), 'built-lods')
 
-  async function generate(basePointer: string): Promise<string[] | undefined> {
+  async function generate(basePointer: string): Promise<string[]> {
     let files: string[] = []
     if (!fs.existsSync(outputPath)) {
       fs.mkdirSync(outputPath, { recursive: true })
     }
 
-    try {
-      const commandToExecute = `${lodGeneratorProgram} "coords" "${basePointer}" "${outputPath}" "${sceneLodEntitiesManifestBuilder}"`
-      files = await new Promise((resolve, reject) => {
-        exec(commandToExecute, (error, _stdout, stderr) => {
-          const processOutput = `${outputPath}/${basePointer}`
-          if (!fs.existsSync(processOutput)) {
-            reject(new Error(`No files were generated. Error: ${error?.message}`))
-          }
-
+    const commandToExecute = `${lodGeneratorProgram} "coords" "${basePointer}" "${outputPath}" "${sceneLodEntitiesManifestBuilder}"`
+    files = await new Promise((resolve, _) => {
+      exec(commandToExecute, (_error, _stdout, _stderr) => {
+        const processOutput = `${outputPath}/${basePointer}`
+        if (fs.existsSync(processOutput)) {
           const generatedFiles = fs.readdirSync(processOutput)
           // if files exists return otherwise reject
-          if (generatedFiles.length > 0) {
-            resolve(generatedFiles)
-          } else {
-            reject(new Error(`No files were generated. Error: ${error?.message}, Stderr: ${stderr}`))
-          }
-        })
+          resolve(generatedFiles.map((file) => `${processOutput}/${file}`))
+        } else {
+          resolve([])
+        }
       })
-    } catch (error: any) {
-      logger.error('Failed while generating LODs', {
-        error: error.message
-      })
-      return undefined
-    }
+    })
 
     return files
   }

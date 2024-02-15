@@ -16,13 +16,10 @@ namespace DCL_PiXYZ
         private string filename;
         private readonly int lodLevel;
 
-        public PXZExporter(PXZParams pxzParams, bool isDebug)
+        public PXZExporter(PXZParams pxzParams)
         {
             extensions = new List<string>() { ".fbx", ".glb" };
-            if (isDebug)
-                path = Path.Combine(pxzParams.OutputDirectory, $"/{pxzParams.DecimationValue}");
-            else
-                path = pxzParams.OutputDirectory;
+            path = pxzParams.OutputDirectory;
             filename = $"{pxzParams.SceneHash}_{pxzParams.LodLevel}";
             lodLevel = pxzParams.LodLevel;
         }
