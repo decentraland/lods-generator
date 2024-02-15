@@ -22,7 +22,7 @@ namespace DCL_PiXYZ
         private static async Task RunLODBuilder(string[] args)
         {
             string defaultScene = "0,10";
-            string defaultOutputPath = Path.Combine(Directory.GetCurrentDirectory(), "built-lodsE") ;
+            string defaultOutputPath = Path.Combine(Directory.GetCurrentDirectory(), "built-lods") ;
             string defaultSceneLodManifestDirectory = Path.Combine(Directory.GetCurrentDirectory(), "scene-lod-entities-manifest-builder/");
             bool isDebug = true;
             if (args.Length > 0)
