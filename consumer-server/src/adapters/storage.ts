@@ -13,7 +13,7 @@ export async function createCloudStorageAdapter({
   const bucket = await config.getString('BUCKET')
   const bucketEndpoint = (await config.getString('BUCKET_ENDPOINT')) || 'https://s3.amazonaws.com'
   const region = (await config.getString('AWS_REGION')) || 'us-east-1'
-  
+
   const s3 = new S3Client({ region, endpoint: bucketEndpoint })
 
   async function store(key: string, content: Buffer, contentType: string): Promise<void> {
@@ -31,13 +31,15 @@ export async function createCloudStorageAdapter({
 
   async function storeFiles(filePaths: string[], basePointer: string, entityTimestamp: string): Promise<boolean> {
     try {
-      const files = await Promise.all(filePaths.map(async (filePath) => {
-        const buffer = await fs.readFile(filePath)
-        const name = filePath.split('/').pop()
-        const contentType = mime.contentType(name!) || 'application/octet-stream'
-      
-        return { buffer, name, contentType }
-      }))
+      const files = await Promise.all(
+        filePaths.map(async (filePath) => {
+          const buffer = await fs.readFile(filePath)
+          const name = filePath.split('/').pop()
+          const contentType = mime.contentType(name!) || 'application/octet-stream'
+
+          return { buffer, name, contentType }
+        })
+      )
 
       await Promise.all(
         files.map((file) =>
