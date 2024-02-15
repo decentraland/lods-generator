@@ -20,14 +20,15 @@ export function createMessageHandlerComponent({
 
     const filesToUpload = await lodGenerator.generate(base)
 
+    if (filesToUpload.length === 0) {
+      logger.info('Could not generate LODs', { entityId })
+      return
+    }
+
     const resultTxt = filesToUpload.find((file) => file.endsWith('output.txt'))
     if (resultTxt) {
       const lodGenerationResult = fs.readFileSync(resultTxt, 'utf-8')
       logger.info('LOD generation result', { result: lodGenerationResult, entityId })
-    }
-
-    if (filesToUpload.length === 0) {
-      return
     }
 
     logger.info('LODs correctly generated', { files: filesToUpload.join(', '), entityId })
