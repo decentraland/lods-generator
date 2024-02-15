@@ -21,7 +21,7 @@ namespace DCL_PiXYZ
 
         private static async Task RunLODBuilder(string[] args)
         {
-            string defaultScene = "0,10";
+            string defaultScene = "0,0";
             string defaultOutputPath = Path.Combine(Directory.GetCurrentDirectory(), "built-lods") ;
             string defaultSceneLodManifestDirectory = Path.Combine(Directory.GetCurrentDirectory(), "scene-lod-entities-manifest-builder/");
             if (args.Length > 0)
@@ -36,7 +36,7 @@ namespace DCL_PiXYZ
             //If its bulk, a single number will represent a square to parse, going from -value to value
 
             //Scenes param is single coordinates or bulk value. Single scenes are separated by 
-            var sceneConversionInfo = new SceneConversionInfo("7000", "triangle", "coords", "single", defaultScene, defaultOutputPath, defaultSceneLodManifestDirectory);
+            var sceneConversionInfo = new SceneConversionInfo("7000;3000;1000", "triangle", "coords", "bulk", "40", defaultOutputPath, defaultSceneLodManifestDirectory);
             var debugInfo = new SceneConversionDebugInfo(defaultOutputPath, "SuccessScenes.txt", "FailScenes.txt", "EmptyScenes.txt", "PolygonCount.txt" , false);
 
             CreateDirectories(sceneConversionInfo);
@@ -58,7 +58,7 @@ namespace DCL_PiXYZ
 
                 if (CheckFaillingDebugScenes(sceneConversionInfo.SceneImporter.GetCurrentScenePointersList(), scene)) continue;
 
-                if (!await ManifestGeneratedSuccesfully(sceneConversionInfo, debugInfo, scene)) continue;
+                //if (!await ManifestGeneratedSuccesfully(sceneConversionInfo, debugInfo, scene)) continue;
 
                 if (!await sceneConversionInfo.SceneImporter.DownloadAllContent(debugInfo)) continue;
 
@@ -240,7 +240,7 @@ namespace DCL_PiXYZ
         {
             //TODO: Check if build path is correctly copying the scene lod manifest project
             Console.WriteLine("INSTALLING AND BUILDING NPM");
-            NPMUtils.DoNPMInstall(sceneManifestDirectory);
+            //NPMUtils.DoNPMInstall(sceneManifestDirectory);
             Console.WriteLine("END INSTALLING AND BUILDING NPM");
             Console.WriteLine("INITIALIZING PIXYZ");
             InitializePiXYZ();

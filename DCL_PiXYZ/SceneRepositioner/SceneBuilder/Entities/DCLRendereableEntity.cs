@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Numerics;
 using DCL_PiXYZ.SceneRepositioner.JsonParsing;
 using UnityEngine.Pixyz.API;
@@ -48,9 +49,9 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
             this.pxz = pxz;
         }
 
-        public PXZModel PositionAndInstantiteMesh(Dictionary<string, string> contentTable, Dictionary<int, DCLRendereableEntity> renderableEntities)
+        public PXZModel PositionAndInstantiteMesh(Dictionary<string, string> contentTable, Dictionary<int, DCLRendereableEntity> renderableEntities, string sceneID)
         {
-            InstantiateTransform(renderableEntities);
+            InstantiateTransform(renderableEntities, sceneID);
             if (rendereableMesh != null)
             {
                 uint material = dclMaterial.GetMaterial(pxz, entityID.ToString(), contentTable);
@@ -60,7 +61,7 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
                 return PXYZConstants.EMPTY_MODEL;
         }
 
-        private void InstantiateTransform(Dictionary<int, DCLRendereableEntity> renderableEntities)
+        private void InstantiateTransform(Dictionary<int, DCLRendereableEntity> renderableEntities, string sceneID)
         {
             if (transform.parent != 0)
                 if (renderableEntities.TryGetValue((int)transform.parent, out DCLRendereableEntity rendereableEntity))
@@ -68,10 +69,31 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
 
             Matrix4 matrix4 = new Matrix4();
             matrix4.Init();
-            matrix4.Rotate(new Quaternion(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w));
             matrix4.Scale(new Vector3(transform.scale.x, transform.scale.y, transform.scale.z));
+            Quaternion quaternion = ValidateOrNormalize(new Quaternion(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w), entityID.ToString(), sceneID);
+            matrix4.Rotate(quaternion);
             matrix4.Translate(new Vector3(transform.position.x, transform.position.y, transform.position.z));
             pxz.Scene.ApplyTransformation(instantiatedEntity, matrix4);
+        }
+        
+        public static Quaternion ValidateOrNormalize(Quaternion q, string entityID, string sceneID)
+        {
+            double magnitudeSquared = q.W * q.W + q.X * q.X + q.Y * q.Y + q.Z * q.Z;
+        
+            // Considering a small tolerance for floating point arithmetic errors
+            const double tolerance = 1E-4;
+            if (Math.Abs(magnitudeSquared - 1.0) <= tolerance)
+            {
+                // It's a valid unit quaternion
+                return q;
+            }
+            else
+            {
+                
+                PXZEntryPoint.WriteToFile($"{sceneID}\t{entityID}\t{q.ToString()}\t", Path.Combine(Directory.GetCurrentDirectory(), "InvalidQuaternions.txt"));
+                // Return the identity quaternion if not valid
+                return Quaternion.Normalize(q);
+            }
         }
 
     }
