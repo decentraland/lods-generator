@@ -105,11 +105,11 @@ namespace DCL_PiXYZ
                 string elapsedTime = string.Format("{0:00}:{1:00}:{2:00}",
                     stopwatch.Elapsed.Hours, stopwatch.Elapsed.Minutes, stopwatch.Elapsed.Seconds);
 
-                WriteToFile($"{scene}\t{pxzParams.DecimationValue}\t{elapsedTime}" , debugInfo.SuccessFile);
+                FileWriter.WriteToFile($"{scene}\t{pxzParams.DecimationValue}\t{elapsedTime}" , debugInfo.SuccessFile);
             }
             catch (Exception e)
             {
-                WriteToFile($"{scene}\t{pxzParams.DecimationValue}\tCONVERSION ERROR: {e.Message}", debugInfo.FailFile);
+                FileWriter.WriteToFile($"{scene}\t{pxzParams.DecimationValue}\tCONVERSION ERROR: {e.Message}", debugInfo.FailFile);
             }
         }
 
@@ -141,7 +141,7 @@ namespace DCL_PiXYZ
             }
             catch (Exception e)
             {
-                WriteToFile($"{scene}\tSCENE DEFINITION DOWNLOAD ERROR: {e.Message}", debugInfo.FailFile);
+                FileWriter.WriteToFile($"{scene}\tSCENE DEFINITION DOWNLOAD ERROR: {e.Message}", debugInfo.FailFile);
                 return false;
             }
 
@@ -196,7 +196,7 @@ namespace DCL_PiXYZ
                 if (!isIgnorableError)
                 {
                     Console.WriteLine($"MANIFEST ERROR: {possibleError}");
-                    WriteToFile($"{sceneValue}\tMANIFEST ERROR: {possibleError}", failFile);
+                    FileWriter.WriteToFile($"{sceneValue}\tMANIFEST ERROR: {possibleError}", failFile);
                     return false; // Early exit if the error cannot be ignored.
                 }
             }
@@ -227,7 +227,7 @@ namespace DCL_PiXYZ
                 modifiers.Add(new PXZMergeMeshes(pxzParams.LodLevel));
             }
 
-            modifiers.Add(new PXZExporter(pxzParams));
+            modifiers.Add(new PXZExporter(pxzParams, debugInfo));
 
             PXZStopwatch stopwatch = new PXZStopwatch();
             foreach (var pxzModifier in modifiers)
@@ -266,12 +266,6 @@ namespace DCL_PiXYZ
             Directory.CreateDirectory(Path.Combine(sceneConversionInfo.OutputDirectory, sceneConversionInfo.Scene));
         }
 
-        public static void WriteToFile(string message, string fileName)
-        {
-            using (StreamWriter file = new StreamWriter(Path.Combine(Directory.GetCurrentDirectory(),fileName), true))
-                file.WriteLine(message);
-        }
-        
         public static void CloseApplication(string errorMessage)
         {
             Console.Error.WriteLine(errorMessage);
