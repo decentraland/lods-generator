@@ -23,7 +23,7 @@ namespace DCL_PiXYZ
     {
         public string SceneType { get; }
         public string ConversionType { get; }
-        public string Scenes { get; }
+        public string Scene { get; }
         public string DecimationType { get; }
         public string DecimationValues { get; }
         public string SceneManifestDirectory { get; }
@@ -38,11 +38,11 @@ namespace DCL_PiXYZ
 
         public WebRequestsHandler WebRequestsHandler;
 
-        public SceneConversionInfo(string decimationValues, string decimationType, string sceneType, string conversionType, string scenes, string outputPath, string defaultSceneLodManifestDirectory)
+        public SceneConversionInfo(string decimationValues, string decimationType, string sceneType, string conversionType, string scene, string outputPath, string defaultSceneLodManifestDirectory)
         {
             SceneType = sceneType;
             ConversionType = conversionType;
-            Scenes = scenes;
+            Scene = scene;
             DecimationType = decimationType;
             DecimationValues = decimationValues;
             SceneManifestDirectory = defaultSceneLodManifestDirectory;
@@ -54,7 +54,7 @@ namespace DCL_PiXYZ
             SceneImporter = null;
             WebRequestsHandler = new WebRequestsHandler();
             
-            GetScenesToAnalyzeList(ConversionType, Scenes);
+            GetScenesToAnalyzeList(ConversionType, Scene);
             GetDecimationValues(DecimationType, DecimationValues);
         }
 
