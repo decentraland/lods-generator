@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using DCL_PiXYZ.SceneRepositioner.JsonParsing;
+using DCL_PiXYZ.Utils;
 using UnityEngine.Pixyz.Algo;
 using UnityEngine.Pixyz.API;
 using UnityEngine.Pixyz.Scene;
@@ -40,18 +41,16 @@ namespace DCL_PiXYZ
             originalPolygonCount =
                 pxz.Scene.GetPolygonCount(new OccurrenceList(new uint[] { pxz.Scene.GetRoot() }), true);
             pxz.Algo.DecimateTarget(new OccurrenceList(new uint[]{pxz.Scene.GetRoot()}), decimate);
-            WriteFinalVertexAmount(pxz.Scene.GetPolygonCount(new OccurrenceList(new uint[] { pxz.Scene.GetRoot() }),true), debugInfo);
+            WriteFinalVertexAmount(pxz.Scene.GetPolygonCount(new OccurrenceList(new uint[] { pxz.Scene.GetRoot() }),true));
             Console.WriteLine("END PXZ MODIFIER DECIMATOR");
         }
         
-        private void WriteFinalVertexAmount(ulong polygonCount, SceneConversionDebugInfo debugInfo)
+        private void WriteFinalVertexAmount(ulong polygonCount)
         {
-            using (StreamWriter file = new StreamWriter(Path.Combine(Directory.GetCurrentDirectory(),debugInfo.PolygonCountFile), true))
-                if (decimate._type == DecimateOptionsSelector.Type.TRIANGLECOUNT)
-                    file.WriteLine($"{scenePointer}\t{decimate._type}\t{decimate.triangleCount}\t{originalPolygonCount}\t{polygonCount}");
-                else
-                    file.WriteLine($"{scenePointer}\t{decimate._type}\t{decimate.ratio}\t{originalPolygonCount}\t{polygonCount}");
-                
+            if (decimate._type == DecimateOptionsSelector.Type.TRIANGLECOUNT)
+                FileWriter.WriteToFile($"{scenePointer}\t{decimate._type}\t{decimate.triangleCount}\t{originalPolygonCount}\t{polygonCount}", debugInfo.PolygonCountFile);
+            else
+                FileWriter.WriteToFile($"{scenePointer}\t{decimate._type}\t{decimate.ratio}\t{originalPolygonCount}\t{polygonCount}", debugInfo.PolygonCountFile);
         }
     }
 }
