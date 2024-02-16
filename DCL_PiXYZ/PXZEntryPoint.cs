@@ -263,6 +263,7 @@ namespace DCL_PiXYZ
         {
             Directory.CreateDirectory(PXYZConstants.RESOURCES_DIRECTORY);
             Directory.CreateDirectory(sceneConversionInfo.OutputDirectory);
+            Directory.CreateDirectory(Path.Combine(sceneConversionInfo.OutputDirectory, sceneConversionInfo.Scene));
         }
 
         public static void WriteToFile(string message, string fileName)
