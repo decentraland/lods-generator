@@ -4,12 +4,12 @@ FROM mcr.microsoft.com/windows/servercore:ltsc2019 as base
 ADD https://aka.ms/vs/16/release/vc_redist.x64.exe C:\\vc_redist.x64.exe
 RUN C:\\vc_redist.x64.exe /quiet /install
 
-ADD https://nodejs.org/dist/v18.19.1/node-v18.19.1-win-x64.zip C:\\node.zip
+ADD https://nodejs.org/dist/v18.14.2/node-v18.14.2-win-x64.zip C:\\node.zip
 RUN powershell -Command \
     Expand-Archive -Path C:\\node.zip -DestinationPath C:\\Node; \
     Remove-Item -Force C:\\node.zip
 
-RUN setx /M PATH "C:\\Node/node-v18.19.1-win-x64;%PATH%"
+RUN setx /M PATH "C:\\Node/node-v18.14.2-win-x64;%PATH%"
 
 ADD https://classic.yarnpkg.com/latest.msi C:\\yarn.msi
 RUN powershell -Command \
@@ -66,13 +66,13 @@ RUN powershell -Command Set-ExecutionPolicy RemoteSigned -Force
 ADD https://aka.ms/vs/16/release/vc_redist.x64.exe C:\\vc_redist.x64.exe
 RUN C:\\vc_redist.x64.exe /quiet /install
 
-ADD https://nodejs.org/dist/v18.19.1/node-v18.19.1-win-x64.zip C:\\node.zip
+ADD https://nodejs.org/dist/v18.14.2/node-v18.14.2-win-x64.zip C:\\node.zip
 RUN powershell -Command \
     Expand-Archive -Path C:\\node.zip -DestinationPath C:\\Node; \
     Remove-Item -Force C:\\node.zip
 
 
-RUN setx /M PATH "%PATH%;C:/Node/node-v18.19.1-win-x64"
+RUN setx /M PATH "%PATH%;C:/Node/node-v18.14.2-win-x64"
 RUN npm install -g npm@10.2.4
 
 WORKDIR /vulkan-sdt
