@@ -73,7 +73,6 @@ RUN powershell -Command \
 
 
 RUN setx /M PATH "%PATH%;C:/Node/node-v18.14.2-win-x64"
-RUN npm install -g npm@10.2.4
 
 WORKDIR /vulkan-sdt
 ARG VULKAN_DLL_PATH
