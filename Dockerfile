@@ -61,6 +61,8 @@ COPY ${VULKAN_DLL_PATH} ./publish/vulkan-1.dll
 # bundle all apps
 FROM mcr.microsoft.com/windows:ltsc2019
 
+RUN powershell -Command Set-ExecutionPolicy RemoteSigned -Force
+
 ADD https://aka.ms/vs/16/release/vc_redist.x64.exe C:\\vc_redist.x64.exe
 RUN C:\\vc_redist.x64.exe /quiet /install
 
