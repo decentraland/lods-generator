@@ -73,8 +73,15 @@ export type QueueComponent = {
 
 export type QueueWorker = IBaseComponent
 
+export type LodGenerationResult = {
+  lodsFiles: string[]
+  logFile: string
+  error: { message: string; detailedError: string } | undefined
+  outputPath: string
+}
+
 export type LodGeneratorComponent = {
-  generate(basePointer: string): Promise<string[]>
+  generate(basePointer: string): Promise<LodGenerationResult>
 }
 
 export type MessageHandlerComponent = {
