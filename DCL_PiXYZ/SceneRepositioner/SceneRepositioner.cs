@@ -11,20 +11,20 @@ namespace DCL_PiXYZ.SceneRepositioner
 {
     public class SceneRepositioner {
 
-        private WebRequestsHandler webRequestsHandler;
         private string baseURL;
         private string sceneID;
         private Dictionary<string, string> sceneContent;
         private PiXYZAPI pxz;
+        private SceneConversionDebugInfo debugInfo;
 
-        public SceneRepositioner(WebRequestsHandler webRequestHandler, string baseUrl, string sceneID,
-            Dictionary<string, string> sceneContent, PiXYZAPI pxz)
+        public SceneRepositioner(string baseUrl, string sceneID,
+            Dictionary<string, string> sceneContent, PiXYZAPI pxz, SceneConversionDebugInfo debugInfo)
         {
-            this.webRequestsHandler = webRequestHandler;
             this.baseURL = baseUrl;
             this.sceneID = sceneID;
             this.sceneContent = sceneContent;
             this.pxz = pxz;
+            this.debugInfo = debugInfo;
         }
     
         public async Task<List<PXZModel>> SetupSceneInPiXYZ()
@@ -50,7 +50,7 @@ namespace DCL_PiXYZ.SceneRepositioner
                 dclRendereableEntity.Value.InitEntity(pxz, rootOccurrence);
 
             foreach (KeyValuePair<int, DCLRendereableEntity> dclRendereableEntity in renderableEntitiesDictionary)
-                models.Add(dclRendereableEntity.Value.PositionAndInstantiteMesh(sceneContent, renderableEntitiesDictionary, sceneID));
+                models.Add(dclRendereableEntity.Value.PositionAndInstantiteMesh(sceneContent, renderableEntitiesDictionary, sceneID, debugInfo));
 
             Console.WriteLine("END REPOSITIONING");
 

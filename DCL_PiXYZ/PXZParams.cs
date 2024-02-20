@@ -101,14 +101,17 @@ namespace DCL_PiXYZ
         public string SuccessFile;
         public string FailFile;
         public string PolygonCountFile;
+        public string FailGLBImporterFile;
 
-        public SceneConversionDebugInfo(string defaultOutputPath, string successFile, string failFile, string vertexCountFile, string scene, bool isDebug)
+
+        public SceneConversionDebugInfo(string defaultOutputPath, string successFile, string failFile, string vertexCountFile, string failGlbImporterFile ,string scene, bool isDebug)
         {
             if (isDebug)
             {
                 SuccessFile = Path.Combine(defaultOutputPath, successFile);
                 FailFile = Path.Combine(defaultOutputPath, failFile);
                 PolygonCountFile =  Path.Combine(defaultOutputPath, vertexCountFile);
+                FailGLBImporterFile = Path.Combine(defaultOutputPath, failGlbImporterFile);
             }
             else
             {
@@ -116,6 +119,7 @@ namespace DCL_PiXYZ
                 SuccessFile = Path.Combine(defaultOutputPath, pathWithBasePointer);
                 FailFile = Path.Combine(defaultOutputPath, pathWithBasePointer);
                 PolygonCountFile =  Path.Combine(defaultOutputPath, pathWithBasePointer);
+                FailGLBImporterFile =  Path.Combine(defaultOutputPath, pathWithBasePointer);
             }
 
         }

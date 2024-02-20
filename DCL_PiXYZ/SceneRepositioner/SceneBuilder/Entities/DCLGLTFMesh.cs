@@ -5,6 +5,7 @@ using System.Linq;
 using System.Numerics;
 using DCL_PiXYZ;
 using DCL_PiXYZ.SceneRepositioner.JsonParsing;
+using DCL_PiXYZ.Utils;
 using SharpGLTF.Geometry;
 using SharpGLTF.Materials;
 using SharpGLTF.Scenes;
@@ -17,19 +18,19 @@ namespace AssetBundleConverter.LODs
 {
     public class DCLGLTFMesh : DCLMesh
     {
+        private SceneConversionDebugInfo debugInfo;
 
-        private string src;
-
-        public DCLGLTFMesh(string src)
+        public DCLGLTFMesh()
         {
-            this.src = src;
         }
 
-        public override PXZModel InstantiateMesh(PiXYZAPI pxz, string entityID , uint parent, uint material, Dictionary<string, string> sceneContent)
+        public override PXZModel InstantiateMesh(PiXYZAPI pxz, string entityID , uint parent, uint material, Dictionary<string, string> sceneContent, SceneConversionDebugInfo debugInfo)
         {
+            this.debugInfo = debugInfo;
+            
             if (!sceneContent.TryGetValue(entityID.ToLower(), out string modelPath))
             {
-                Console.WriteLine($"ERROR: GLTF {entityID} file not found in sceneContent");
+                Console.WriteLine($"GLTF {entityID} file not found in sceneContent");
                 return PXYZConstants.EMPTY_MODEL;
             }
             
@@ -42,7 +43,6 @@ namespace AssetBundleConverter.LODs
             }
 
             return pxzModel;
-            
         }
         
         private bool TryProcessModel(string modelPath)
@@ -162,8 +162,7 @@ namespace AssetBundleConverter.LODs
 
         private void LogError(string message)
         {
-            PXZEntryPoint.WriteToFile(message, "FAILEDIMPORTMODELS.txt");
-            Console.WriteLine(message);
+            FileWriter.WriteToFile(message, debugInfo.FailGLBImporterFile);
         }
         
     }

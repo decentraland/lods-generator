@@ -32,7 +32,6 @@ namespace DCL_PiXYZ
                 defaultScene = args[1];
                 defaultOutputPath = args[2];
                 defaultSceneLodManifestDirectory = args[3];
-
                 isDebug = false;
             }
 
@@ -42,7 +41,7 @@ namespace DCL_PiXYZ
 
             //Scenes param is single coordinates or bulk value. Single scenes are separated by 
             var sceneConversionInfo = new SceneConversionInfo("7000;3000;1000", "triangle", "coords", "single", defaultScene, defaultOutputPath, defaultSceneLodManifestDirectory);
-            var debugInfo = new SceneConversionDebugInfo(defaultOutputPath, "SuccessScenes.txt", "FailScenes.txt", "PolygonCount.txt" , defaultScene, isDebug);
+            var debugInfo = new SceneConversionDebugInfo(defaultOutputPath, "SuccessScenes.txt", "FailScenes.txt", "PolygonCount.txt" , "FailedGLBImport.txt" , defaultScene, isDebug);
 
 
             CreateDirectories(sceneConversionInfo);
@@ -102,7 +101,7 @@ namespace DCL_PiXYZ
 
                 stopwatch.Restart();
                 Console.WriteLine($"BEGIN CONVERTING {scene} WITH {pxzParams.DecimationValue}");
-                await ConvertScene(sceneConversionInfo.WebRequestsHandler, pxzParams, debugInfo);
+                await ConvertScene(pxzParams, debugInfo);
                 Console.WriteLine($"END CONVERTING {scene} WITH {pxzParams.DecimationValue}");
                 stopwatch.Stop();
 
@@ -209,12 +208,12 @@ namespace DCL_PiXYZ
             return true; // Return true as default, indicating success if no unignorable error was found.
         }
 
-        private static async Task ConvertScene(WebRequestsHandler webRequestsHandler, PXZParams pxzParams, SceneConversionDebugInfo debugInfo)
+        private static async Task ConvertScene(PXZParams pxzParams, SceneConversionDebugInfo debugInfo)
         {
             SceneRepositioner.SceneRepositioner sceneRepositioner = 
-                new SceneRepositioner.SceneRepositioner(webRequestsHandler,
+                new SceneRepositioner.SceneRepositioner(
                     pxzParams.ManifestOutputJSONDirectory,
-                    $"{pxzParams.SceneHash}-lod-manifest.json", pxzParams.SceneContent, pxz);
+                    $"{pxzParams.SceneHash}-lod-manifest.json", pxzParams.SceneContent, pxz, debugInfo);
             List<PXZModel> models = await sceneRepositioner.SetupSceneInPiXYZ();
 
             
