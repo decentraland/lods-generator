@@ -46,7 +46,7 @@ namespace DCL_PiXYZ
         
         private void WriteFinalVertexAmount(ulong polygonCount, SceneConversionDebugInfo debugInfo)
         {
-            using (StreamWriter file = new StreamWriter(Path.Combine(Directory.GetCurrentDirectory(),debugInfo.PolygonCountFile), true))
+            using (StreamWriter file = new StreamWriter(debugInfo.PolygonCountFile, true))
                 if (decimate._type == DecimateOptionsSelector.Type.TRIANGLECOUNT)
                     file.WriteLine($"{scenePointer}\t{decimate._type}\t{decimate.triangleCount}\t{originalPolygonCount}\t{polygonCount}");
                 else

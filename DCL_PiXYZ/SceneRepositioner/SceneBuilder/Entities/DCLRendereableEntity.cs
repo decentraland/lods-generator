@@ -70,13 +70,13 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
             Matrix4 matrix4 = new Matrix4();
             matrix4.Init();
             matrix4.Scale(new Vector3(transform.scale.x, transform.scale.y, transform.scale.z));
-            Quaternion quaternion = ValidateOrNormalize(new Quaternion(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w), entityID.ToString(), sceneID);
+            Quaternion quaternion = ValidateOrNormalize(new Quaternion(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w));
             matrix4.Rotate(quaternion);
             matrix4.Translate(new Vector3(transform.position.x, transform.position.y, transform.position.z));
             pxz.Scene.ApplyTransformation(instantiatedEntity, matrix4);
         }
         
-        public static Quaternion ValidateOrNormalize(Quaternion q, string entityID, string sceneID)
+        public static Quaternion ValidateOrNormalize(Quaternion q)
         {
             double magnitudeSquared = q.W * q.W + q.X * q.X + q.Y * q.Y + q.Z * q.Z;
         
@@ -87,13 +87,8 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
                 // It's a valid unit quaternion
                 return q;
             }
-            else
-            {
-                
-                PXZEntryPoint.WriteToFile($"{sceneID}\t{entityID}\t{q.ToString()}\t", Path.Combine(Directory.GetCurrentDirectory(), "InvalidQuaternions.txt"));
-                // Return the identity quaternion if not valid
-                return Quaternion.Normalize(q);
-            }
+
+            return Quaternion.Normalize(q);
         }
 
     }

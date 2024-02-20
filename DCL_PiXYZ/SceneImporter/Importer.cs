@@ -36,7 +36,7 @@ namespace SceneImporter
 
             paramByHash = paramType.Equals(PXYZConstants.HASH_PARAM);
 
-            ignoreExtensions = new []{".mp3", ".js", ".lib", ".json", ".md", ".wav", ".bin"};
+            ignoreExtensions = new []{".mp3", ".js", ".lib", ".json", ".md", ".wav"};
             contentsURL = "https://peer.decentraland.org/content/contents/";
             activeEntitiesURL = "https://peer.decentraland.org/content/entities/active";
         }

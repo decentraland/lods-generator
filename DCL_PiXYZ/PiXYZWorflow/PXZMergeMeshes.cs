@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using DCL_PiXYZ.SceneRepositioner.JsonParsing;
 using UnityEngine.Pixyz.Algo;
@@ -30,7 +31,7 @@ namespace DCL_PiXYZ
             bakeOption = new BakeOption();
             BakeMaps bakeMaps = new BakeMaps();
             bakeMaps.diffuse = true;
-            bakeMaps.opacity = true;
+            //bakeMaps.opacity = true;
             bakeOption.bakingMethod = BakingMethod.RayOnly;
             this.lodLevel = lodLevel;
             bakeOption.padding = 1;
@@ -70,7 +71,6 @@ namespace DCL_PiXYZ
 
                 if (currentCandidate > maxVertexCountPerMerge)
                 {
-                    
                     DoMerge(currentVertexCount, toMerge, isOpaque, mergedMesh);
                     toMerge = new OccurrenceList();
                     currentVertexCount = 0;
@@ -103,7 +103,7 @@ namespace DCL_PiXYZ
 
             
             uint combineMeshes = pxz.Algo.CombineMeshes(toMerge, bakeOption);
-            pxz.Core.SetProperty(combineMeshes, "Name", $"MERGED MESH {index} {(isOpaque ? "OPAQUE" : "TRANSPARENT")}");
+            pxz.Core.SetProperty(combineMeshes, "Name", $"MERGED MESH {index} {(isOpaque ? "OPAQUE" : "FORCED_TRANSPARENT")}");
             Console.WriteLine("End merging meshes ");
 
             Console.WriteLine("Copying Material");
@@ -113,7 +113,7 @@ namespace DCL_PiXYZ
             if (material.list?.Length > 0)
             {
                 uint copyMaterial = pxz.Material.CopyMaterial(material.list[0], false);
-                pxz.Core.SetProperty(copyMaterial, "Name", $"MERGE MATERIAL {index} {(isOpaque ? "OPAQUE" : "TRANSPARENT")}");
+                pxz.Core.SetProperty(copyMaterial, "Name", $"MERGE MATERIAL {index} {(isOpaque ? "OPAQUE" : "FORCED_TRANSPARENT")}");
                 pxz.Scene.SetOccurrenceMaterial(combineMeshes,copyMaterial);
                 Console.WriteLine("Setting Material");
             }
@@ -128,17 +128,16 @@ namespace DCL_PiXYZ
                 for (var i = 0; i < packedTree.occurrences.list.Length; i++)
                 {
                     //Means it has a mesh component
-                    if (pxz.Scene.HasComponent(packedTree.occurrences[i], ComponentType.Part))
+                    uint packedTreeOccurrence = packedTree.occurrences[i];
+                    if (pxz.Scene.HasComponent(packedTreeOccurrence, ComponentType.Part))
                     {
-                        MaterialList material = pxz.Scene.GetMaterialsFromSubtree(packedTree.occurrences[i]);
-                        bool isOpaque = false;
-                        //TODO: This is not going to work for, for example, garden in genesis city
-                        if (material.list.Length > 0)
-                            isOpaque = pxz.Material.IsOpaque(material.list[0]);
-                        if (isOpaque)
-                            opaquesToMerge.AddOccurrence(packedTree.occurrences[i]);
+                        MaterialList material = pxz.Scene.GetMaterialsFromSubtree(packedTreeOccurrence);
+                        //A material will be consider transparent only if it has a single material and its name contains "FORCED_TRANSPARENT" added during the material curation
+                        bool isTransparent = material.list.Length == 1 && pxz.Core.GetProperty(material.list[0], "Name").Contains("FORCED_TRANSPARENT");
+                        if (isTransparent)
+                            transparentsToMerge.AddOccurrence(packedTreeOccurrence);
                         else
-                            transparentsToMerge.AddOccurrence(packedTree.occurrences[i]);
+                            opaquesToMerge.AddOccurrence(packedTreeOccurrence);
                     }
                 }
             }

@@ -50,10 +50,6 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
         {
             string cylinderCreated = CylinderVariantsFactory.Create(entityID, radiusTop, radiusBottom);
             return pxz.IO.ImportScene(Path.Combine(PXYZConstants.RESOURCES_DIRECTORY, cylinderCreated));
-            /*if (radiusTop == 0)
-                return pxz.Scene.CreateCone(radiusBottom, PrimitivesSize.CYLINDER_HEIGHT);
-            else
-                return pxz.Scene.CreateCylinder(radiusTop, PrimitivesSize.CYLINDER_HEIGHT);*/
         }
     }
 
@@ -65,7 +61,6 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
         {
             string planeCreated = PlaneFactory.Create(entityID, uvs);
             return pxz.IO.ImportScene(Path.Combine(PXYZConstants.RESOURCES_DIRECTORY, planeCreated));
-            //pxz.Scene.CreatePlane(PrimitivesSize.PLANE_SIZE.X, PrimitivesSize.PLANE_SIZE.Y);
         }
     }
 
@@ -75,7 +70,6 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
         {
             string sphereCreated = SphereFactory.Create(entityID);
             return pxz.IO.ImportScene(Path.Combine(PXYZConstants.RESOURCES_DIRECTORY, sphereCreated));
-            //pxz.Scene.CreateSphere(PrimitivesSize.SPHERE_RADIUS);
         }
     }
     

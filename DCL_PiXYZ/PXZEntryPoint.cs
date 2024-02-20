@@ -58,7 +58,7 @@ namespace DCL_PiXYZ
 
                 if (CheckFaillingDebugScenes(sceneConversionInfo.SceneImporter.GetCurrentScenePointersList(), scene)) continue;
 
-                //if (!await ManifestGeneratedSuccesfully(sceneConversionInfo, debugInfo, scene)) continue;
+                if (!await ManifestGeneratedSuccesfully(sceneConversionInfo, debugInfo, scene)) continue;
 
                 if (!await sceneConversionInfo.SceneImporter.DownloadAllContent(debugInfo)) continue;
 
