@@ -47,7 +47,7 @@ namespace DCL_PiXYZ
 
             foreach (string currentScene in sceneConversionInfo.ScenesToAnalyze)
             {
-                if (HasSceneBeenAnalyzed(sceneConversionInfo.AnalyzedScenes, currentScene)) continue;
+                if (SceneHasBeenAnalyzed(sceneConversionInfo.AnalyzedScenes, currentScene)) continue;
 
                 sceneConversionInfo.SceneImporter = new Importer(sceneConversionInfo.ConversionType, currentScene, sceneConversionInfo.WebRequestsHandler);
                 if (!await SceneDefinitionDownloadSuccesfully(sceneConversionInfo, currentScene, debugInfo)) continue;
@@ -67,13 +67,13 @@ namespace DCL_PiXYZ
                 Console.WriteLine("BEGIN SCENE CONVERSION FOR SCENE " + currentScene);
                 var pxzParams = new PXZParams
                 {
-                    DecimationType = sceneConversionInfo.DecimationType, ManifestOutputJSONDirectory = sceneConversionInfo.ManifestOutputJsonDirectory, OutputDirectory = Path.Combine(sceneConversionInfo.OutputDirectory, sceneConversionInfo.SceneImporter.GetScenePointer()), ParcelAmount = sceneConversionInfo.SceneImporter.GetCurrentScenePointersList().Length,
+                    DecimationType = sceneConversionInfo.DecimationType, ManifestOutputJSONDirectory = sceneConversionInfo.SceneManifestOutputJSONDirectory, OutputDirectory = Path.Combine(sceneConversionInfo.OutputDirectory, defaultScene), ParcelAmount = sceneConversionInfo.SceneImporter.GetCurrentScenePointersList().Length,
                     SceneContent = sceneConversionInfo.SceneImporter.sceneContent, SceneHash = sceneConversionInfo.SceneImporter.GetSceneHash(), ScenePointer = sceneConversionInfo.SceneImporter.GetScenePointer()
                 };
                 foreach (var decimationValue in sceneConversionInfo.DecimationToAnalyze)
                 {
                     pxz.Core.ResetSession();
-                    if (isDebug && SceneHasBeenConverted(sceneConversionInfo, decimationValue, currentScene))
+                    if (SceneHasBeenConverted(sceneConversionInfo, decimationValue, currentScene, debugInfo))
                     {
                         pxzParams.LodLevel += 1;
                         continue;
@@ -86,6 +86,16 @@ namespace DCL_PiXYZ
                 GC.Collect();
                 Console.WriteLine("END SCENE CONVERSION FOR SCENE " + currentScene);
             }
+
+            DoManifestCleanup(sceneConversionInfo.SceneManifestOutputJSONDirectory);
+        }
+
+        private static void DoManifestCleanup(string path)
+        {
+            DirectoryInfo dir = new DirectoryInfo(path);
+
+            foreach(FileInfo fi in dir.GetFiles())
+                fi.Delete();
         }
 
         private static async Task DoConversion(PXZParams pxzParams, SceneConversionInfo sceneConversionInfo, string scene, SceneConversionDebugInfo debugInfo)
@@ -94,8 +104,6 @@ namespace DCL_PiXYZ
 
             try
             {
-                //Check if they were converted
-
                 stopwatch.Restart();
                 Console.WriteLine($"BEGIN CONVERTING {scene} WITH {pxzParams.DecimationValue}");
                 await ConvertScene(sceneConversionInfo.WebRequestsHandler, pxzParams, debugInfo);
@@ -113,15 +121,16 @@ namespace DCL_PiXYZ
             }
         }
 
-        private static bool SceneHasBeenConverted(SceneConversionInfo sceneConversionInfo, double currentDecimationValue, string currentScene)
+        private static bool SceneHasBeenConverted(SceneConversionInfo sceneConversionInfo, double currentDecimationValue, string currentScene, SceneConversionDebugInfo debugInfo)
         {
-            if (Directory.Exists(Path.Combine(sceneConversionInfo.OutputDirectory, Path.Combine(sceneConversionInfo.SceneImporter.GetCurrentScenePointersList()[0], currentDecimationValue.ToString()))))
-            {
-                Console.WriteLine($"Skipping scene {currentScene} since its already converted");
-                return true;
-            }
+            if (debugInfo.IsDebug)
+                return false;
+            
+            if (!Directory.Exists(sceneConversionInfo.OutputDirectory))
+                return false;
 
-            return false;
+            Console.WriteLine($"Skipping scene {currentScene} since its already converted");
+            return true;
         }
 
         private static async Task<bool> ManifestGeneratedSuccesfully(SceneConversionInfo sceneConversionInfo, SceneConversionDebugInfo debugInfo, string scene)
@@ -171,7 +180,7 @@ namespace DCL_PiXYZ
             return false;
         }
 
-        private static bool HasSceneBeenAnalyzed(List<string> analyzedScenes, string scene)
+        private static bool SceneHasBeenAnalyzed(List<string> analyzedScenes, string scene)
         {
             //Check if the scene has already been analyzed (for bulk conversion)
             if (analyzedScenes.Contains(scene))

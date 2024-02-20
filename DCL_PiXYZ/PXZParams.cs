@@ -27,7 +27,7 @@ namespace DCL_PiXYZ
         public string DecimationType { get; }
         public string DecimationValues { get; }
         public string SceneManifestDirectory { get; }
-        public string ManifestOutputJsonDirectory { get; }
+        public string SceneManifestOutputJSONDirectory { get; }
         public string OutputDirectory { get; }
         public List<string> ScenesToAnalyze { get; set; }
         public List<string> AnalyzedScenes { get; set; }
@@ -46,7 +46,7 @@ namespace DCL_PiXYZ
             DecimationType = decimationType;
             DecimationValues = decimationValues;
             SceneManifestDirectory = defaultSceneLodManifestDirectory;
-            ManifestOutputJsonDirectory = Path.Combine(SceneManifestDirectory, "output-manifests/");
+            SceneManifestOutputJSONDirectory = Path.Combine(defaultSceneLodManifestDirectory, "output-manifests/");
             OutputDirectory = outputPath;
             ScenesToAnalyze = new List<string>();
             AnalyzedScenes = new List<string>();
