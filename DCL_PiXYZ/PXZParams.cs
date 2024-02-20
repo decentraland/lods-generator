@@ -101,10 +101,12 @@ namespace DCL_PiXYZ
         public string SuccessFile;
         public string FailFile;
         public string PolygonCountFile;
+        public bool IsDebug;
 
         public SceneConversionDebugInfo(string defaultOutputPath, string successFile, string failFile, string vertexCountFile, string scene, bool isDebug)
         {
-            if (isDebug)
+            this.IsDebug = isDebug;
+            if (IsDebug)
             {
                 SuccessFile = Path.Combine(defaultOutputPath, successFile);
                 FailFile = Path.Combine(defaultOutputPath, failFile);
