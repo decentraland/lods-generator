@@ -1,35 +1,44 @@
 import { exec } from 'child_process'
 import path from 'path'
-import os from 'os'
 import fs from 'fs'
 
-import { LodGeneratorComponent } from '../types'
+import { AppComponents, LodGeneratorComponent } from '../types'
 
-export function createLodGeneratorComponent(): LodGeneratorComponent {
+export function createLodGeneratorComponent({ logs }: Pick<AppComponents, 'logs'>): LodGeneratorComponent {
   const projectRoot = path.resolve(__dirname, '..', '..', '..') // project root according to Dockerfile bundling
   const lodGeneratorProgram = path.join(projectRoot, 'api', 'DCL_PiXYZ.exe') // path to the lod generator program
-  const outputPath = path.join(os.tmpdir(), "built-lods")
+  const sceneLodEntitiesManifestBuilder = path.join(projectRoot, 'scene-lod') // path to the scene lod entities manifest builder
+  const outputPath = path.join(projectRoot, 'built-lods')
+  const logger = logs.getLogger('lod-generator')
 
-  async function generate(entityId: string, basePointer: string): Promise<string[]> {
-
+  async function generate(basePointer: string): Promise<string[]> {
+    let files: string[] = []
     if (!fs.existsSync(outputPath)) {
       fs.mkdirSync(outputPath, { recursive: true })
     }
 
-    const commandToExecute = `${lodGeneratorProgram} "coords" "${basePointer}" "${outputPath}"`
-    const files: string[] = await new Promise((resolve, reject) => {
+    const commandToExecute = `${lodGeneratorProgram} "coords" "${basePointer}" "${outputPath}" "${sceneLodEntitiesManifestBuilder}"`
+    files = await new Promise((resolve, _) => {
       exec(commandToExecute, (error, _stdout, stderr) => {
-        const generatedFiles = fs.readdirSync(`${outputPath}/${basePointer}`)
-        // if files exists return otherwise reject
-        if (generatedFiles.length > 0) {
-          resolve(generatedFiles)
+        if (error || stderr) {
+          logger.error('Failed to generate LODs', { error: error?.message || 'Something failed' })
+          const parsedStderr = (stderr as string) || ''
+          const lines = parsedStderr.split('\n')
+          lines.forEach((line) => {
+            logger.debug('Error line', { error: line })
+          })
+        }
+
+        const processOutput = `${outputPath}/${basePointer}`
+        if (fs.existsSync(processOutput)) {
+          const generatedFiles = fs.readdirSync(processOutput)
+          resolve(generatedFiles.map((file) => `${processOutput}/${file}`))
         } else {
-          reject(new Error(`No files were generated. Error: ${error?.message}, Stderr: ${stderr}`))
+          resolve([])
         }
       })
     })
 
-    fs.rmdirSync(outputPath)
     return files
   }
 

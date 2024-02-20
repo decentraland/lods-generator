@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using DCL_PiXYZ;
+using DCL_PiXYZ.Utils;
 using Newtonsoft.Json;
 
 namespace SceneImporter
@@ -101,7 +102,7 @@ namespace SceneImporter
                 }
                 catch (Exception e)
                 {
-                    PXZEntryPoint.WriteToFile($"{scenePointer}\tDOWNLOAD ERROR: {e.Message}", debugInfo.FailFile);
+                    FileWriter.WriteToFile($"{scenePointer}\tDOWNLOAD ERROR: {e.Message}", debugInfo.FailFile);
                     return false;
                 }
             }

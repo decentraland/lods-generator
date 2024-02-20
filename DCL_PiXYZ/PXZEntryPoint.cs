@@ -24,11 +24,16 @@ namespace DCL_PiXYZ
             string defaultScene = "0,0";
             string defaultOutputPath = Path.Combine(Directory.GetCurrentDirectory(), "built-lods") ;
             string defaultSceneLodManifestDirectory = Path.Combine(Directory.GetCurrentDirectory(), "scene-lod-entities-manifest-builder/");
+
+            bool isDebug = true;
+
             if (args.Length > 0)
             {
                 defaultScene = args[1];
                 defaultOutputPath = args[2];
                 defaultSceneLodManifestDirectory = args[3];
+
+                isDebug = false;
             }
 
             //Conversion type can be single or bulk
@@ -36,33 +41,34 @@ namespace DCL_PiXYZ
             //If its bulk, a single number will represent a square to parse, going from -value to value
 
             //Scenes param is single coordinates or bulk value. Single scenes are separated by 
-            var sceneConversionInfo = new SceneConversionInfo("7000;3000;1000", "triangle", "coords", "bulk", "40", defaultOutputPath, defaultSceneLodManifestDirectory);
-            var debugInfo = new SceneConversionDebugInfo(defaultOutputPath, "SuccessScenes.txt", "FailScenes.txt", "EmptyScenes.txt", "PolygonCount.txt" , false);
+            var sceneConversionInfo = new SceneConversionInfo("7000;3000;1000", "triangle", "coords", "single", defaultScene, defaultOutputPath, defaultSceneLodManifestDirectory);
+            var debugInfo = new SceneConversionDebugInfo(defaultOutputPath, "SuccessScenes.txt", "FailScenes.txt", "PolygonCount.txt" , defaultScene, isDebug);
+
 
             CreateDirectories(sceneConversionInfo);
 
             FrameworkInitialization(sceneConversionInfo.SceneManifestDirectory);
 
-            foreach (var scene in sceneConversionInfo.ScenesToAnalyze)
+            foreach (string currentScene in sceneConversionInfo.ScenesToAnalyze)
             {
-                if (HasSceneBeenAnalyzed(sceneConversionInfo.AnalyzedScenes, scene)) continue;
+                if (HasSceneBeenAnalyzed(sceneConversionInfo.AnalyzedScenes, currentScene)) continue;
 
-                sceneConversionInfo.SceneImporter = new Importer(sceneConversionInfo.ConversionType, scene, sceneConversionInfo.WebRequestsHandler);
-                if (!await SceneDefinitionDownloadSuccesfully(sceneConversionInfo, scene, debugInfo)) continue;
+                sceneConversionInfo.SceneImporter = new Importer(sceneConversionInfo.ConversionType, currentScene, sceneConversionInfo.WebRequestsHandler);
+                if (!await SceneDefinitionDownloadSuccesfully(sceneConversionInfo, currentScene, debugInfo)) continue;
 
-                if (CheckEmptyScene(sceneConversionInfo.SceneImporter.GetCurrentScenePointersList(), scene, debugInfo)) continue;
+                if (CheckEmptyScene(sceneConversionInfo.SceneImporter.GetCurrentScenePointersList(), currentScene, debugInfo)) continue;
 
                 //Add it to the analyzed scenes array
                 foreach (string pointer in sceneConversionInfo.SceneImporter.GetCurrentScenePointersList())
                     sceneConversionInfo.AnalyzedScenes.Add(pointer);
 
-                if (CheckFaillingDebugScenes(sceneConversionInfo.SceneImporter.GetCurrentScenePointersList(), scene)) continue;
+                if (CheckFaillingDebugScenes(sceneConversionInfo.SceneImporter.GetCurrentScenePointersList(), currentScene)) continue;
 
-                //if (!await ManifestGeneratedSuccesfully(sceneConversionInfo, debugInfo, scene)) continue;
+              if (!await ManifestGeneratedSuccesfully(sceneConversionInfo, debugInfo, currentScene)) continue;
 
                 if (!await sceneConversionInfo.SceneImporter.DownloadAllContent(debugInfo)) continue;
 
-                Console.WriteLine("BEGIN SCENE CONVERSION FOR SCENE " + scene);
+                Console.WriteLine("BEGIN SCENE CONVERSION FOR SCENE " + currentScene);
                 var pxzParams = new PXZParams
                 {
                     DecimationType = sceneConversionInfo.DecimationType, ManifestOutputJSONDirectory = sceneConversionInfo.ManifestOutputJsonDirectory, OutputDirectory = Path.Combine(sceneConversionInfo.OutputDirectory, sceneConversionInfo.SceneImporter.GetScenePointer()), ParcelAmount = sceneConversionInfo.SceneImporter.GetCurrentScenePointersList().Length,
@@ -71,17 +77,18 @@ namespace DCL_PiXYZ
                 foreach (var decimationValue in sceneConversionInfo.DecimationToAnalyze)
                 {
                     pxz.Core.ResetSession();
-
-                    if (!SceneHasBeenConverted(sceneConversionInfo, decimationValue, scene, debugInfo))
+                    if (isDebug && SceneHasBeenConverted(sceneConversionInfo, decimationValue, currentScene))
                     {
-                        pxzParams.DecimationValue = decimationValue;
-                        await DoConversion(pxzParams, sceneConversionInfo, scene, debugInfo);
+                        pxzParams.LodLevel += 1;
+                        continue;
                     }
 
+                    pxzParams.DecimationValue = decimationValue;
+                    await DoConversion(pxzParams, sceneConversionInfo, currentScene, debugInfo);
                     pxzParams.LodLevel += 1;
                 }
                 GC.Collect();
-                Console.WriteLine("END SCENE CONVERSION FOR SCENE " + scene);
+                Console.WriteLine("END SCENE CONVERSION FOR SCENE " + currentScene);
             }
         }
 
@@ -102,19 +109,19 @@ namespace DCL_PiXYZ
                 string elapsedTime = string.Format("{0:00}:{1:00}:{2:00}",
                     stopwatch.Elapsed.Hours, stopwatch.Elapsed.Minutes, stopwatch.Elapsed.Seconds);
 
-                WriteToFile($"{scene}\t{pxzParams.DecimationValue}\t{elapsedTime}" , debugInfo.SuccessFile);
+                FileWriter.WriteToFile($"{scene}\t{pxzParams.DecimationValue}\t{elapsedTime}" , debugInfo.SuccessFile);
             }
             catch (Exception e)
             {
-                WriteToFile($"{scene}\t{pxzParams.DecimationValue}\tCONVERSION ERROR: {e.Message}", debugInfo.FailFile);
+                FileWriter.WriteToFile($"{scene}\t{pxzParams.DecimationValue}\tCONVERSION ERROR: {e.Message}", debugInfo.FailFile);
             }
         }
 
-        private static bool SceneHasBeenConverted(SceneConversionInfo sceneConversionInfo, double decimationValue, string scene, SceneConversionDebugInfo debugInfo)
+        private static bool SceneHasBeenConverted(SceneConversionInfo sceneConversionInfo, double currentDecimationValue, string currentScene)
         {
-            if (debugInfo.IsDebug && Directory.Exists(Path.Combine(sceneConversionInfo.OutputDirectory, Path.Combine(sceneConversionInfo.SceneImporter.GetCurrentScenePointersList()[0], decimationValue.ToString()))))
+            if (Directory.Exists(Path.Combine(sceneConversionInfo.OutputDirectory, Path.Combine(sceneConversionInfo.SceneImporter.GetCurrentScenePointersList()[0], currentDecimationValue.ToString()))))
             {
-                Console.WriteLine($"Skipping scene {scene} since its already converted");
+                Console.WriteLine($"Skipping scene {currentScene} since its already converted");
                 return true;
             }
 
@@ -138,7 +145,7 @@ namespace DCL_PiXYZ
             }
             catch (Exception e)
             {
-                WriteToFile($"{scene}\tSCENE DEFINITION DOWNLOAD ERROR: {e.Message}", debugInfo.FailFile);
+                FileWriter.WriteToFile($"{scene}\tSCENE DEFINITION DOWNLOAD ERROR: {e.Message}", debugInfo.FailFile);
                 return false;
             }
 
@@ -162,7 +169,6 @@ namespace DCL_PiXYZ
             if (currentPointersList.Length == 0)
             {
                 Console.WriteLine($"Scene {scene} is empty. Ignoring");
-                WriteToFile($"{scene}", debugInfo.EmptyScenesFile);
                 return true;
             }
 
@@ -194,7 +200,7 @@ namespace DCL_PiXYZ
                 if (!isIgnorableError)
                 {
                     Console.WriteLine($"MANIFEST ERROR: {possibleError}");
-                    WriteToFile($"{sceneValue}\tMANIFEST ERROR: {possibleError}", failFile);
+                    FileWriter.WriteToFile($"{sceneValue}\tMANIFEST ERROR: {possibleError}", failFile);
                     return false; // Early exit if the error cannot be ignored.
                 }
             }
@@ -225,7 +231,7 @@ namespace DCL_PiXYZ
                 modifiers.Add(new PXZMergeMeshes(pxzParams.LodLevel));
             }
 
-            modifiers.Add(new PXZExporter(pxzParams, debugInfo.IsDebug));
+            modifiers.Add(new PXZExporter(pxzParams, debugInfo));
 
             PXZStopwatch stopwatch = new PXZStopwatch();
             foreach (var pxzModifier in modifiers)
@@ -261,14 +267,9 @@ namespace DCL_PiXYZ
         {
             Directory.CreateDirectory(PXYZConstants.RESOURCES_DIRECTORY);
             Directory.CreateDirectory(sceneConversionInfo.OutputDirectory);
+            Directory.CreateDirectory(Path.Combine(sceneConversionInfo.OutputDirectory, sceneConversionInfo.Scene));
         }
 
-        public static void WriteToFile(string message, string fileName)
-        {
-            using (StreamWriter file = new StreamWriter(Path.Combine(Directory.GetCurrentDirectory(),fileName), true))
-                file.WriteLine(message);
-        }
-        
         public static void CloseApplication(string errorMessage)
         {
             Console.Error.WriteLine(errorMessage);

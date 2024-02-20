@@ -23,7 +23,7 @@ namespace DCL_PiXYZ
     {
         public string SceneType { get; }
         public string ConversionType { get; }
-        public string Scenes { get; }
+        public string Scene { get; }
         public string DecimationType { get; }
         public string DecimationValues { get; }
         public string SceneManifestDirectory { get; }
@@ -38,11 +38,11 @@ namespace DCL_PiXYZ
 
         public WebRequestsHandler WebRequestsHandler;
 
-        public SceneConversionInfo(string decimationValues, string decimationType, string sceneType, string conversionType, string scenes, string outputPath, string defaultSceneLodManifestDirectory)
+        public SceneConversionInfo(string decimationValues, string decimationType, string sceneType, string conversionType, string scene, string outputPath, string defaultSceneLodManifestDirectory)
         {
             SceneType = sceneType;
             ConversionType = conversionType;
-            Scenes = scenes;
+            Scene = scene;
             DecimationType = decimationType;
             DecimationValues = decimationValues;
             SceneManifestDirectory = defaultSceneLodManifestDirectory;
@@ -54,7 +54,7 @@ namespace DCL_PiXYZ
             SceneImporter = null;
             WebRequestsHandler = new WebRequestsHandler();
             
-            GetScenesToAnalyzeList(ConversionType, Scenes);
+            GetScenesToAnalyzeList(ConversionType, Scene);
             GetDecimationValues(DecimationType, DecimationValues);
         }
 
@@ -100,17 +100,24 @@ namespace DCL_PiXYZ
     {
         public string SuccessFile;
         public string FailFile;
-        public string EmptyScenesFile;
         public string PolygonCountFile;
-        public bool IsDebug;
 
-        public SceneConversionDebugInfo(string defaultOutputPath, string successFile, string failFile, string emptyScenesFile, string vertexCountFile, bool isDebug)
+        public SceneConversionDebugInfo(string defaultOutputPath, string successFile, string failFile, string vertexCountFile, string scene, bool isDebug)
         {
-            SuccessFile = Path.Combine(defaultOutputPath, successFile);
-            FailFile = Path.Combine(defaultOutputPath, failFile);
-            EmptyScenesFile = Path.Combine(defaultOutputPath, emptyScenesFile);
-            PolygonCountFile =  Path.Combine(defaultOutputPath, vertexCountFile);
-            IsDebug = isDebug;
+            if (isDebug)
+            {
+                SuccessFile = Path.Combine(defaultOutputPath, successFile);
+                FailFile = Path.Combine(defaultOutputPath, failFile);
+                PolygonCountFile =  Path.Combine(defaultOutputPath, vertexCountFile);
+            }
+            else
+            {
+                string pathWithBasePointer = $"{scene}/output.txt";
+                SuccessFile = Path.Combine(defaultOutputPath, pathWithBasePointer);
+                FailFile = Path.Combine(defaultOutputPath, pathWithBasePointer);
+                PolygonCountFile =  Path.Combine(defaultOutputPath, pathWithBasePointer);
+            }
+
         }
     }
 }
