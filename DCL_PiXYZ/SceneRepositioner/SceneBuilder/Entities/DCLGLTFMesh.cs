@@ -31,7 +31,7 @@ namespace AssetBundleConverter.LODs
         {
             this.debugInfo = debugInfo;
             
-            if (!sceneContent.TryGetValue(entityID.ToLower(), out string modelPath))
+            if (!sceneContent.TryGetValue(src.ToLower(), out string modelPath))
             {
                 Console.WriteLine($"GLTF {entityID} file not found in sceneContent");
                 return PXYZConstants.EMPTY_MODEL;
