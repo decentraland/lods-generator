@@ -1,3 +1,5 @@
+import fs from 'fs'
+
 import { AppComponents, MessageHandlerComponent, QueueMessage } from '../types'
 
 export function createMessageHandlerComponent({
@@ -16,7 +18,19 @@ export function createMessageHandlerComponent({
     const entityId = message.entity.entityId
     const base = message.entity.metadata.scene.base
 
-    const filesToUpload = await lodGenerator.generate(entityId, base)
+    const filesToUpload = await lodGenerator.generate(base)
+
+    if (filesToUpload.length === 0) {
+      logger.info('Could not generate LODs', { entityId })
+      return
+    }
+
+    const resultTxt = filesToUpload.find((file) => file.endsWith('output.txt'))
+    if (resultTxt) {
+      const lodGenerationResult = fs.readFileSync(resultTxt, 'utf-8')
+      logger.info('LOD generation result', { result: lodGenerationResult, entityId })
+    }
+
     logger.info('LODs correctly generated', { files: filesToUpload.join(', '), entityId })
     await storage.storeFiles(filesToUpload, base, message.entity.entityTimestamp.toString())
   }

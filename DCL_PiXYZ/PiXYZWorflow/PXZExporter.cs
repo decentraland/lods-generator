@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using DCL_PiXYZ.SceneRepositioner.JsonParsing;
+using DCL_PiXYZ.Utils;
 using UnityEngine.Pixyz.API;
 using UnityEngine.Pixyz.Scene;
 
@@ -15,14 +16,13 @@ namespace DCL_PiXYZ
         private string path;
         private string filename;
         private readonly int lodLevel;
+        private readonly SceneConversionDebugInfo debugInfo;
 
-        public PXZExporter(PXZParams pxzParams, bool isDebug)
+        public PXZExporter(PXZParams pxzParams, SceneConversionDebugInfo debugInfo)
         {
+            this.debugInfo = debugInfo;
             extensions = new List<string>() { ".fbx", ".glb" };
-            if (isDebug)
-                path = Path.Combine(pxzParams.OutputDirectory, $"/{pxzParams.DecimationValue}");
-            else
-                path = pxzParams.OutputDirectory;
+            path = pxzParams.OutputDirectory;
             filename = $"{pxzParams.SceneHash}_{pxzParams.LodLevel}";
             lodLevel = pxzParams.LodLevel;
         }
@@ -46,13 +46,13 @@ namespace DCL_PiXYZ
                 else
                 {
                     // Handle the timeout case here
-                    PXZEntryPoint.WriteToFile($"Export for file {filename} timed out for extension {extensions[currentExtensionTried]}", "FailScenes.txt");
+                    FileWriter.WriteToFile($"Export for file {filename} timed out for extension {extensions[currentExtensionTried]}", debugInfo.FailFile);
                     currentExtensionTried++; // Move on to the next extension
                 }
             }
 
             if (!exportSucceeded)
-                PXZEntryPoint.WriteToFile($"All extensions failed for {filename}", "FailScenes.txt");
+                FileWriter.WriteToFile($"All extensions failed for {filename}", debugInfo.FailFile);
         }
 
 
