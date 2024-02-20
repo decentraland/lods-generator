@@ -125,28 +125,13 @@ namespace AssetBundleConverter.LODs
                         foreach(MeshPrimitive meshPrimitive in modelLogicalNode.Mesh.Primitives)
                         {
                             Mesh meshToExport = modelRoot.CreateMesh(modelLogicalNode.Name);
-                            var positions = meshPrimitive.GetVertexAccessor("POSITION").AsVector3Array().ToArray();
-                            var normals = meshPrimitive.GetVertexAccessor("NORMAL").AsVector3Array().ToArray();
-                            var indices = (int[])(object)meshPrimitive.GetIndexAccessor().AsIndicesArray().ToArray();
-                            //TODO: Fix this if
-                            if (meshPrimitive.GetVertexAccessor("TEXCOORD_0") != null)
-                            {
-                                var texcoord = meshPrimitive.GetVertexAccessor("TEXCOORD_0").AsVector2Array().ToArray();
-                                meshToExport.CreatePrimitive()
-                                    .WithVertexAccessor("POSITION", positions)
-                                    .WithVertexAccessor("NORMAL", normals)
-                                    .WithVertexAccessor("TEXCOORD_0", texcoord)
-                                    .WithIndicesAccessor(PrimitiveType.TRIANGLES, indices)
-                                    .WithMaterial(modelRoot.CreateMaterial(meshPrimitive.Material.ToMaterialBuilder()));
-                            }
-                            else
-                            {
-                                meshToExport.CreatePrimitive()
-                                    .WithVertexAccessor("POSITION", positions)
-                                    .WithVertexAccessor("NORMAL", normals)
-                                    .WithIndicesAccessor(PrimitiveType.TRIANGLES, indices)
-                                    .WithMaterial(modelRoot.CreateMaterial(meshPrimitive.Material.ToMaterialBuilder()));
-                            }
+
+                            BuildMesh(meshToExport.CreatePrimitive(), meshPrimitive.GetVertexAccessor("POSITION"), 
+                                meshPrimitive.GetVertexAccessor("NORMAL"), 
+                                meshPrimitive.GetVertexAccessor("TEXCOORD_0"),
+                                (int[])(object)meshPrimitive.GetIndexAccessor().AsIndicesArray().ToArray(), 
+                                modelRoot.CreateMaterial(meshPrimitive.Material.ToMaterialBuilder()));
+                         
                             Node node = sceneModel.CreateNode(modelLogicalNode.Name).WithMesh(meshToExport);
                             node.WorldMatrix = modelLogicalNode.WorldMatrix;
                         }
@@ -159,7 +144,22 @@ namespace AssetBundleConverter.LODs
                 LogError($"Failed to export modified model {modelPath} due to error: {e}");
             }
         }
-        
+
+        private void BuildMesh(MeshPrimitive meshToExport, Accessor positions, Accessor normals, Accessor texcoord, int[] indices, Material material)
+        {
+            if (positions != null)
+                meshToExport.WithVertexAccessor("POSITION", positions.AsVector3Array().ToArray());
+            
+            if (normals != null)
+                meshToExport.WithVertexAccessor("NORMAL", normals.AsVector3Array().ToArray());
+            
+            if(texcoord != null)
+                meshToExport.WithVertexAccessor("TEXCOORD_0", texcoord.AsVector2Array().ToArray());
+
+            meshToExport.WithIndicesAccessor(PrimitiveType.TRIANGLES, indices);
+            meshToExport.WithMaterial(material);
+        }
+
         private void LogError(string message)
         {
             PXZEntryPoint.WriteToFile(message, "FAILEDIMPORTMODELS.txt");
