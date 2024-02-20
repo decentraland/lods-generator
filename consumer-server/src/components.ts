@@ -35,7 +35,7 @@ export async function initComponents(): Promise<AppComponents> {
   const sceneFetcher = await createEntityFetcherComponent({ config, fetcher })
   const sqsEndpoint = await config.getString('QUEUE_URL')
   const queue = sqsEndpoint ? await createSqsAdapter(sqsEndpoint) : createMemoryQueueAdapter()
-  const lodGenerator = createLodGeneratorComponent({ logs })
+  const lodGenerator = createLodGeneratorComponent()
   const storage = await createCloudStorageAdapter({ logs, config })
   const messageHandler = createMessageHandlerComponent({ logs, lodGenerator, storage })
 

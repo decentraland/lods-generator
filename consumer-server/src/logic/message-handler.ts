@@ -1,6 +1,6 @@
 import fs from 'fs'
 
-import { AppComponents, MessageHandlerComponent, QueueMessage } from '../types'
+import { AppComponents, LodGenerationResult, MessageHandlerComponent, QueueMessage } from '../types'
 
 export function createMessageHandlerComponent({
   logs,
@@ -14,24 +14,25 @@ export function createMessageHandlerComponent({
       return
     }
 
-    logger.debug('Processing scene deployment', { message: JSON.stringify(message) })
+    logger.info('Processing scene deployment', { message: JSON.stringify(message) })
     const entityId = message.entity.entityId
     const base = message.entity.metadata.scene.base
 
-    const filesToUpload = await lodGenerator.generate(base)
+    const result: LodGenerationResult = await lodGenerator.generate(base)
 
-    if (filesToUpload.length === 0) {
-      logger.info('Could not generate LODs', { entityId })
-      return
+    logger.info('LOD generation result', {
+      entityId,
+      base,
+      generatedFiles: result.lodsFiles.map((file) => file.split('/').pop()).join(', ')
+    })
+    logger.debug('LOD generation log', { logFile: fs.readFileSync(result.logFile, 'utf-8') })
+
+    if (result.error) {
+      logger.error('Error while generating LODs', { error: result.error.message || 'Unexpected failure' })
+      logger.debug('Details about execution failure', { errorDetails: result.error.detailedError })
     }
 
-    const resultTxt = filesToUpload.find((file) => file.endsWith('output.txt'))
-    if (resultTxt) {
-      const lodGenerationResult = fs.readFileSync(resultTxt, 'utf-8')
-      logger.info('LOD generation result', { result: lodGenerationResult, entityId })
-    }
-
-    logger.info('LODs correctly generated', { files: filesToUpload.join(', '), entityId })
+    const filesToUpload = result.lodsFiles.concat(result.logFile)
     await storage.storeFiles(filesToUpload, base, message.entity.entityTimestamp.toString())
   }
 
