@@ -24,10 +24,6 @@ export async function createMessagesConsumerComponent({
         const { MessageId, Body, ReceiptHandle } = message
         try {
           const parsedMessage: { Message: string } = JSON.parse(Body!)
-          logger.debug('Message received', {
-            id: MessageId!,
-            message: parsedMessage.Message
-          })
           await messageHandler.handle(JSON.parse(parsedMessage.Message))
         } catch (error: any) {
           logger.error('Failed while handling message from queue', {
