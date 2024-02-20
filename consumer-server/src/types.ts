@@ -77,6 +77,7 @@ export type LodGenerationResult = {
   lodsFiles: string[]
   logFile: string
   error: { message: string; detailedError: string } | undefined
+  outputPath: string
 }
 
 export type LodGeneratorComponent = {

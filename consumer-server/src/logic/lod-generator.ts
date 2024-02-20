@@ -15,10 +15,12 @@ export function createLodGeneratorComponent(): LodGeneratorComponent {
   }
 
   async function generate(basePointer: string): Promise<LodGenerationResult> {
+    const processOutput = `${outputPath}/${basePointer}`
     let result: LodGenerationResult = {
       error: undefined,
       lodsFiles: [],
-      logFile: ''
+      logFile: '',
+      outputPath: processOutput
     }
 
     const commandToExecute = `${lodGeneratorProgram} "coords" "${basePointer}" "${outputPath}" "${sceneLodEntitiesManifestBuilder}"`
@@ -31,7 +33,6 @@ export function createLodGeneratorComponent(): LodGeneratorComponent {
           }
         }
 
-        const processOutput = `${outputPath}/${basePointer}`
         if (fs.existsSync(processOutput)) {
           const generatedFiles = fs.readdirSync(processOutput)
           result = generatedFiles.reduce((acc, file) => {
