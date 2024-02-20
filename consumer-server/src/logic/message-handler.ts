@@ -34,6 +34,7 @@ export function createMessageHandlerComponent({
 
     const filesToUpload = result.lodsFiles.concat(result.logFile)
     await storage.storeFiles(filesToUpload, base, message.entity.entityTimestamp.toString())
+    fs.rmdirSync(result.outputPath, { recursive: true })
   }
 
   return { handle }
