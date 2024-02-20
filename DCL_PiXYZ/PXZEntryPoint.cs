@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DCL_PiXYZ.SceneRepositioner.JsonParsing;
 using DCL_PiXYZ.Utils;
+using Newtonsoft.Json;
 using SceneImporter;
 using UnityEngine.Pixyz.API;
 
@@ -21,7 +22,7 @@ namespace DCL_PiXYZ
 
         private static async Task RunLODBuilder(string[] args)
         {
-            string defaultScene = "0,0";
+            string defaultScene = "0,10";
             string defaultOutputPath = Path.Combine(Directory.GetCurrentDirectory(), "built-lods") ;
             string defaultSceneLodManifestDirectory = Path.Combine(Directory.GetCurrentDirectory(), "scene-lod-entities-manifest-builder/");
 
@@ -43,13 +44,14 @@ namespace DCL_PiXYZ
             var sceneConversionInfo = new SceneConversionInfo("7000;3000;1000", "triangle", "coords", "single", defaultScene, defaultOutputPath, defaultSceneLodManifestDirectory);
             var debugInfo = new SceneConversionDebugInfo(defaultOutputPath, "SuccessScenes.txt", "FailScenes.txt", "PolygonCount.txt" , "FailedGLBImport.txt" , defaultScene, isDebug);
 
-
+            List<string> roadCoordinates = LoadRoads();
             CreateDirectories(sceneConversionInfo);
-
             FrameworkInitialization(sceneConversionInfo.SceneManifestDirectory);
 
             foreach (string currentScene in sceneConversionInfo.ScenesToAnalyze)
             {
+                if (IsRoad(roadCoordinates, currentScene)) continue;
+                
                 if (HasSceneBeenAnalyzed(sceneConversionInfo.AnalyzedScenes, currentScene)) continue;
 
                 sceneConversionInfo.SceneImporter = new Importer(sceneConversionInfo.ConversionType, currentScene, sceneConversionInfo.WebRequestsHandler);
@@ -241,11 +243,27 @@ namespace DCL_PiXYZ
             }
         }
         
+        private static bool IsRoad(List<string> roadCoordinates, string currentScene)
+        {
+            if (roadCoordinates.Contains(currentScene))
+            {
+                Console.WriteLine($"Skipping scene {currentScene} since its a road");
+                return true;
+            }
+
+            return false;
+        }
+
+        private static List<string> LoadRoads()
+        {
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "RoadCoordinates.json");
+            return JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(filePath));
+        }
+        
         private static void FrameworkInitialization(string sceneManifestDirectory)
         {
-            //TODO: Check if build path is correctly copying the scene lod manifest project
             Console.WriteLine("INSTALLING AND BUILDING NPM");
-            //NPMUtils.DoNPMInstall(sceneManifestDirectory);
+            NPMUtils.DoNPMInstall(sceneManifestDirectory);
             Console.WriteLine("END INSTALLING AND BUILDING NPM");
             Console.WriteLine("INITIALIZING PIXYZ");
             InitializePiXYZ();
