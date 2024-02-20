@@ -20,8 +20,11 @@ namespace AssetBundleConverter.LODs
     {
         private SceneConversionDebugInfo debugInfo;
 
-        public DCLGLTFMesh()
+        private string src;
+
+        public DCLGLTFMesh(string src)
         {
+            this.src = src;
         }
 
         public override PXZModel InstantiateMesh(PiXYZAPI pxz, string entityID , uint parent, uint material, Dictionary<string, string> sceneContent, SceneConversionDebugInfo debugInfo)

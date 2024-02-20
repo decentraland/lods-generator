@@ -31,7 +31,7 @@ namespace DCL_PiXYZ.SceneRepositioner.JsonParsing.Parsers
                     componentData = new MaterialData();
                     break;
                 case RenderableEntityConstants.GLTFContainer:
-                   componentData = new GLTFContainerData(new DCLGLTFMesh());
+                    componentData = new GLTFContainerData(new DCLGLTFMesh(jsonObject["data"]["src"].Value<string>()));
                    break;
                 case RenderableEntityConstants.MeshRenderer:
                     componentData = new MeshRendererData();
