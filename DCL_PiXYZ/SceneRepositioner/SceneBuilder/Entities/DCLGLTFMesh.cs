@@ -114,38 +114,31 @@ namespace AssetBundleConverter.LODs
                 return; 
             }
 
-            try
+            ReadSettings readSettings = new ReadSettings(ValidationMode.TryFix);
+            var model = ModelRoot.Load(modelPath, readSettings);
+            
+            ModelRoot modelRoot = ModelRoot.CreateModel();
+            Scene sceneModel = modelRoot.UseScene("Default");
+            foreach (var modelLogicalNode in model.LogicalNodes)
             {
-                ReadSettings readSettings = new ReadSettings(ValidationMode.TryFix);
-                var model = ModelRoot.Load(modelPath, readSettings);
-                
-                ModelRoot modelRoot = ModelRoot.CreateModel();
-                Scene sceneModel = modelRoot.UseScene("Default");
-                foreach (var modelLogicalNode in model.LogicalNodes)
+                if (modelLogicalNode.Mesh != null)
                 {
-                    if (modelLogicalNode.Mesh != null)
+                    foreach(MeshPrimitive meshPrimitive in modelLogicalNode.Mesh.Primitives)
                     {
-                        foreach(MeshPrimitive meshPrimitive in modelLogicalNode.Mesh.Primitives)
-                        {
-                            Mesh meshToExport = modelRoot.CreateMesh(modelLogicalNode.Name);
+                        Mesh meshToExport = modelRoot.CreateMesh(modelLogicalNode.Name);
 
-                            BuildMesh(meshToExport.CreatePrimitive(), meshPrimitive.GetVertexAccessor("POSITION"), 
-                                meshPrimitive.GetVertexAccessor("NORMAL"), 
-                                meshPrimitive.GetVertexAccessor("TEXCOORD_0"),
-                                (int[])(object)meshPrimitive.GetIndexAccessor().AsIndicesArray().ToArray(), 
-                                modelRoot.CreateMaterial(meshPrimitive.Material.ToMaterialBuilder()));
-                         
-                            Node node = sceneModel.CreateNode(modelLogicalNode.Name).WithMesh(meshToExport);
-                            node.WorldMatrix = modelLogicalNode.WorldMatrix;
-                        }
+                        BuildMesh(meshToExport.CreatePrimitive(), meshPrimitive.GetVertexAccessor("POSITION"), 
+                            meshPrimitive.GetVertexAccessor("NORMAL"), 
+                            meshPrimitive.GetVertexAccessor("TEXCOORD_0"),
+                            (int[])(object)meshPrimitive.GetIndexAccessor().AsIndicesArray().ToArray(), 
+                            modelRoot.CreateMaterial(meshPrimitive.Material.ToMaterialBuilder()));
+                     
+                        Node node = sceneModel.CreateNode(modelLogicalNode.Name).WithMesh(meshToExport);
+                        node.WorldMatrix = modelLogicalNode.WorldMatrix;
                     }
                 }
-                SaveModel(model, modelPath + "_EDITED.glb");
             }
-            catch (Exception e)
-            {
-                LogError($"Failed to export modified model {modelPath} due to error: {e}");
-            }
+            SaveModel(model, modelPath + "_EDITED.glb");
         }
 
         private void BuildMesh(MeshPrimitive meshToExport, Accessor positions, Accessor normals, Accessor texcoord, int[] indices, Material material)
