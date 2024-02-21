@@ -22,7 +22,7 @@ namespace DCL_PiXYZ
 
         private static async Task RunLODBuilder(string[] args)
         {
-            string defaultScene = "0,10";
+            string defaultScene = "5,19";
             string defaultOutputPath = Path.Combine(Directory.GetCurrentDirectory(), "built-lods") ;
             string defaultSceneLodManifestDirectory = Path.Combine(Directory.GetCurrentDirectory(), "scene-lod-entities-manifest-builder/");
 
@@ -65,6 +65,8 @@ namespace DCL_PiXYZ
 
                 if (CheckFaillingDebugScenes(sceneConversionInfo.SceneImporter.GetCurrentScenePointersList(), currentScene)) continue;
 
+                //if (SceneHasBeenConverted(sceneConversionInfo, sceneConversionInfo.SceneImporter.GetScenePointer())) continue;
+                
                 if (!await ManifestGeneratedSuccesfully(sceneConversionInfo, debugInfo, currentScene)) continue;
 
                 if (!await sceneConversionInfo.SceneImporter.DownloadAllContent(debugInfo)) continue;
@@ -78,11 +80,7 @@ namespace DCL_PiXYZ
                 foreach (var decimationValue in sceneConversionInfo.DecimationToAnalyze)
                 {
                     pxz.Core.ResetSession();
-                    if (isDebug && SceneHasBeenConverted(sceneConversionInfo, decimationValue, currentScene))
-                    {
-                        pxzParams.LodLevel += 1;
-                        continue;
-                    }
+                    
 
                     pxzParams.DecimationValue = decimationValue;
                     await DoConversion(pxzParams, sceneConversionInfo, currentScene, debugInfo);
@@ -100,7 +98,6 @@ namespace DCL_PiXYZ
             try
             {
                 //Check if they were converted
-
                 stopwatch.Restart();
                 Console.WriteLine($"BEGIN CONVERTING {scene} WITH {pxzParams.DecimationValue}");
                 await ConvertScene(pxzParams, debugInfo);
@@ -118,9 +115,9 @@ namespace DCL_PiXYZ
             }
         }
 
-        private static bool SceneHasBeenConverted(SceneConversionInfo sceneConversionInfo, double currentDecimationValue, string currentScene)
+        private static bool SceneHasBeenConverted(SceneConversionInfo sceneConversionInfo, string currentScene)
         {
-            if (Directory.Exists(Path.Combine(sceneConversionInfo.OutputDirectory, Path.Combine(sceneConversionInfo.SceneImporter.GetCurrentScenePointersList()[0], currentDecimationValue.ToString()))))
+            if (Directory.Exists(Path.Combine(sceneConversionInfo.OutputDirectory, currentScene)))
             {
                 Console.WriteLine($"Skipping scene {currentScene} since its already converted");
                 return true;
@@ -155,7 +152,7 @@ namespace DCL_PiXYZ
 
         private static bool CheckFaillingDebugScenes(string[] currentPointersList, string scene)
         {
-            if (currentPointersList[0].Equals("-27,-17") || currentPointersList[0].Equals("-75,-9") || currentPointersList[0].Equals("-5,36") || currentPointersList[0].Equals("16,34"))
+            if (currentPointersList[0].Equals("-15,-39") || currentPointersList[0].Equals("-27,-17") || currentPointersList[0].Equals("-75,-9") || currentPointersList[0].Equals("-5,36") || currentPointersList[0].Equals("16,34"))
             {
                 Console.WriteLine($"Skipping scene {scene} because it was causing an exit without exception");
                 return true;
@@ -215,7 +212,7 @@ namespace DCL_PiXYZ
             SceneRepositioner.SceneRepositioner sceneRepositioner = 
                 new SceneRepositioner.SceneRepositioner(
                     pxzParams.ManifestOutputJSONDirectory,
-                    $"{pxzParams.SceneHash}-lod-manifest.json", pxzParams.SceneContent, pxz, debugInfo);
+                    $"{pxzParams.SceneHash}-lod-manifest.json", pxzParams.SceneContent, pxz, debugInfo, pxzParams.LodLevel);
             List<PXZModel> models = await sceneRepositioner.SetupSceneInPiXYZ();
 
             
