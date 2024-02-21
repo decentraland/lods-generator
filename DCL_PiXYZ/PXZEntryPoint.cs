@@ -43,7 +43,7 @@ namespace DCL_PiXYZ
 
             CreateDirectories(sceneConversionInfo);
 
-            FrameworkInitialization(sceneConversionInfo.SceneManifestDirectory);
+            FrameworkInitialization(sceneConversionInfo.SceneManifestDirectory, debugInfo);
 
             foreach (string currentScene in sceneConversionInfo.ScenesToAnalyze)
             {
@@ -247,12 +247,14 @@ namespace DCL_PiXYZ
             }
         }
         
-        private static void FrameworkInitialization(string sceneManifestDirectory)
+        private static void FrameworkInitialization(string sceneManifestDirectory, SceneConversionDebugInfo debugInfo)
         {
-            //TODO: Check if build path is correctly copying the scene lod manifest project
-            Console.WriteLine("INSTALLING AND BUILDING NPM");
-            NPMUtils.DoNPMInstall(sceneManifestDirectory);
-            Console.WriteLine("END INSTALLING AND BUILDING NPM");
+            if (debugInfo.IsDebug)
+            {
+                Console.WriteLine("INSTALLING AND BUILDING NPM");
+                NPMUtils.DoNPMInstall(sceneManifestDirectory);
+                Console.WriteLine("END INSTALLING AND BUILDING NPM");
+            }
             Console.WriteLine("INITIALIZING PIXYZ");
             InitializePiXYZ();
             Console.WriteLine("END INITIALIZING PIXYZ");

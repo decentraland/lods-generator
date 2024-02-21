@@ -106,7 +106,7 @@ namespace DCL_PiXYZ
         public SceneConversionDebugInfo(string defaultOutputPath, string successFile, string failFile, string vertexCountFile, string scene, bool isDebug)
         {
             this.IsDebug = isDebug;
-            if (isDebug)
+            if (IsDebug)
             {
                 SuccessFile = Path.Combine(defaultOutputPath, successFile);
                 FailFile = Path.Combine(defaultOutputPath, failFile);
