@@ -1,18 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
-using DCL_PiXYZ;
 using DCL_PiXYZ.Utils;
 using Newtonsoft.Json;
+using SceneImporter;
 
-namespace SceneImporter
+namespace DCL_PiXYZ
 {
-    public class Importer
+    public class SceneImporter
     {
         private string contentsURL;
         private string activeEntitiesURL;
@@ -24,13 +21,13 @@ namespace SceneImporter
         private bool paramByHash;
 
         private string sceneHash;
-        private string scenePointer;
+        private string sceneBasePointer;
 
         private string[] currentPointersList;
 
         public Dictionary<string, string> sceneContent;
 
-        public Importer(string paramType, string sceneParam, WebRequestsHandler webRequestsHandler)
+        public SceneImporter(string paramType, string sceneParam, WebRequestsHandler webRequestsHandler)
         {
             this.sceneParam = sceneParam;
             this.webRequestsHandler = webRequestsHandler;
@@ -77,7 +74,7 @@ namespace SceneImporter
         {
             this.sceneHash = setSceneHash;
             //TODO: Change to scene base
-            scenePointer = sceneDefinition.metadata.scene.baseParcel;
+            sceneBasePointer = sceneDefinition.metadata.scene.baseParcel;
             currentPointersList = sceneDefinition.pointers;
         }
 
@@ -86,7 +83,7 @@ namespace SceneImporter
             return currentPointersList;
         }
 
-        public async Task<bool> DownloadAllContent(SceneConversionDebugInfo debugInfo)
+        public async Task<bool> DownloadAllContent(SceneConversionPathHandler pathHandler)
         {
             Console.WriteLine("BEGIN FILE CONTENT DOWNLOAD");
             sceneContent = new Dictionary<string, string>();
@@ -102,7 +99,7 @@ namespace SceneImporter
                 }
                 catch (Exception e)
                 {
-                    FileWriter.WriteToFile($"{scenePointer}\tDOWNLOAD ERROR: {e.Message}", debugInfo.FailFile);
+                    FileWriter.WriteToFile($"{sceneBasePointer}\tDOWNLOAD ERROR: {e.Message}", pathHandler.FailFile);
                     return false;
                 }
             }
@@ -116,9 +113,9 @@ namespace SceneImporter
             return sceneHash;
         }
 
-        public string GetScenePointer()
+        public string GetSceneBasePointer()
         {
-            return scenePointer;
+            return sceneBasePointer;
         }
     }
 }

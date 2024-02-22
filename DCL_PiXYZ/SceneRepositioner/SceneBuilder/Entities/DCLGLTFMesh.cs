@@ -18,7 +18,7 @@ namespace AssetBundleConverter.LODs
 {
     public class DCLGLTFMesh : DCLMesh
     {
-        private SceneConversionDebugInfo debugInfo;
+        private SceneConversionPathHandler _pathHandler;
 
         private string src;
 
@@ -27,7 +27,7 @@ namespace AssetBundleConverter.LODs
             this.src = src;
         }
 
-        public override PXZModel InstantiateMesh(PiXYZAPI pxz, string entityID, uint parent, uint material, Dictionary<string, string> contentTable, SceneConversionDebugInfo debugInfo, int lodLevel)
+        public override PXZModel InstantiateMesh(PiXYZAPI pxz, string entityID, uint parent, uint material, Dictionary<string, string> contentTable, SceneConversionPathHandler pathHandler, int lodLevel)
         {
             if (contentTable.TryGetValue(src.ToLower(), out string modelPath))
             {
@@ -35,7 +35,7 @@ namespace AssetBundleConverter.LODs
                 try
                 {
                     ReadSettings readSettings = new ReadSettings(ValidationMode.TryFix);
-                    var model = SharpGLTF.Schema2.ModelRoot.Load(modelPath, readSettings);
+                    var model = ModelRoot.Load(modelPath, readSettings);
                     foreach (var gltfMaterial in model.LogicalMaterials)
                     {
                         if (gltfMaterial.Alpha != AlphaMode.OPAQUE && !gltfMaterial.Name.Contains("FORCED_TRANSPARENT"))
@@ -54,7 +54,7 @@ namespace AssetBundleConverter.LODs
                 try
                 {
                     ReadSettings readSettings = new ReadSettings(ValidationMode.TryFix);
-                    var model = SharpGLTF.Schema2.ModelRoot.Load(modelPath, readSettings);
+                    var model = ModelRoot.Load(modelPath, readSettings);
                     ModelRoot modelRoot = ModelRoot.CreateModel();
                     Scene sceneModel = modelRoot.UseScene("Default");
                     foreach (var modelLogicalNode in model.LogicalNodes)
