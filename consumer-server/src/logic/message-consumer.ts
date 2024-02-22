@@ -31,6 +31,7 @@ export async function createMessagesConsumerComponent({
             error: error.message
           })
         } finally {
+          logger.info('Message processed, removing it from the queue', { id: MessageId! })
           await queue.deleteMessage(ReceiptHandle!)
         }
       }
