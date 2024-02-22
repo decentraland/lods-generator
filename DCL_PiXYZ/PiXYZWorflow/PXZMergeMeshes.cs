@@ -32,7 +32,6 @@ namespace DCL_PiXYZ
             bakeOption = new BakeOption();
             BakeMaps bakeMaps = new BakeMaps();
             bakeMaps.diffuse = true;
-            bakeMaps.opacity = true;
             bakeOption.bakingMethod = BakingMethod.RayOnly;
             this.lodLevel = lodLevel;
             bakeOption.padding = 1;
@@ -134,7 +133,6 @@ namespace DCL_PiXYZ
                         MaterialList material = pxz.Scene.GetMaterialsFromSubtree(packedTreeOccurrence);
                         //A material will be consider transparent only if it has a single material and its name contains "FORCED_TRANSPARENT" added during the material curation
                         bool isTransparent = material.list.Length == 1 && pxz.Core.GetProperty(material.list[0], "Name").Contains("FORCED_TRANSPARENT");
-                        
                         if (isTransparent)
                             transparentsToMerge.AddOccurrence(packedTreeOccurrence);
                         else

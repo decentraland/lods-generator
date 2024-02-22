@@ -29,28 +29,33 @@ namespace AssetBundleConverter.LODs
 
         public override PXZModel InstantiateMesh(PiXYZAPI pxz, string entityID, uint parent, uint material, Dictionary<string, string> contentTable, SceneConversionPathHandler pathHandler, int lodLevel)
         {
-            if (contentTable.TryGetValue(src.ToLower(), out string modelPath))
+            if (!contentTable.TryGetValue(src.ToLower(), out string modelPath))
             {
-                bool modelWorkSuccessfull = true;
-                try
+                Console.WriteLine($"ERROR: GLTF {src} file not found in sceneContent");
+                return PXYZConstants.EMPTY_MODEL;
+            }
+
+            bool modelWorkSuccessfull = true;
+            try
+            {
+                var readSettings = new ReadSettings(ValidationMode.TryFix);
+                var model = ModelRoot.Load(modelPath, readSettings);
+                foreach (var gltfMaterial in model.LogicalMaterials)
                 {
-                    ReadSettings readSettings = new ReadSettings(ValidationMode.TryFix);
-                    var model = ModelRoot.Load(modelPath, readSettings);
-                    foreach (var gltfMaterial in model.LogicalMaterials)
-                    {
-                        if (gltfMaterial.Alpha != AlphaMode.OPAQUE && !gltfMaterial.Name.Contains("FORCED_TRANSPARENT"))
-                            gltfMaterial.Name += "FORCED_TRANSPARENT";
-                    }
-                    if (Path.GetExtension(modelPath).Contains("glb", StringComparison.OrdinalIgnoreCase))
-                        model.SaveGLB(modelPath);
-                    else
-                        model.SaveGLTF(modelPath);
+                    if (gltfMaterial.Alpha != AlphaMode.OPAQUE && !gltfMaterial.Name.Contains("FORCED_TRANSPARENT"))
+                        gltfMaterial.Name += "FORCED_TRANSPARENT";
                 }
-                catch (Exception e)
-                {
-                    //PXZEntryPoint.WriteToFile($"MODEL FAILED A {modelPath} {e}", "FAILEDIMPORTMODELS.txt");
-                    Console.WriteLine($"ERROR pre-processing GLTF material: {e}");
-                }
+
+                if (Path.GetExtension(modelPath).Contains("glb", StringComparison.OrdinalIgnoreCase))
+                    model.SaveGLB(modelPath);
+                else
+                    model.SaveGLTF(modelPath);
+            }
+            catch (Exception e)
+            {
+                //PXZEntryPoint.WriteToFile($"MODEL FAILED A {modelPath} {e}", "FAILEDIMPORTMODELS.txt");
+                Console.WriteLine($"ERROR pre-processing GLTF material: {e}");
+            }
                 try
                 {
                     ReadSettings readSettings = new ReadSettings(ValidationMode.TryFix);
@@ -118,12 +123,7 @@ namespace AssetBundleConverter.LODs
                     Console.WriteLine($"ERROR: Importing GLTF {src} failed with error {e}");
                     return PXYZConstants.EMPTY_MODEL;
                 }
-            }
-            else
-            {
-                Console.WriteLine($"ERROR: GLTF {src} file not found in sceneContent");
-                return PXYZConstants.EMPTY_MODEL;
-            }
+
         }
 
         

@@ -26,7 +26,7 @@ namespace DCL_PiXYZ
             string defaultOutputPath = Path.Combine(Directory.GetCurrentDirectory(), "built-lods") ;
             string defaultSceneLodManifestDirectory = Path.Combine(Directory.GetCurrentDirectory(), "scene-lod-entities-manifest-builder/");
 
-            bool isDebug = false;
+            bool isDebug = true;
 
             if (args.Length > 0)
             {
