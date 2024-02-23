@@ -16,13 +16,13 @@ namespace DCL_PiXYZ
         private string path;
         private string filename;
         private readonly int lodLevel;
-        private readonly SceneConversionDebugInfo debugInfo;
+        private readonly SceneConversionPathHandler pathHandler;
 
-        public PXZExporter(PXZParams pxzParams, SceneConversionDebugInfo debugInfo)
+        public PXZExporter(PXZParams pxzParams, SceneConversionPathHandler pathHandler)
         {
-            this.debugInfo = debugInfo;
+            this.pathHandler = pathHandler;
             extensions = new List<string>() { ".fbx", ".glb" };
-            path = pxzParams.OutputDirectory;
+            path = pathHandler.OutputPath;
             filename = $"{pxzParams.SceneHash}_{pxzParams.LodLevel}";
             lodLevel = pxzParams.LodLevel;
         }
@@ -46,20 +46,19 @@ namespace DCL_PiXYZ
                 else
                 {
                     // Handle the timeout case here
-                    FileWriter.WriteToFile($"Export for file {filename} timed out for extension {extensions[currentExtensionTried]}", debugInfo.FailFile);
+                    FileWriter.WriteToFile($"Export for file {filename} timed out for extension {extensions[currentExtensionTried]}", pathHandler.FailFile);
                     currentExtensionTried++; // Move on to the next extension
                 }
             }
 
             if (!exportSucceeded)
-                FileWriter.WriteToFile($"All extensions failed for {filename}", debugInfo.FailFile);
+                FileWriter.WriteToFile($"All extensions failed for {filename}", pathHandler.FailFile);
         }
 
 
         private void DoExportWithExtension(PiXYZAPI pxz, string extension)
         {
             Console.WriteLine($"BEGIN PXZ EXPORT {filename}{extension}");
-            Directory.CreateDirectory(path);
             //Use it to flatten the hierarchy
             //TODO: This will break all possible skinning. But do we care about it?
             if (lodLevel != 0)

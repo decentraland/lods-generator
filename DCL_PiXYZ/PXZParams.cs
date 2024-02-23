@@ -12,10 +12,8 @@ namespace DCL_PiXYZ
         public string ScenePointer { get; set; }
         public Dictionary<string, string> SceneContent { get; set; }
         public int ParcelAmount { get; set; }
-        public string ManifestOutputJSONDirectory { get; set; }
         public double DecimationValue { get; set; }
         public int LodLevel { get; set; }
-        public string OutputDirectory { get; set; }
         public string DecimationType { get; set; }  
     }
 
@@ -26,28 +24,21 @@ namespace DCL_PiXYZ
         public string Scene { get; }
         public string DecimationType { get; }
         public string DecimationValues { get; }
-        public string SceneManifestDirectory { get; }
-        public string SceneManifestOutputJSONDirectory { get; }
-        public string OutputDirectory { get; }
         public List<string> ScenesToAnalyze { get; set; }
         public List<string> AnalyzedScenes { get; set; }
-
         public List<double> DecimationToAnalyze { get; set; }
 
-        public Importer SceneImporter;
+        public SceneImporter SceneImporter;
 
         public WebRequestsHandler WebRequestsHandler;
 
-        public SceneConversionInfo(string decimationValues, string decimationType, string sceneType, string conversionType, string scene, string outputPath, string defaultSceneLodManifestDirectory)
+        public SceneConversionInfo(string decimationValues, string decimationType, string sceneType, string conversionType, string scene)
         {
             SceneType = sceneType;
             ConversionType = conversionType;
             Scene = scene;
             DecimationType = decimationType;
             DecimationValues = decimationValues;
-            SceneManifestDirectory = defaultSceneLodManifestDirectory;
-            SceneManifestOutputJSONDirectory = Path.Combine(defaultSceneLodManifestDirectory, "output-manifests/");
-            OutputDirectory = outputPath;
             ScenesToAnalyze = new List<string>();
             AnalyzedScenes = new List<string>();
             DecimationToAnalyze = new List<double>();
@@ -96,21 +87,32 @@ namespace DCL_PiXYZ
         }
     }
 
-    public struct SceneConversionDebugInfo
+    public struct SceneConversionPathHandler
     {
         public string SuccessFile;
         public string FailFile;
         public string PolygonCountFile;
+        public string FailGLBImporterFile;
+        public string OutputPath;
+        public string ManifestOutputJsonFile;
+        public string ManifestProjectDirectory;
+
+        private readonly string DefaultOutputPath;
+
         public bool IsDebug;
 
-        public SceneConversionDebugInfo(string defaultOutputPath, string successFile, string failFile, string vertexCountFile, string scene, bool isDebug)
+
+        public SceneConversionPathHandler(bool isDebug, string defaultOutputPath, string manifestProjectDirectory, string successFile, string failFile, string vertexCountFile, string failGlbImporterFile, string scene)
         {
-            this.IsDebug = isDebug;
+            IsDebug = isDebug;
+            DefaultOutputPath = defaultOutputPath;
+            ManifestProjectDirectory = manifestProjectDirectory;
             if (IsDebug)
             {
                 SuccessFile = Path.Combine(defaultOutputPath, successFile);
                 FailFile = Path.Combine(defaultOutputPath, failFile);
                 PolygonCountFile =  Path.Combine(defaultOutputPath, vertexCountFile);
+                FailGLBImporterFile = Path.Combine(defaultOutputPath, failGlbImporterFile);
             }
             else
             {
@@ -118,8 +120,21 @@ namespace DCL_PiXYZ
                 SuccessFile = Path.Combine(defaultOutputPath, pathWithBasePointer);
                 FailFile = Path.Combine(defaultOutputPath, pathWithBasePointer);
                 PolygonCountFile =  Path.Combine(defaultOutputPath, pathWithBasePointer);
+                FailGLBImporterFile =  Path.Combine(defaultOutputPath, pathWithBasePointer);
             }
 
+            OutputPath = "";
+            ManifestOutputJsonFile = "";
         }
+
+        public void SetOutputPath(SceneImporter sceneSceneImporter)
+        {
+            OutputPath = Path.Combine(DefaultOutputPath, sceneSceneImporter.GetSceneBasePointer());
+            ManifestOutputJsonFile = Path.Combine(ManifestProjectDirectory, "output-manifests", sceneSceneImporter.GetSceneHash() + "-lod-manifest.json");
+
+            Directory.CreateDirectory(DefaultOutputPath);
+            Directory.CreateDirectory(OutputPath);
+        }
+        
     }
 }
