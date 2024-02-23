@@ -31,6 +31,11 @@ namespace DCL_PiXYZ.SceneRepositioner.JsonParsing
             y = Y;
             z = Z;
         }
+
+        public override string ToString()
+        {
+            return $"({x},{y},{z})";
+        }
     }
 
     [Serializable]
@@ -56,6 +61,11 @@ namespace DCL_PiXYZ.SceneRepositioner.JsonParsing
             z = Z;
             w = W;
         }
+
+        public override string ToString()
+        {
+            return $"({x},{y},{z},{w})";
+        }
     }
 
     [Serializable]
@@ -77,6 +87,11 @@ namespace DCL_PiXYZ.SceneRepositioner.JsonParsing
             x = X;
             y = Y;
             z = Z;
+        }
+
+        public override string ToString()
+        {
+            return $"({x},{y},{z})";
         }
     }
 }

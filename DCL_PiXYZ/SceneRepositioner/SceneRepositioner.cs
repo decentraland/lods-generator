@@ -10,30 +10,27 @@ using UnityEngine.Pixyz.API;
 namespace DCL_PiXYZ.SceneRepositioner
 {
     public class SceneRepositioner {
-
-        private WebRequestsHandler webRequestsHandler;
-        private string baseURL;
-        private string sceneID;
+        private readonly string sceneManifestJSONPath;
         private Dictionary<string, string> sceneContent;
-        private Dictionary<string, uint> importedMaterials;
         private PiXYZAPI pxz;
+        private readonly SceneConversionPathHandler _pathHandler;
+        private int lodLevel;
 
-        public SceneRepositioner(WebRequestsHandler webRequestHandler, string baseUrl, string sceneID,
-            Dictionary<string, string> sceneContent, PiXYZAPI pxz)
+        public SceneRepositioner(string sceneManifestJSONPath,
+            Dictionary<string, string> sceneContent, PiXYZAPI pxz, SceneConversionPathHandler pathHandler, int lodLevel)
         {
-            this.webRequestsHandler = webRequestHandler;
-            this.baseURL = baseUrl;
-            this.sceneID = sceneID;
+            this.sceneManifestJSONPath = sceneManifestJSONPath;
             this.sceneContent = sceneContent;
             this.pxz = pxz;
-            importedMaterials = new Dictionary<string, uint>();
+            _pathHandler = pathHandler;
+            //this.lodLevel = lodLevel;
         }
     
         public async Task<List<PXZModel>> SetupSceneInPiXYZ()
         {
             Console.WriteLine("BEGIN REPOSITIONING");
             List<PXZModel> models = new List<PXZModel>();
-            List<RenderableEntity> renderableEntities = JsonConvert.DeserializeObject<List<RenderableEntity>>(File.ReadAllText($"{baseURL}{sceneID}"));
+            var renderableEntities = JsonConvert.DeserializeObject<List<RenderableEntity>>(File.ReadAllText(sceneManifestJSONPath));
             Dictionary<int, DCLRendereableEntity> renderableEntitiesDictionary = new Dictionary<int, DCLRendereableEntity>();
            
             foreach (var sceneDescriptorRenderableEntity in renderableEntities)
@@ -52,7 +49,7 @@ namespace DCL_PiXYZ.SceneRepositioner
                 dclRendereableEntity.Value.InitEntity(pxz, rootOccurrence);
 
             foreach (KeyValuePair<int, DCLRendereableEntity> dclRendereableEntity in renderableEntitiesDictionary)
-                models.Add(dclRendereableEntity.Value.PositionAndInstantiteMesh(sceneContent, renderableEntitiesDictionary, importedMaterials));
+                models.Add(dclRendereableEntity.Value.PositionAndInstantiteMesh(sceneContent, renderableEntitiesDictionary, _pathHandler, lodLevel));
 
             Console.WriteLine("END REPOSITIONING");
 

@@ -15,9 +15,9 @@ namespace DCL_PiXYZ
         private DecimateOptionsSelector decimate;
         private string scenePointer;
         private ulong originalPolygonCount;
-        private SceneConversionDebugInfo debugInfo;
+        private readonly SceneConversionPathHandler _pathHandler;
 
-        public PXZDecimator(string scenePointer, string decimationType, double decimationParam, int parcelAmount, SceneConversionDebugInfo debugInfo)
+        public PXZDecimator(string scenePointer, string decimationType, double decimationParam, int parcelAmount, SceneConversionPathHandler pathHandler)
         {
             decimate = new DecimateOptionsSelector();
             if (decimationType.Equals("triangle"))
@@ -31,7 +31,7 @@ namespace DCL_PiXYZ
                 decimate.ratio = decimationParam;
             }
 
-            this.debugInfo = debugInfo;
+            _pathHandler = pathHandler;
             this.scenePointer = scenePointer;
         } 
         
@@ -48,9 +48,9 @@ namespace DCL_PiXYZ
         private void WriteFinalVertexAmount(ulong polygonCount)
         {
             if (decimate._type == DecimateOptionsSelector.Type.TRIANGLECOUNT)
-                FileWriter.WriteToFile($"{scenePointer}\t{decimate._type}\t{decimate.triangleCount}\t{originalPolygonCount}\t{polygonCount}", debugInfo.PolygonCountFile);
+                FileWriter.WriteToFile($"{scenePointer}\t{decimate._type}\t{decimate.triangleCount}\t{originalPolygonCount}\t{polygonCount}", _pathHandler.PolygonCountFile);
             else
-                FileWriter.WriteToFile($"{scenePointer}\t{decimate._type}\t{decimate.ratio}\t{originalPolygonCount}\t{polygonCount}", debugInfo.PolygonCountFile);
+                FileWriter.WriteToFile($"{scenePointer}\t{decimate._type}\t{decimate.ratio}\t{originalPolygonCount}\t{polygonCount}", _pathHandler.PolygonCountFile);
         }
     }
 }
