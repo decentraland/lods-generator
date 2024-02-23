@@ -11,6 +11,7 @@ export function createMessageHandlerComponent({
 
   async function handle(message: QueueMessage): Promise<void> {
     if (message.entity.entityType !== 'scene') {
+      logger.debug(`Message received but it does not correspond to a scene and will not be processed`, { entityType: message.entity.entityType, entityId: message.entity.entityId})
       return
     }
 
@@ -34,7 +35,7 @@ export function createMessageHandlerComponent({
 
     const filesToUpload = result.lodsFiles.concat(result.logFile)
     await storage.storeFiles(filesToUpload, base, message.entity.entityTimestamp.toString())
-    fs.rmdirSync(result.outputPath, { recursive: true })
+    fs.rmSync(result.outputPath, { recursive: true })
   }
 
   return { handle }
