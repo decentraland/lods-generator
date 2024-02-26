@@ -22,22 +22,22 @@ jobs:
       run:  dotnet publish -c Release -r win10-x64 -o ./publish --self-contained true 
       
     - name: Copy manifest builder to publish directory
-        run: |
+      run: |
         Copy-Item -Path "${{ github.workspace }}\DCL_PiXYZ\bin\Release\netcoreapp3.1\win10-x64\scene-lod-entities-manifest-builder" -Destination "${{ github.workspace }}\publish\scene-lod-entities-manifest-builder" -Recurse
-        shell: pwsh
+      shell: pwsh
       
     - name: Copy road coordinates
-        run: |
+      run: |
           Copy-Item -Path "${{ github.workspace }}\DCL_PiXYZ\bin\Release\netcoreapp3.1\win10-x64\RoadCoordinates.json" -Destination "${{ github.workspace }}\publish\"
-        shell: pwsh
+      shell: pwsh
     
     - name: Copy license file
-        run: |
+      run: |
           Copy-Item -Path "${{ github.workspace }}\pixyzsdk-29022024.lic" -Destination "${{ github.workspace }}\publish\"
-        shell: pwsh
+      shell: pwsh
  
     - name: List files in the publish directory
-        run: ls -lah "${{ github.workspace }}/publish/"
+      run: ls -lah "${{ github.workspace }}/publish/"
 
     - name: Install Vulkan SDK
       uses: jakoch/install-vulkan-sdk-action@v1.0.0
