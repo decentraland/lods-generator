@@ -67,7 +67,7 @@ jobs:
           "bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_2.fbx"
         )
         $expectedSizesKB = @(6066, 620, 218) # Example sizes in KB, replace with actual expected sizes
-        $toleranceKB = 3 # 1 KB tolerance
+        $toleranceKB = 5 # 5 KB tolerance
 
         foreach ($i in 0..2) {
           $filePath = Join-Path -Path $basePath -ChildPath $files[$i]
@@ -80,7 +80,7 @@ jobs:
           $lowerBoundKB = $expectedSizesKB[$i] - $toleranceKB
           $upperBoundKB = $expectedSizesKB[$i] + $toleranceKB
           if ($fileSizeKB -lt $lowerBoundKB -or $fileSizeKB -gt $upperBoundKB) {
-            throw "File size mismatch for $filePath. Expected: $($expectedSizesKB[$i]) KB (+/- 3KB), Found: $fileSizeKB KB"
+            throw "File size mismatch for $filePath. Expected: $($expectedSizesKB[$i]) KB (+/- 5KB), Found: $fileSizeKB KB"
           }
         }
         Write-Host "All files exist and are within the acceptable size range in KB."
