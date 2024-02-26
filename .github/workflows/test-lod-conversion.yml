@@ -36,10 +36,6 @@ jobs:
           Copy-Item -Path "${{ github.workspace }}\pixyzsdk-29022024.lic" -Destination "${{ github.workspace }}\publish"
       shell: pwsh
  
-    - name: List files in the publish directory
-      run: Get-ChildItem -Path "${{ github.workspace }}\publish\" -Recurse | Format-Table -AutoSize
-      shell: pwsh
-
     - name: Install Vulkan SDK
       uses: jakoch/install-vulkan-sdk-action@v1.0.0
       with:
@@ -64,7 +60,7 @@ jobs:
 
     - name: Check Output Files with Size Tolerance in KB
       run: |
-        $basePath = "${{ github.workspace }}\publish\OutputDirectoryPath"
+        $basePath = "${{ github.workspace }}\publish\OutputDirectoryPath\5,19"
         $files = @(
           "bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_0.fbx", # Hash output for 5,19
           "bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_1.fbx",
