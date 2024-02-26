@@ -1,0 +1,72 @@
+name: Test LOD Conversion
+
+on:
+  pull_request: {}
+  push: { branches: [main] }
+
+jobs:
+  build-and-run:
+    runs-on: windows-2019
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        lfs: true
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '3.1.x'
+
+    - name: Publish with dotnet
+      run:  dotnet publish -c Release -r win10-x64 -o ./publish --self-contained true 
+
+    - name: Install Vulkan SDK
+      uses: jakoch/install-vulkan-sdk-action@v1.0.0
+      with:
+        vulkan_version: 1.3.268.0
+        optional_components: com.lunarg.vulkan.vma
+        install_runtime: true
+        cache: true
+        destination: ${{ github.workspace }}/vulkan-sdt
+
+    - name: Move Vulkan DLL to output directory
+      run: |
+        mv ./vulkan-sdt/1.3.268.0/runtime/x64/vulkan-1.dll ./publish/
+      shell: bash
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18.14.2'
+
+    - name: Run the application
+      run: .\publish\DCL_PiXYZ.exe "coords" "5,19" "${{ github.workspace }}\publish\OutputDirectoryPath" "${{ github.workspace }}\publish\scene-lod-entities-manifest-builder" "false"
+
+    - name: Check Output Files with Size Tolerance in KB
+      run: |
+        $basePath = "${{ github.workspace }}\publish\OutputDirectoryPath"
+        $files = @(
+          "bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_0.fbx",
+          "bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_1.fbx",
+          "bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_2.fbx"
+        )
+        $expectedSizesKB = @(6066, 619, 218) # Example sizes in KB, replace with actual expected sizes
+        $toleranceKB = 2 # 1 KB tolerance
+
+        foreach ($i in 0..2) {
+          $filePath = Join-Path -Path $basePath -ChildPath $files[$i]
+          if (-Not (Test-Path $filePath)) {
+            throw "File not found: $filePath"
+          }
+
+          $fileSizeBytes = (Get-Item $filePath).length
+          $fileSizeKB = [math]::Round($fileSizeBytes / 1024, 2) # Convert file size to KB and round to 2 decimal places
+          $lowerBoundKB = $expectedSizesKB[$i] - $toleranceKB
+          $upperBoundKB = $expectedSizesKB[$i] + $toleranceKB
+          if ($fileSizeKB -lt $lowerBoundKB -or $fileSizeKB -gt $upperBoundKB) {
+            throw "File size mismatch for $filePath. Expected: $($expectedSizesKB[$i]) KB (+/- 2KB), Found: $fileSizeKB KB"
+          }
+        }
+        Write-Host "All files exist and are within the acceptable size range in KB."
+      shell: pwsh
