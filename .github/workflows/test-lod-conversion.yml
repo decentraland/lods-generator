@@ -23,7 +23,9 @@ jobs:
       
     - name: Copy additional files to publish directory
       run: |
-        cp -r path/to/your/folder ./publish/path/to/your/folder
+        cp -r  "${{ github.workspace }}\DCL_PiXYZ\bin\Release\netcoreapp3.1\win10-x64\scene-lod-entities-manifest-builder" "${{ github.workspace }}\publish\scene-lod-entities-manifest-builder"
+        cp "${{ github.workspace }}\DCL_PiXYZ\bin\Release\netcoreapp3.1\win10-x64\RoadCoordinates.json" "${{ github.workspace }}\publish\"
+        
 
     - name: Install Vulkan SDK
       uses: jakoch/install-vulkan-sdk-action@v1.0.0
