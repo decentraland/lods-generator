@@ -20,6 +20,10 @@ jobs:
 
     - name: Publish with dotnet
       run:  dotnet publish -c Release -r win10-x64 -o ./publish --self-contained true 
+      
+  - name: Copy additional files to publish directory
+    run: |
+      cp -r path/to/your/folder ./publish/path/to/your/folder
 
     - name: Install Vulkan SDK
       uses: jakoch/install-vulkan-sdk-action@v1.0.0
@@ -47,7 +51,7 @@ jobs:
       run: |
         $basePath = "${{ github.workspace }}\publish\OutputDirectoryPath"
         $files = @(
-          "bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_0.fbx",
+          "bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_0.fbx", # Hash output for 5,19
           "bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_1.fbx",
           "bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_2.fbx"
         )
