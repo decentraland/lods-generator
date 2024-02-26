@@ -21,9 +21,9 @@ jobs:
     - name: Publish with dotnet
       run:  dotnet publish -c Release -r win10-x64 -o ./publish --self-contained true 
       
-  - name: Copy additional files to publish directory
-    run: |
-      cp -r path/to/your/folder ./publish/path/to/your/folder
+    - name: Copy additional files to publish directory
+      run: |
+        cp -r path/to/your/folder ./publish/path/to/your/folder
 
     - name: Install Vulkan SDK
       uses: jakoch/install-vulkan-sdk-action@v1.0.0
