@@ -79,6 +79,7 @@ jobs:
           $fileSizeKB = [math]::Round($fileSizeBytes / 1024, 2) # Convert file size to KB and round to 2 decimal places
           $lowerBoundKB = $expectedSizesKB[$i] - $toleranceKB
           $upperBoundKB = $expectedSizesKB[$i] + $toleranceKB
+          Write-Host "The file size is $fileSizeBytes bytes"
           if ($fileSizeKB -lt $lowerBoundKB -or $fileSizeKB -gt $upperBoundKB) {
             throw "File size mismatch for $filePath. Expected: $($expectedSizesKB[$i]) KB (+/- 5KB), Found: $fileSizeKB KB"
           }
