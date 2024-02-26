@@ -14,7 +14,7 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
     {
         protected abstract uint GetMesh(PiXYZAPI pxz, string entityID);
 
-        public override PXZModel InstantiateMesh(PiXYZAPI pxz, string entityID, uint parent, uint material, Dictionary<string, string> sceneContent, SceneConversionPathHandler pathHandler, int lodLevel)
+        public override PXZModel InstantiateMesh(PiXYZAPI pxz, string entityID, uint parent, uint material, Dictionary<string, string> sceneContent, SceneConversionPathHandler pathHandler)
         {
             uint mesh = GetMesh(pxz, entityID);
             Matrix4 matrix4 = new Matrix4();

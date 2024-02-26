@@ -67,11 +67,9 @@ namespace DCL_PiXYZ
                 foreach (string pointer in sceneConversionInfo.SceneImporter.GetCurrentScenePointersList())
                     sceneConversionInfo.AnalyzedScenes.Add(pointer);
 
-                if (!await ManifestGeneratedSuccesfully(sceneConversionInfo, pathHandler, currentScene)) continue;
-
-                if (!await sceneConversionInfo.SceneImporter.DownloadAllContent(pathHandler)) continue;
-
                 Console.WriteLine("BEGIN SCENE CONVERSION FOR " + currentScene);
+                if (!await ManifestGeneratedSuccesfully(sceneConversionInfo, pathHandler, currentScene)) continue;
+                if (!await sceneConversionInfo.SceneImporter.DownloadAllContent(pathHandler)) continue;
                 var pxzParams = new PXZParams
                 {
                     DecimationType = sceneConversionInfo.DecimationType, ParcelAmount = sceneConversionInfo.SceneImporter.GetCurrentScenePointersList().Length, SceneContent = sceneConversionInfo.SceneImporter.sceneContent
