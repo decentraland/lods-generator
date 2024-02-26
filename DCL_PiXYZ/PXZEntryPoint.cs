@@ -27,6 +27,8 @@ namespace DCL_PiXYZ
             string defaultSceneLodManifestDirectory = Path.Combine(Directory.GetCurrentDirectory(), "scene-lod-entities-manifest-builder/");
 
             bool isDebug = true;
+            bool installNPM = true;
+
 
             if (args.Length > 0)
             {
@@ -34,6 +36,7 @@ namespace DCL_PiXYZ
                 defaultOutputPath = args[2];
                 defaultSceneLodManifestDirectory = args[3];
                 bool.TryParse(args[4], out isDebug);
+                bool.TryParse(args[5], out installNPM);
             }
 
             //Conversion type can be single or bulk
@@ -49,7 +52,7 @@ namespace DCL_PiXYZ
             List<string> roadCoordinates = LoadRoads();
             var convertedScenes = LoadConvertedScenes();
             CreateDirectories(sceneConversionInfo);
-            FrameworkInitialization(pathHandler.ManifestProjectDirectory, isDebug);
+            FrameworkInitialization(pathHandler.ManifestProjectDirectory, installNPM);
 
             foreach (string currentScene in sceneConversionInfo.ScenesToAnalyze)
             {
@@ -270,11 +273,13 @@ namespace DCL_PiXYZ
             File.WriteAllText(convertedScenePathFile, JsonConvert.SerializeObject(convertedScenes));
         }
 
-        private static void FrameworkInitialization(string sceneManifestDirectory, bool isDebug)
+        private static void FrameworkInitialization(string sceneManifestDirectory, bool installAndBuildNPM)
         {
-            Console.WriteLine("INSTALLING AND BUILDING NPM");
-            if (!isDebug)
+            if (installAndBuildNPM)
+            {
+                Console.WriteLine("INSTALLING AND BUILDING NPM");
                 NPMUtils.DoNPMInstall(sceneManifestDirectory);
+            }
             Console.WriteLine("INITIALIZING PIXYZ");
             InitializePiXYZ();
         }
