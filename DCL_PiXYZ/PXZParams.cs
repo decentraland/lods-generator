@@ -23,7 +23,6 @@ namespace DCL_PiXYZ
         public string DecimationType { get; }
         public string DecimationValues { get; }
         public List<string> ScenesToAnalyze { get; set; }
-        public List<string> AnalyzedScenes { get; set; }
         public List<double> DecimationToAnalyze { get; set; }
 
         public SceneImporter SceneImporter;
@@ -38,7 +37,6 @@ namespace DCL_PiXYZ
             DecimationType = decimationType;
             DecimationValues = decimationValues;
             ScenesToAnalyze = new List<string>();
-            AnalyzedScenes = new List<string>();
             DecimationToAnalyze = new List<double>();
             SceneImporter = null;
             WebRequestsHandler = new WebRequestsHandler();
