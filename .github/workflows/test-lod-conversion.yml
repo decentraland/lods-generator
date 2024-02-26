@@ -56,7 +56,7 @@ jobs:
         node-version: '18.14.2'
 
     - name: Run the application
-      run: .\publish\DCL_PiXYZ.exe "coords" "5,19" "${{ github.workspace }}\publish\OutputDirectoryPath" "${{ github.workspace }}\publish\scene-lod-entities-manifest-builder" "false"
+      run: .\publish\DCL_PiXYZ.exe "coords" "5,19" "${{ github.workspace }}\publish\OutputDirectoryPath" "${{ github.workspace }}\publish\scene-lod-entities-manifest-builder" "false" "true"
 
     - name: Check Output Files with Size Tolerance in KB
       run: |
