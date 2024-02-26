@@ -37,7 +37,8 @@ jobs:
       shell: pwsh
  
     - name: List files in the publish directory
-      run: ls -lah "${{ github.workspace }}/publish/"
+      run: Get-ChildItem -Path "${{ github.workspace }}\publish\" -Recurse | Format-Table -AutoSize
+      shell: pwsh
 
     - name: Install Vulkan SDK
       uses: jakoch/install-vulkan-sdk-action@v1.0.0
