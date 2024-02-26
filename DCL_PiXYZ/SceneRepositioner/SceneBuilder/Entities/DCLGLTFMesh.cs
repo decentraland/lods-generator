@@ -26,40 +26,40 @@ namespace AssetBundleConverter.LODs
         {
             this.src = src;
         }
-
+        
         public override PXZModel InstantiateMesh(PiXYZAPI pxz, string entityID, uint parent, uint material, Dictionary<string, string> contentTable, SceneConversionPathHandler pathHandler)
         {
             this.pathHandler = pathHandler;
-
+            
             if (!contentTable.TryGetValue(src.ToLower(), out string modelPath))
             {
                 LogError($"ERROR: GLTF {src} file not found in sceneContent");
                 return PXYZConstants.EMPTY_MODEL;
             }
 
-            bool isModelProcessingSuccessful = TryProcessModel(modelPath);
-
-            if (!TryImportGLTF(pxz, parent, modelPath, isModelProcessingSuccessful, out var pxzModel))
-            {
-                Console.WriteLine($"ERROR: Importing GLTF {entityID} failed");
-                return PXYZConstants.EMPTY_MODEL;
-            }
-
-            return pxzModel;
-        }
-
-        private bool TryProcessModel(string modelPath)
-        {
+            bool modelRecreatedSuccessfully = true;
+            
             try
             {
                 ModifyModelMaterials(modelPath);
                 ExportModifiedModel(modelPath);
-                return true;
             }
             catch (Exception e)
             {
-                LogError($"MODEL PROCESSING FAILED {modelPath} {e}");
-                return false;
+                LogError($"ERROR pre-processing GLTF with GLTFSharp: {e}");
+                modelRecreatedSuccessfully = false;
+            }
+
+            try
+            {
+                uint importedFileOccurrence = pxz.IO.ImportScene(modelRecreatedSuccessfully ? modelPath + "_EDITED.glb" : modelPath);
+                pxz.Scene.SetParent(importedFileOccurrence, parent);
+                return new PXZModel(true, importedFileOccurrence);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"ERROR: Importing GLTF {src} failed with error {e}");
+                return PXYZConstants.EMPTY_MODEL;
             }
         }
 
@@ -75,7 +75,7 @@ namespace AssetBundleConverter.LODs
 
             SaveModel(model, modelPath);
         }
-
+        
         private void SaveModel(ModelRoot model, string modelPath)
         {
             if (Path.GetExtension(modelPath).Contains("glb", StringComparison.OrdinalIgnoreCase))
@@ -83,25 +83,7 @@ namespace AssetBundleConverter.LODs
             else
                 model.SaveGLTF(modelPath);
         }
-
-        private bool TryImportGLTF(PiXYZAPI pxz, uint parent, string modelPath, bool isModelProcessed, out PXZModel pxzModel)
-        {
-            try
-            {
-                string finalModelPath = isModelProcessed ? $"{modelPath}_EDITED.glb" : modelPath;
-                uint importedFileOccurrence = pxz.IO.ImportScene(finalModelPath);
-                pxz.Scene.SetParent(importedFileOccurrence, parent);
-                pxzModel = new PXZModel(true, importedFileOccurrence);
-                return true;
-            }
-            catch (Exception e)
-            {
-                LogError($"ERROR importing GLTF: {e}");
-                pxzModel = PXYZConstants.EMPTY_MODEL;
-                return false;
-            }
-        }
-
+        
         private void ExportModifiedModel(string modelPath)
         {
             // Determine the output file path based on the original model path
@@ -116,7 +98,6 @@ namespace AssetBundleConverter.LODs
 
             var readSettings = new ReadSettings(ValidationMode.TryFix);
             var model = ModelRoot.Load(modelPath, readSettings);
-
             var modelRoot = ModelRoot.CreateModel();
             var sceneModel = modelRoot.UseScene("Default");
             foreach (var modelLogicalNode in model.LogicalNodes)
@@ -126,22 +107,20 @@ namespace AssetBundleConverter.LODs
                     foreach (var meshPrimitive in modelLogicalNode.Mesh.Primitives)
                     {
                         var meshToExport = modelRoot.CreateMesh(modelLogicalNode.Name);
-
                         BuildMesh(meshToExport.CreatePrimitive(), meshPrimitive.GetVertexAccessor("POSITION"),
                             meshPrimitive.GetVertexAccessor("NORMAL"),
                             meshPrimitive.GetVertexAccessor("TEXCOORD_0"),
                             (int[])(object)meshPrimitive.GetIndexAccessor().AsIndicesArray().ToArray(),
                             modelRoot.CreateMaterial(meshPrimitive.Material.ToMaterialBuilder()));
-
                         var node = sceneModel.CreateNode(modelLogicalNode.Name).WithMesh(meshToExport);
                         node.WorldMatrix = modelLogicalNode.WorldMatrix;
                     }
                 }
             }
 
-            SaveModel(model, modelPath + "_EDITED.glb");
+            modelRoot.SaveGLB(modelPath + "_EDITED.glb");
         }
-
+        
         private void BuildMesh(MeshPrimitive meshToExport, Accessor positions, Accessor normals, Accessor texcoord, int[] indices, Material material)
         {
             if (positions != null)
@@ -156,11 +135,14 @@ namespace AssetBundleConverter.LODs
             meshToExport.WithIndicesAccessor(PrimitiveType.TRIANGLES, indices);
             meshToExport.WithMaterial(material);
         }
-
-
+        
         private void LogError(string message)
         {
             FileWriter.WriteToFile(message, pathHandler.FailGLBImporterFile);
         }
+        
+
     }
+        
+    
 }
