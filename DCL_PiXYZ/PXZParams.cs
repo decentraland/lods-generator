@@ -8,8 +8,6 @@ namespace DCL_PiXYZ
 {
     public struct PXZParams
     {
-        public string SceneHash { get; set; }
-        public string ScenePointer { get; set; }
         public Dictionary<string, string> SceneContent { get; set; }
         public int ParcelAmount { get; set; }
         public double DecimationValue { get; set; }
@@ -95,19 +93,17 @@ namespace DCL_PiXYZ
         public string FailGLBImporterFile;
         public string OutputPath;
         public string ManifestOutputJsonFile;
+        public string ManifestOutputJsonDirectory;
         public string ManifestProjectDirectory;
 
         private readonly string DefaultOutputPath;
 
-        public bool IsDebug;
-
 
         public SceneConversionPathHandler(bool isDebug, string defaultOutputPath, string manifestProjectDirectory, string successFile, string failFile, string vertexCountFile, string failGlbImporterFile, string scene)
         {
-            IsDebug = isDebug;
             DefaultOutputPath = defaultOutputPath;
             ManifestProjectDirectory = manifestProjectDirectory;
-            if (IsDebug)
+            if (isDebug)
             {
                 SuccessFile = Path.Combine(defaultOutputPath, successFile);
                 FailFile = Path.Combine(defaultOutputPath, failFile);
@@ -125,12 +121,14 @@ namespace DCL_PiXYZ
 
             OutputPath = "";
             ManifestOutputJsonFile = "";
+            ManifestOutputJsonDirectory = "";
         }
 
         public void SetOutputPath(SceneImporter sceneSceneImporter)
         {
             OutputPath = Path.Combine(DefaultOutputPath, sceneSceneImporter.GetSceneBasePointer());
-            ManifestOutputJsonFile = Path.Combine(ManifestProjectDirectory, "output-manifests", sceneSceneImporter.GetSceneHash() + "-lod-manifest.json");
+            ManifestOutputJsonDirectory = Path.Combine(ManifestProjectDirectory, "output-manifests");
+            ManifestOutputJsonFile = Path.Combine(ManifestOutputJsonDirectory, sceneSceneImporter.GetSceneHash() + "-lod-manifest.json");
 
             Directory.CreateDirectory(DefaultOutputPath);
             Directory.CreateDirectory(OutputPath);

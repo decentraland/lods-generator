@@ -33,7 +33,7 @@ namespace DCL_PiXYZ
                 defaultScene = args[1];
                 defaultOutputPath = args[2];
                 defaultSceneLodManifestDirectory = args[3];
-                isDebug = false;
+                bool.TryParse(args[4], out isDebug);
             }
 
             //Conversion type can be single or bulk
@@ -46,7 +46,7 @@ namespace DCL_PiXYZ
 
             List<string> roadCoordinates = LoadRoads();
             CreateDirectories(sceneConversionInfo);
-            FrameworkInitialization(pathHandler.ManifestProjectDirectory);
+            FrameworkInitialization(pathHandler.ManifestProjectDirectory, isDebug);
 
             foreach (string currentScene in sceneConversionInfo.ScenesToAnalyze)
             {
@@ -67,17 +67,14 @@ namespace DCL_PiXYZ
                 foreach (string pointer in sceneConversionInfo.SceneImporter.GetCurrentScenePointersList())
                     sceneConversionInfo.AnalyzedScenes.Add(pointer);
 
-                if (CheckFaillingDebugScenes(sceneConversionInfo.SceneImporter.GetCurrentScenePointersList(), currentScene)) continue;
-
                 if (!await ManifestGeneratedSuccesfully(sceneConversionInfo, pathHandler, currentScene)) continue;
 
                 if (!await sceneConversionInfo.SceneImporter.DownloadAllContent(pathHandler)) continue;
 
-                Console.WriteLine("Begin scene conversion for " + currentScene);
+                Console.WriteLine("BEGIN SCENE CONVERSION FOR " + currentScene);
                 var pxzParams = new PXZParams
                 {
-                    DecimationType = sceneConversionInfo.DecimationType, ParcelAmount = sceneConversionInfo.SceneImporter.GetCurrentScenePointersList().Length, SceneContent = sceneConversionInfo.SceneImporter.sceneContent, SceneHash = sceneConversionInfo.SceneImporter.GetSceneHash(),
-                    ScenePointer = sceneConversionInfo.SceneImporter.GetSceneBasePointer()
+                    DecimationType = sceneConversionInfo.DecimationType, ParcelAmount = sceneConversionInfo.SceneImporter.GetCurrentScenePointersList().Length, SceneContent = sceneConversionInfo.SceneImporter.sceneContent
                 };
                 foreach (var decimationValue in sceneConversionInfo.DecimationToAnalyze)
                 {
@@ -87,8 +84,21 @@ namespace DCL_PiXYZ
                     pxzParams.LodLevel += 1;
                 }
                 GC.Collect();
-                Console.WriteLine("END SCENE CONVERSION FOR SCENE " + currentScene);
+                Console.WriteLine("END SCENE CONVERSION FOR " + currentScene);
             }
+
+            DoManifestCleanup(isDebug, pathHandler);
+        }
+
+        private static void DoManifestCleanup(bool isDebug, SceneConversionPathHandler pathHandler)
+        {
+            if (isDebug)
+                return;
+
+            var dir = new DirectoryInfo(pathHandler.ManifestOutputJsonDirectory);
+
+            foreach (var fi in dir.GetFiles())
+                fi.Delete();
         }
 
         private static async Task DoConversion(PXZParams pxzParams, SceneConversionInfo sceneConversionInfo, string scene, SceneConversionPathHandler pathHandler)
@@ -100,8 +110,7 @@ namespace DCL_PiXYZ
                 //Check if they were converted
                 stopwatch.Restart();
                 Console.WriteLine($"BEGIN CONVERTING {scene} WITH {pxzParams.DecimationValue}");
-                await ConvertScene(pxzParams, pathHandler);
-                Console.WriteLine($"END CONVERTING {scene} WITH {pxzParams.DecimationValue}");
+                await ConvertScene(pxzParams, pathHandler, sceneConversionInfo);
                 stopwatch.Stop();
 
                 string elapsedTime = string.Format("{0:00}:{1:00}:{2:00}",
@@ -153,17 +162,6 @@ namespace DCL_PiXYZ
             return true;
         }
 
-        private static bool CheckFaillingDebugScenes(string[] currentPointersList, string scene)
-        {
-            if (currentPointersList[0].Equals("-15,-39") || currentPointersList[0].Equals("-27,-17") || currentPointersList[0].Equals("-75,-9") || currentPointersList[0].Equals("-5,36") || currentPointersList[0].Equals("16,34"))
-            {
-                Console.WriteLine($"Skipping scene {scene} because it was causing an exit without exception");
-                return true;
-            }
-
-            return false;
-        }
-
         private static bool CheckEmptyScene(string[] currentPointersList, string scene)
         {
             //Check empty scenes
@@ -206,11 +204,10 @@ namespace DCL_PiXYZ
                 }
             }
 
-            Console.WriteLine($"END MANIFEST GENERATION FOR SCENE {sceneValue}");
             return true; // Return true as default, indicating success if no unignorable error was found.
         }
 
-        private static async Task ConvertScene(PXZParams pxzParams, SceneConversionPathHandler pathHandler)
+        private static async Task ConvertScene(PXZParams pxzParams, SceneConversionPathHandler pathHandler, SceneConversionInfo sceneConversionInfo)
         {
             SceneRepositioner.SceneRepositioner sceneRepositioner =
                 new SceneRepositioner.SceneRepositioner(pathHandler.ManifestOutputJsonFile, pxzParams.SceneContent, pxz, pathHandler, pxzParams.LodLevel);
@@ -225,12 +222,12 @@ namespace DCL_PiXYZ
             if (pxzParams.LodLevel != 0)
             {
                 modifiers.Add(new PXZDeleteByName(".*collider.*"));
-                modifiers.Add(new PXZDecimator(pxzParams.ScenePointer, pxzParams.DecimationType,
+                modifiers.Add(new PXZDecimator(sceneConversionInfo.SceneImporter.GetSceneBasePointer(), pxzParams.DecimationType,
                     pxzParams.DecimationValue, pxzParams.ParcelAmount, pathHandler));
                 modifiers.Add(new PXZMergeMeshes(pxzParams.LodLevel));
             }
 
-            modifiers.Add(new PXZExporter(pxzParams, pathHandler));
+            modifiers.Add(new PXZExporter(pxzParams, pathHandler, sceneConversionInfo));
 
             PXZStopwatch stopwatch = new PXZStopwatch();
             foreach (var pxzModifier in modifiers)
@@ -257,15 +254,14 @@ namespace DCL_PiXYZ
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "RoadCoordinates.json");
             return JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(filePath));
         }
-        
-        private static void FrameworkInitialization(string sceneManifestDirectory)
+
+        private static void FrameworkInitialization(string sceneManifestDirectory, bool isDebug)
         {
             Console.WriteLine("INSTALLING AND BUILDING NPM");
-            NPMUtils.DoNPMInstall(sceneManifestDirectory);
-            Console.WriteLine("END INSTALLING AND BUILDING NPM");
+            if (!isDebug)
+                NPMUtils.DoNPMInstall(sceneManifestDirectory);
             Console.WriteLine("INITIALIZING PIXYZ");
             InitializePiXYZ();
-            Console.WriteLine("END INITIALIZING PIXYZ");
         }
 
         private static void InitializePiXYZ()
