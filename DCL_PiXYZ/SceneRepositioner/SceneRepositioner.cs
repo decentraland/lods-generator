@@ -49,7 +49,7 @@ namespace DCL_PiXYZ.SceneRepositioner
                 dclRendereableEntity.Value.InitEntity(pxz, rootOccurrence);
 
             foreach (KeyValuePair<int, DCLRendereableEntity> dclRendereableEntity in renderableEntitiesDictionary)
-                models.Add(dclRendereableEntity.Value.PositionAndInstantiteMesh(sceneContent, renderableEntitiesDictionary, _pathHandler, lodLevel));
+                models.Add(dclRendereableEntity.Value.PositionAndInstantiteMesh(sceneContent, renderableEntitiesDictionary, _pathHandler));
 
 
             return models;

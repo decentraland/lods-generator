@@ -66,8 +66,8 @@ jobs:
           "bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_1.fbx",
           "bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_2.fbx"
         )
-        $expectedSizesKB = @(6066, 620, 218) # Example sizes in KB, replace with actual expected sizes
-        $toleranceKB = 5 # 5 KB tolerance
+        $expectedSizesB = @(6210224, 631424, 219776 ) # Expected sizes in bytes
+        $toleranceB = 500 # 0.5 KB tolerance
 
         foreach ($i in 0..2) {
           $filePath = Join-Path -Path $basePath -ChildPath $files[$i]
@@ -75,13 +75,11 @@ jobs:
             throw "File not found: $filePath"
           }
 
-          $fileSizeBytes = (Get-Item $filePath).length
-          $fileSizeKB = [math]::Round($fileSizeBytes / 1024, 2) # Convert file size to KB and round to 2 decimal places
-          $lowerBoundKB = $expectedSizesKB[$i] - $toleranceKB
-          $upperBoundKB = $expectedSizesKB[$i] + $toleranceKB
-          Write-Host "The file size is $fileSizeBytes bytes"
-          if ($fileSizeKB -lt $lowerBoundKB -or $fileSizeKB -gt $upperBoundKB) {
-            throw "File size mismatch for $filePath. Expected: $($expectedSizesKB[$i]) KB (+/- 5KB), Found: $fileSizeKB KB"
+          $fileSizeInBytes = (Get-Item $filePath).length
+          $lowerBoundB = $expectedSizesB[$i] - $toleranceB
+          $upperBoundB = $expectedSizesB[$i] + $toleranceB
+          if ($fileSizeInBytes -lt $lowerBoundB -or $fileSizeInBytes -gt $upperBoundB) {
+            throw "File size mismatch for $filePath. Expected: $($expectedSizesB[$i]) B (+/- 500 B), Found: $fileSizeInBytes bytes"
           }
         }
         Write-Host "All files exist and are within the acceptable size range in KB."
