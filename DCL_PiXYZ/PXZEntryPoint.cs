@@ -38,34 +38,37 @@ namespace DCL_PiXYZ
 
             //Conversion type can be single or bulk
             //If its single, we pass as many scenes as we want to parse separated by ;
-            //If its bulk, a single number will represent a square to parse, going from -value to value
+            //If its bulk, a single number will represent a square to parse, going from -value to value.
+            //Comment (Juani): Im living bulk implementation for reference, but currently Im invoking the creation of all the scenes through an external program
+            //PiXYZ was crashing and exiting the application if it was called form the same program
 
             //Scenes param is single coordinates or bulk value. Single scenes are separated by 
             var sceneConversionInfo = new SceneConversionInfo("7000;3000;1000", "triangle", "coords", "single", defaultScene);
             var pathHandler = new SceneConversionPathHandler(isDebug, defaultOutputPath, defaultSceneLodManifestDirectory, "SuccessScenes.txt", "FailScenes.txt", "PolygonCount.txt" , "FailedGLBImport.txt" , defaultScene);
 
             List<string> roadCoordinates = LoadRoads();
+            var convertedScenes = LoadConvertedScenes();
             CreateDirectories(sceneConversionInfo);
             FrameworkInitialization(pathHandler.ManifestProjectDirectory, isDebug);
 
             foreach (string currentScene in sceneConversionInfo.ScenesToAnalyze)
             {
                 if (IsRoad(roadCoordinates, currentScene)) continue;
-                
-                if (HasSceneBeenAnalyzed(sceneConversionInfo.AnalyzedScenes, currentScene)) continue;
+
+                if (HasSceneBeenAnalyzed(convertedScenes, currentScene)) continue;
 
                 sceneConversionInfo.SceneImporter = new SceneImporter(sceneConversionInfo.ConversionType, currentScene, sceneConversionInfo.WebRequestsHandler);
                 if (!await SceneDefinitionDownloadSuccesfully(sceneConversionInfo, currentScene, pathHandler)) continue;
 
-                pathHandler.SetOutputPath(sceneConversionInfo.SceneImporter);
-
-                if (HasSceneBeenConverted(pathHandler, currentScene)) continue;
+                if (HasSceneBeenConverted(convertedScenes, sceneConversionInfo.SceneImporter.GetSceneBasePointer())) continue;
 
                 if (CheckEmptyScene(sceneConversionInfo.SceneImporter.GetCurrentScenePointersList(), currentScene)) continue;
 
+                pathHandler.SetOutputPath(sceneConversionInfo.SceneImporter);
+
                 //Add it to the analyzed scenes array
                 foreach (string pointer in sceneConversionInfo.SceneImporter.GetCurrentScenePointersList())
-                    sceneConversionInfo.AnalyzedScenes.Add(pointer);
+                    convertedScenes.Add(pointer);
 
                 Console.WriteLine("BEGIN SCENE CONVERSION FOR " + currentScene);
                 if (!await ManifestGeneratedSuccesfully(sceneConversionInfo, pathHandler, currentScene)) continue;
@@ -83,8 +86,8 @@ namespace DCL_PiXYZ
                 }
                 GC.Collect();
                 Console.WriteLine("END SCENE CONVERSION FOR " + currentScene);
+                UpdateConvertedScenesFile(convertedScenes);
             }
-
             DoManifestCleanup(isDebug, pathHandler);
         }
 
@@ -122,10 +125,9 @@ namespace DCL_PiXYZ
             }
         }
 
-        private static bool HasSceneBeenConverted(SceneConversionPathHandler pathHandler, string scene)
+        private static bool HasSceneBeenConverted(List<string> convertedScenes, string scene)
         {
-            var d =  new DirectoryInfo(pathHandler.OutputPath);
-            if (d.Exists && d.GetFiles().Length > 0)
+            if (convertedScenes.Contains(scene))
             {
                 Console.WriteLine($"Skipping scene {scene} since its already converted");
                 return true;
@@ -210,12 +212,10 @@ namespace DCL_PiXYZ
             SceneRepositioner.SceneRepositioner sceneRepositioner =
                 new SceneRepositioner.SceneRepositioner(pathHandler.ManifestOutputJsonFile, pxzParams.SceneContent, pxz, pathHandler, pxzParams.LodLevel);
             List<PXZModel> models = await sceneRepositioner.SetupSceneInPiXYZ();
-
             
             List<IPXZModifier> modifiers = new List<IPXZModifier>();
             modifiers.Add(new PXZBeginCleanMaterials());
             modifiers.Add(new PXZRepairMesh(models));
-
             
             if (pxzParams.LodLevel != 0)
             {
@@ -253,6 +253,23 @@ namespace DCL_PiXYZ
             return JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(filePath));
         }
 
+        private static List<string> LoadConvertedScenes()
+        {
+            string convertedScenePathFile = Path.Combine(Directory.GetCurrentDirectory(), "ConvertedScenes.json");
+            if (File.Exists(convertedScenePathFile))
+            {
+                return JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(convertedScenePathFile));
+            }
+
+            return new List<string>();
+        }
+
+        private static void UpdateConvertedScenesFile(List<string> convertedScenes)
+        {
+            string convertedScenePathFile = Path.Combine(Directory.GetCurrentDirectory(), "ConvertedScenes.json");
+            File.WriteAllText(convertedScenePathFile, JsonConvert.SerializeObject(convertedScenes));
+        }
+
         private static void FrameworkInitialization(string sceneManifestDirectory, bool isDebug)
         {
             Console.WriteLine("INSTALLING AND BUILDING NPM");
@@ -275,7 +292,6 @@ namespace DCL_PiXYZ
         private static void CreateDirectories(SceneConversionInfo sceneConversionInfo)
         {
             Directory.CreateDirectory(PXYZConstants.RESOURCES_DIRECTORY);
-
         }
 
         public static void CloseApplication(string errorMessage)
