@@ -46,7 +46,7 @@ namespace AssetBundleConverter.LODs
             }
             catch (Exception e)
             {
-                LogError($"ERROR pre-processing GLTF with GLTFSharp: {e}");
+                LogError($"ERROR pre-processing GLTF with GLTFSharp for file {src}: {e}");
                 modelRecreatedSuccessfully = false;
             }
 
