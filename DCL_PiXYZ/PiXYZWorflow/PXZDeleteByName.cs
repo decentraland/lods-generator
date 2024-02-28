@@ -19,7 +19,7 @@ namespace DCL_PiXYZ
         {
 
             Console.WriteLine("BEGIN PXZ DELETE BY NAME FOR REGEX " + regex);
-            OccurrenceList occurenceToDelete = pxz.Scene.FindOccurrencesByProperty("Name", regex);
+            var occurenceToDelete = pxz.Scene.FindOccurrencesByProperty("Name", regex, caseInsensitive: true);
             foreach (uint u in occurenceToDelete.list)
                 pxz.Scene.DeleteComponentByType(ComponentType.Part, u);
         }
