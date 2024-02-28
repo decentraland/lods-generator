@@ -26,7 +26,10 @@ export function createMessageHandlerComponent({
       base,
       generatedFiles: result.lodsFiles.map((file) => file.split('/').pop()).join(', ')
     })
-    logger.debug('LOD generation log', { logFile: fs.readFileSync(result.logFile, 'utf-8') })
+
+    if (result.logFile) {
+      logger.debug('LOD generation log', { logFile: fs.readFileSync(result.logFile, 'utf-8') })
+    }
 
     if (result.error) {
       logger.error('Error while generating LODs', { error: result.error.message || 'Unexpected failure' })
