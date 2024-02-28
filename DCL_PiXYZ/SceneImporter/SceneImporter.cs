@@ -23,8 +23,6 @@ namespace DCL_PiXYZ
         private string sceneHash;
         private string sceneBasePointer;
 
-        private string[] currentPointersList;
-
         public Dictionary<string, string> sceneContent;
 
         public SceneImporter(string paramType, string sceneParam, WebRequestsHandler webRequestsHandler)
@@ -33,6 +31,7 @@ namespace DCL_PiXYZ
             this.webRequestsHandler = webRequestsHandler;
 
             paramByHash = paramType.Equals(PXYZConstants.HASH_PARAM);
+            sceneDefinition = new SceneDefinition();
 
             ignoreExtensions = new []{".mp3", ".js", ".lib", ".json", ".md", ".wav"};
             contentsURL = "https://peer.decentraland.org/content/contents/";
@@ -42,14 +41,12 @@ namespace DCL_PiXYZ
         public async Task DownloadSceneDefinition()
         {
             Console.WriteLine("BEGIN SCENE DEFINITION DOWNLOAD");
-            currentPointersList = Array.Empty<string>();
             try
             {
                 if (paramByHash)
                 {
                     string rawSceneDefinition = await webRequestsHandler.GetRequest($"{contentsURL}{sceneHash}");
                     sceneDefinition = JsonConvert.DeserializeObject<SceneDefinition>(rawSceneDefinition);
-                    SetResult(sceneHash);
                 }
                 else
                 {
@@ -57,10 +54,7 @@ namespace DCL_PiXYZ
                     List<SceneDefinition> sceneDefinitions =
                         JsonConvert.DeserializeObject<List<SceneDefinition>>(rawSceneDefinition);
                     if (sceneDefinitions.Count > 0)
-                    {
                         sceneDefinition = sceneDefinitions[0];
-                        SetResult(sceneDefinitions[0].id);
-                    }
                 }
             }
             catch (Exception e)
@@ -69,17 +63,9 @@ namespace DCL_PiXYZ
             }
         }
 
-        private void SetResult(string setSceneHash)
+        public string[] GetPointers()
         {
-            this.sceneHash = setSceneHash;
-            //TODO: Change to scene base
-            sceneBasePointer = sceneDefinition.metadata.scene.baseParcel;
-            currentPointersList = sceneDefinition.pointers;
-        }
-
-        public string[] GetCurrentScenePointersList()
-        {
-            return currentPointersList;
+            return sceneDefinition.pointers;
         }
 
         public async Task<bool> DownloadAllContent(SceneConversionPathHandler pathHandler)
@@ -108,12 +94,13 @@ namespace DCL_PiXYZ
 
         public string GetSceneHash()
         {
-            return sceneHash;
+            return sceneDefinition.id;
         }
 
         public string GetSceneBasePointer()
         {
-            return sceneBasePointer;
+            return sceneDefinition.metadata.scene.baseParcel;
         }
+
     }
 }

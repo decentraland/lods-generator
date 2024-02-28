@@ -10,6 +10,11 @@ namespace SceneImporter
         public string[] pointers;
         public string id;
         public Metadata metadata;
+
+        public SceneDefinition()
+        {
+            pointers = Array.Empty<string>();
+        }
     }
     
     [Serializable]

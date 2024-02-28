@@ -4,9 +4,9 @@ namespace DCL_PiXYZ.Utils
 {
     public class FileWriter
     {
-        public static void WriteToFile(string message, string fileName)
+        public static void WriteToFile(string message, string fileName, bool append = true)
         {
-            using (StreamWriter file = new StreamWriter(fileName, true))
+            using (var file = new StreamWriter(fileName, append))
                 file.WriteLine(message);
         }
     }

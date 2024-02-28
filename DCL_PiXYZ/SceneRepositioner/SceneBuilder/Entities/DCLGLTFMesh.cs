@@ -19,8 +19,7 @@ namespace AssetBundleConverter.LODs
     public class DCLGLTFMesh : DCLMesh
     {
         private SceneConversionPathHandler pathHandler;
-
-        private readonly string src;
+        public readonly string src;
 
         public DCLGLTFMesh(string src)
         {

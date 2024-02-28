@@ -22,6 +22,9 @@ namespace DCL_PiXYZ
 
         private static async Task RunLODBuilder(string[] args)
         {
+            await RoadJSONGenerator.GenerateWorldROADJSON();
+            return;
+            
             string defaultScene = "5,19";
             string defaultOutputPath = Path.Combine(Directory.GetCurrentDirectory(), "built-lods") ;
             string defaultSceneLodManifestDirectory = Path.Combine(Directory.GetCurrentDirectory(), "scene-lod-entities-manifest-builder/");
@@ -65,20 +68,20 @@ namespace DCL_PiXYZ
 
                 if (HasSceneBeenConverted(convertedScenes, sceneConversionInfo.SceneImporter.GetSceneBasePointer())) continue;
 
-                if (CheckEmptyScene(sceneConversionInfo.SceneImporter.GetCurrentScenePointersList(), currentScene)) continue;
+                if (CheckEmptyScene(sceneConversionInfo.SceneImporter.GetPointers(), currentScene)) continue;
 
                 pathHandler.SetOutputPath(sceneConversionInfo.SceneImporter);
 
                 //Add it to the analyzed scenes array
-                foreach (string pointer in sceneConversionInfo.SceneImporter.GetCurrentScenePointersList())
+                foreach (string pointer in sceneConversionInfo.SceneImporter.GetPointers())
                     convertedScenes.Add(pointer);
 
                 Console.WriteLine("BEGIN SCENE CONVERSION FOR " + currentScene);
-                if (!await ManifestGeneratedSuccesfully(sceneConversionInfo, pathHandler, currentScene)) continue;
+                if (!await ManifestGeneratedSuccesfully(sceneConversionInfo.SceneType, pathHandler, currentScene)) continue;
                 if (!await sceneConversionInfo.SceneImporter.DownloadAllContent(pathHandler)) continue;
                 var pxzParams = new PXZParams
                 {
-                    DecimationType = sceneConversionInfo.DecimationType, ParcelAmount = sceneConversionInfo.SceneImporter.GetCurrentScenePointersList().Length, SceneContent = sceneConversionInfo.SceneImporter.sceneContent
+                    DecimationType = sceneConversionInfo.DecimationType, ParcelAmount = sceneConversionInfo.SceneImporter.GetPointers().Length, SceneContent = sceneConversionInfo.SceneImporter.sceneContent
                 };
                 foreach (var decimationValue in sceneConversionInfo.DecimationToAnalyze)
                 {
@@ -138,12 +141,12 @@ namespace DCL_PiXYZ
             return false;
         }
 
-        private static async Task<bool> ManifestGeneratedSuccesfully(SceneConversionInfo sceneConversionInfo, SceneConversionPathHandler pathHandler, string scene)
+        public static async Task<bool> ManifestGeneratedSuccesfully(string sceneType, SceneConversionPathHandler pathHandler, string scene)
         {
             if (File.Exists(pathHandler.ManifestOutputJsonFile))
                 return true;
 
-            return await GenerateManifest(sceneConversionInfo.SceneType, scene, pathHandler.ManifestProjectDirectory,
+            return await GenerateManifest(sceneType, scene, pathHandler.ManifestProjectDirectory,
                 new List<string>
                 {
                     "manifest file already exists", "Failed to load script"

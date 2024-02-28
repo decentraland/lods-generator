@@ -119,13 +119,12 @@ namespace DCL_PiXYZ
 
             OutputPath = "";
             ManifestOutputJsonFile = "";
-            ManifestOutputJsonDirectory = "";
+            ManifestOutputJsonDirectory = Path.Combine(ManifestProjectDirectory, "output-manifests");
         }
 
         public void SetOutputPath(SceneImporter sceneSceneImporter)
         {
             OutputPath = Path.Combine(DefaultOutputPath, sceneSceneImporter.GetSceneBasePointer());
-            ManifestOutputJsonDirectory = Path.Combine(ManifestProjectDirectory, "output-manifests");
             ManifestOutputJsonFile = Path.Combine(ManifestOutputJsonDirectory, sceneSceneImporter.GetSceneHash() + "-lod-manifest.json");
 
             Directory.CreateDirectory(DefaultOutputPath);
