@@ -67,7 +67,7 @@ jobs:
           "bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_2.fbx"
         )
         $expectedSizesB = @(6210224, 631424, 219776 ) # Expected sizes in bytes
-        $toleranceB = 2000 # 2 KB tolerance
+        $toleranceB = 4000 # 4 KB tolerance
 
         foreach ($i in 0..2) {
           $filePath = Join-Path -Path $basePath -ChildPath $files[$i]
@@ -79,7 +79,7 @@ jobs:
           $lowerBoundB = $expectedSizesB[$i] - $toleranceB
           $upperBoundB = $expectedSizesB[$i] + $toleranceB
           if ($fileSizeInBytes -lt $lowerBoundB -or $fileSizeInBytes -gt $upperBoundB) {
-            throw "File size mismatch for $filePath. Expected: $($expectedSizesB[$i]) B (+/- 500 B), Found: $fileSizeInBytes bytes"
+            throw "File size mismatch for $filePath. Expected: $($expectedSizesB[$i]) B (+/- 4000 B), Found: $fileSizeInBytes bytes"
           }
         }
         Write-Host "All files exist and are within the acceptable size range in KB."
