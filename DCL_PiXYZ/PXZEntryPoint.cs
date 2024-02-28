@@ -22,9 +22,6 @@ namespace DCL_PiXYZ
 
         private static async Task RunLODBuilder(string[] args)
         {
-            await RoadJSONGenerator.GenerateWorldROADJSON();
-            return;
-            
             string defaultScene = "5,19";
             string defaultOutputPath = Path.Combine(Directory.GetCurrentDirectory(), "built-lods") ;
             string defaultSceneLodManifestDirectory = Path.Combine(Directory.GetCurrentDirectory(), "scene-lod-entities-manifest-builder/");
