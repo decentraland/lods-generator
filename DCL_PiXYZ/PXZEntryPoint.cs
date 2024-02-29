@@ -286,12 +286,11 @@ namespace DCL_PiXYZ
 
         private static void InitializePiXYZ()
         {
-            pxz =
-                PiXYZAPI.Initialize("PixyzSDKCSharp",
-                    "204dda67aa3ea8bcb22a76bff9aa1224823b253144396405300e235e434c4711591892c19069c7");
+            pxz = PiXYZAPI.Initialize("PixyzDecentralandSDK",
+                "205721ba17a42f2f2d1a7cbd9924ae7f6b3b2531443973231b2c0f45450a0d01260f06716a212dc567b1bf577a");
             // if no license is found, try to configure a license server
             if (!pxz.Core.CheckLicense())
-                pxz.Core.InstallLicense("pixyzsdk-29022024.lic");
+                pxz.Core.ConfigureLicenseServer("18.204.36.86", 27000);
         }
 
         private static void CreateDirectories(SceneConversionInfo sceneConversionInfo)

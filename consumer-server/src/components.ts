@@ -41,7 +41,7 @@ export async function initComponents(): Promise<AppComponents> {
 
   const messageConsumer = await createMessagesConsumerComponent({ logs, queue, messageHandler })
 
-  await buildLicense({ config, logs })
+  //await buildLicense({ config, logs })
 
   return {
     config,
