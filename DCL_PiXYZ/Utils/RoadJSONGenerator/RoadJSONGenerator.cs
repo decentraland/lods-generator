@@ -11,6 +11,7 @@ namespace DCL_PiXYZ.Utils
     {
         private static WebRequestsHandler webRequestsHandler;
         private static SceneConversionPathHandler pathHandler;
+        private static List<string> ignorePointers;
 
         public static async Task GenerateWorldROADJSON()
         {
@@ -18,23 +19,37 @@ namespace DCL_PiXYZ.Utils
                 Path.Combine(Directory.GetCurrentDirectory(), "scene-lod-entities-manifest-builder/"),
                 "SuccessScenes.txt", "FailScenes.txt", "PolygonCount.txt" , "FailedGLBImport.txt" , "");
 
+
+            ignorePointers = new List<string>();
             NPMUtils.DoNPMInstall(pathHandler.ManifestProjectDirectory);
 
             webRequestsHandler = new WebRequestsHandler();
-            string allParcels = await webRequestsHandler.GetRequest("https://api.decentraland.org/v2/tiles?x1=-150&y1=-150&x2=150&y2=150&include=type");
+            string allParcels = await webRequestsHandler.GetRequest("https://api.decentraland.org/v2/tiles?x1=-5&y1=-150&x2=150&y2=150&include=type");
             var response = JsonConvert.DeserializeObject<AtlasJSONResponse>(allParcels);
 
             var singleParcelRoadsDictionary = new Dictionary<string, RoadInfoJSON>();
 
+            int addedValues = 0;
             foreach (var keyValuePair in response.Data)
             {
-                if (keyValuePair.Value.Type.Equals("road"))
+                string parcelPointer = keyValuePair.Key;
+                if (keyValuePair.Value.Type.Equals("road") && !ignorePointers.Contains(parcelPointer))
                 {
-                    string parcelPointer = keyValuePair.Key;
                     Console.WriteLine($"Analyzing {parcelPointer}");
                     var isSingleParcelRoad = await IsSingleParcelRoad(parcelPointer);
                     if (isSingleParcelRoad.Item1)
-                        singleParcelRoadsDictionary.TryAdd(parcelPointer, isSingleParcelRoad.Item2);
+                    {
+                        bool added = singleParcelRoadsDictionary.TryAdd(parcelPointer, isSingleParcelRoad.Item2);
+                        if (added)
+                        {
+                            addedValues++;
+                            if (addedValues > 100)
+                            {
+                                FileWriter.WriteToFile(JsonConvert.SerializeObject(singleParcelRoadsDictionary), Path.Combine(Directory.GetCurrentDirectory(), "SingleParcelRoadInfo.json"), append: false);
+                                addedValues = 0;
+                            }
+                        }
+                    }
                     Console.WriteLine($"Finished analyzing {parcelPointer}");
                 }
             }
@@ -49,12 +64,25 @@ namespace DCL_PiXYZ.Utils
             await sceneImporter.DownloadSceneDefinition();
 
             if (sceneImporter.GetPointers().Length != 1)
+            {
+                foreach (string pointer in sceneImporter.GetPointers())
+                {
+                    ignorePointers.Add(pointer);
+                }
                 return (false, roadInfoJson);
+            }
 
             pathHandler.SetOutputPath(sceneImporter);
 
             await PXZEntryPoint.ManifestGeneratedSuccesfully("coords", pathHandler, parcelPointer);
 
+            if (!File.Exists($"{pathHandler.ManifestOutputJsonDirectory}\\{sceneImporter.GetSceneHash()}-lod-manifest.json"))
+            {
+                Console.WriteLine("MANIFEST NOT GENERATED");
+                FileWriter.WriteToFile(sceneImporter.GetSceneHash(), Path.Combine(Directory.GetCurrentDirectory(), "RoadsManifestFailInfo.txt"), append: false);
+                return (false, roadInfoJson);
+            }
+            
             var renderableEntities
                 = JsonConvert.DeserializeObject<List<RenderableEntity>>(
                     File.ReadAllText($"{pathHandler.ManifestOutputJsonDirectory}\\{sceneImporter.GetSceneHash()}-lod-manifest.json"));
