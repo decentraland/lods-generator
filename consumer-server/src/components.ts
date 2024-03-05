@@ -12,6 +12,7 @@ import { createLodGeneratorComponent } from './logic/lod-generator'
 import { createCloudStorageAdapter } from './adapters/storage'
 import { createEntityFetcherComponent } from './logic/scene-fetcher'
 import { createMemoryQueueAdapter } from './adapters/memory-queue'
+import { createBundleTriggererComponent } from './logic/bundle-triggerer'
 
 export async function initComponents(): Promise<AppComponents> {
   const config = await createDotEnvConfigComponent(
@@ -35,6 +36,7 @@ export async function initComponents(): Promise<AppComponents> {
   const queue = sqsEndpoint ? await createSqsAdapter(sqsEndpoint) : createMemoryQueueAdapter()
   const lodGenerator = createLodGeneratorComponent()
   const storage = await createCloudStorageAdapter({ config })
+  const bundleTriggerer = await createBundleTriggererComponent({ fetcher, config })
 
   const messageConsumer = await createMessagesConsumerComponent({ logs, queue, lodGenerator, storage })
 
@@ -47,6 +49,7 @@ export async function initComponents(): Promise<AppComponents> {
     queue,
     messageConsumer,
     lodGenerator,
+    bundleTriggerer,
     storage,
     fetcher,
     sceneFetcher

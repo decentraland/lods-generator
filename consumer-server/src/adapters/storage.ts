@@ -12,7 +12,7 @@ export async function createCloudStorageAdapter({ config }: Pick<AppComponents, 
 
   const s3 = new S3Client({ region, endpoint: bucketEndpoint })
 
-  async function storeFiles(filePaths: string[], prefix: string): Promise<void> {
+  async function storeFiles(filePaths: string[], prefix: string): Promise<string[]> {
     const files = await Promise.all(
       filePaths.map(async (filePath) => {
         const buffer = await fs.readFile(filePath)
@@ -23,7 +23,7 @@ export async function createCloudStorageAdapter({ config }: Pick<AppComponents, 
       })
     )
 
-    await Promise.all(
+    const uploadedFiles = await Promise.all(
       files.map(async (file) => {
         const upload = new Upload({
           client: s3,
@@ -34,9 +34,12 @@ export async function createCloudStorageAdapter({ config }: Pick<AppComponents, 
             ContentType: file.contentType
           }
         })
-        return upload.done()
+        await upload.done()
+        return `${bucketEndpoint}/${bucket}/${prefix}/${file.name}`
       })
     )
+
+    return uploadedFiles
   }
 
   return { storeFiles }

@@ -13,6 +13,7 @@
     "@aws-sdk/client-sqs": "^3.489.0",
     "@aws-sdk/lib-storage": "^3.499.0",
     "@dcl/platform-server-commons": "^0.0.4",
+    "@dcl/schemas": "^10.3.0",
     "@well-known-components/env-config-provider": "^1.2.0",
     "@well-known-components/fetch-component": "^2.0.2",
     "@well-known-components/http-server": "^2.0.0",
