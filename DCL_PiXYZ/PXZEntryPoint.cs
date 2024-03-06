@@ -287,8 +287,7 @@ namespace DCL_PiXYZ
 
         private static void InitializePiXYZ()
         {
-            pxz = PiXYZAPI.Initialize("PixyzDecentralandSDK",
-                "205721ba17a42f2f2d1a7cbd9924ae7f6b3b2531443973231b2c0f45450a0d01260f06716a212dc567b1bf577a");
+            pxz = PiXYZAPI.Initialize(Environment.GetEnvironmentVariable("PiXYZProductName"), Environment.GetEnvironmentVariable("PiXYZToken")); 
 
             foreach (string s in pxz.Core.ListTokens().list)
                 pxz.Core.AddWantedToken(s);
