@@ -9,6 +9,7 @@ using DCL_PiXYZ.Utils;
 using Newtonsoft.Json;
 using SceneImporter;
 using UnityEngine.Pixyz.API;
+using UnityEngine.Pixyz.Core;
 
 namespace DCL_PiXYZ
 {
@@ -288,6 +289,10 @@ namespace DCL_PiXYZ
         {
             pxz = PiXYZAPI.Initialize("PixyzDecentralandSDK",
                 "205721ba17a42f2f2d1a7cbd9924ae7f6b3b2531443973231b2c0f45450a0d01260f06716a212dc567b1bf577a");
+
+            foreach (string s in pxz.Core.ListTokens().list)
+                pxz.Core.AddWantedToken(s);
+            
             // if no license is found, try to configure a license server
             if (!pxz.Core.CheckLicense())
                 pxz.Core.ConfigureLicenseServer("18.204.36.86", 27000);
