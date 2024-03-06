@@ -23,13 +23,12 @@ export function createLodGeneratorComponent(): LodGeneratorComponent {
       outputPath: processOutput
     }
 
-
     const commandToExecute = `${lodGeneratorProgram} "coords" "${basePointer}" "${outputPath}" "${sceneLodEntitiesManifestBuilder}" "false" "false"`
 
     result = await new Promise((resolve, _) => {
       exec(commandToExecute, { timeout: 10 * 60 * 1000 }, (error, _, stderr) => {
         if (error) {
-          if (error.killed) { 
+          if (error.killed) {
             result.error = {
               message: 'Operation timed out after 10 minutes',
               detailedError: ((stderr as string) || '').replace('\n', ' ')
