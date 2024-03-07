@@ -22,7 +22,6 @@ export type BaseComponents = {
   queue: QueueComponent
   messageConsumer: QueueWorker
   lodGenerator: LodGeneratorComponent
-  messageHandler: MessageHandlerComponent
   storage: StorageComponent
   fetcher: IFetchComponent
   sceneFetcher: SceneFetcherComponent
@@ -84,12 +83,8 @@ export type LodGeneratorComponent = {
   generate(basePointer: string): Promise<LodGenerationResult>
 }
 
-export type MessageHandlerComponent = {
-  handle(message: QueueMessage): Promise<void>
-}
-
 export type StorageComponent = {
-  storeFiles(filePaths: string[], basePointer: string, entityTimestamp: string): Promise<boolean>
+  storeFiles(filePaths: string[], prefix: string): Promise<void>
 }
 
 export type SceneFetcherComponent = {

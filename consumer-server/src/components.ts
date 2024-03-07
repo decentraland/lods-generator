@@ -9,7 +9,6 @@ import { metricDeclarations } from './metrics'
 import { createSqsAdapter } from './adapters/sqs'
 import { createMessagesConsumerComponent } from './logic/message-consumer'
 import { createLodGeneratorComponent } from './logic/lod-generator'
-import { createMessageHandlerComponent } from './logic/message-handler'
 import { createCloudStorageAdapter } from './adapters/storage'
 import { createEntityFetcherComponent } from './logic/scene-fetcher'
 import { createMemoryQueueAdapter } from './adapters/memory-queue'
@@ -35,10 +34,9 @@ export async function initComponents(): Promise<AppComponents> {
   const sqsEndpoint = await config.getString('QUEUE_URL')
   const queue = sqsEndpoint ? await createSqsAdapter(sqsEndpoint) : createMemoryQueueAdapter()
   const lodGenerator = createLodGeneratorComponent()
-  const storage = await createCloudStorageAdapter({ logs, config })
-  const messageHandler = createMessageHandlerComponent({ logs, lodGenerator, storage })
+  const storage = await createCloudStorageAdapter({ config })
 
-  const messageConsumer = await createMessagesConsumerComponent({ logs, queue, messageHandler })
+  const messageConsumer = await createMessagesConsumerComponent({ logs, queue, lodGenerator, storage })
 
   return {
     config,
@@ -49,7 +47,6 @@ export async function initComponents(): Promise<AppComponents> {
     queue,
     messageConsumer,
     lodGenerator,
-    messageHandler,
     storage,
     fetcher,
     sceneFetcher
