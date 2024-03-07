@@ -23,8 +23,9 @@ export function createLodGeneratorComponent(): LodGeneratorComponent {
       outputPath: processOutput
     }
 
-    const commandToExecute = `${lodGeneratorProgram} "coords" "${basePointer}" "${outputPath}" "${sceneLodEntitiesManifestBuilder}"`
-    
+
+    const commandToExecute = `${lodGeneratorProgram} "coords" "${basePointer}" "${outputPath}" "${sceneLodEntitiesManifestBuilder}" "false" "false"`
+
     result = await new Promise((resolve, _) => {
       exec(commandToExecute, { timeout: 10 * 60 * 1000 }, (error, _, stderr) => {
         if (error) {

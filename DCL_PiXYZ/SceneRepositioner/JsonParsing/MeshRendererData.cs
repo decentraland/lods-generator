@@ -19,7 +19,7 @@ namespace DCL_PiXYZ.SceneRepositioner.JsonParsing
     [Serializable]
     public abstract class DCLMesh
     {
-        public abstract PXZModel InstantiateMesh(PiXYZAPI pxz, string entityID, uint parent, uint material, Dictionary<string, string> contentTable, SceneConversionPathHandler pathHandler, int lodLevel);
+        public abstract PXZModel InstantiateMesh(PiXYZAPI pxz, string entityID, uint parent, uint material, Dictionary<string, string> contentTable, SceneConversionPathHandler pathHandler);
     }
 
     public struct PXZModel

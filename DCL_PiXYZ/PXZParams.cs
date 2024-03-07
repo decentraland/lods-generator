@@ -8,8 +8,6 @@ namespace DCL_PiXYZ
 {
     public struct PXZParams
     {
-        public string SceneHash { get; set; }
-        public string ScenePointer { get; set; }
         public Dictionary<string, string> SceneContent { get; set; }
         public int ParcelAmount { get; set; }
         public double DecimationValue { get; set; }
@@ -25,7 +23,6 @@ namespace DCL_PiXYZ
         public string DecimationType { get; }
         public string DecimationValues { get; }
         public List<string> ScenesToAnalyze { get; set; }
-        public List<string> AnalyzedScenes { get; set; }
         public List<double> DecimationToAnalyze { get; set; }
 
         public SceneImporter SceneImporter;
@@ -40,7 +37,6 @@ namespace DCL_PiXYZ
             DecimationType = decimationType;
             DecimationValues = decimationValues;
             ScenesToAnalyze = new List<string>();
-            AnalyzedScenes = new List<string>();
             DecimationToAnalyze = new List<double>();
             SceneImporter = null;
             WebRequestsHandler = new WebRequestsHandler();
@@ -95,19 +91,17 @@ namespace DCL_PiXYZ
         public string FailGLBImporterFile;
         public string OutputPath;
         public string ManifestOutputJsonFile;
+        public string ManifestOutputJsonDirectory;
         public string ManifestProjectDirectory;
 
         private readonly string DefaultOutputPath;
 
-        public bool IsDebug;
-
 
         public SceneConversionPathHandler(bool isDebug, string defaultOutputPath, string manifestProjectDirectory, string successFile, string failFile, string vertexCountFile, string failGlbImporterFile, string scene)
         {
-            IsDebug = isDebug;
             DefaultOutputPath = defaultOutputPath;
             ManifestProjectDirectory = manifestProjectDirectory;
-            if (IsDebug)
+            if (isDebug)
             {
                 SuccessFile = Path.Combine(defaultOutputPath, successFile);
                 FailFile = Path.Combine(defaultOutputPath, failFile);
@@ -125,12 +119,14 @@ namespace DCL_PiXYZ
 
             OutputPath = "";
             ManifestOutputJsonFile = "";
+            ManifestOutputJsonDirectory = "";
         }
 
         public void SetOutputPath(SceneImporter sceneSceneImporter)
         {
             OutputPath = Path.Combine(DefaultOutputPath, sceneSceneImporter.GetSceneBasePointer());
-            ManifestOutputJsonFile = Path.Combine(ManifestProjectDirectory, "output-manifests", sceneSceneImporter.GetSceneHash() + "-lod-manifest.json");
+            ManifestOutputJsonDirectory = Path.Combine(ManifestProjectDirectory, "output-manifests");
+            ManifestOutputJsonFile = Path.Combine(ManifestOutputJsonDirectory, sceneSceneImporter.GetSceneHash() + "-lod-manifest.json");
 
             Directory.CreateDirectory(DefaultOutputPath);
             Directory.CreateDirectory(OutputPath);

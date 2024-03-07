@@ -56,7 +56,6 @@ namespace DCL_PiXYZ
                 }
             }*/
 
-            Console.WriteLine("END PXZ CLEAN MATERIALS");
         }
     }
 }

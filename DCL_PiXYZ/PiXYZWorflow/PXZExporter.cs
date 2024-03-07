@@ -18,12 +18,12 @@ namespace DCL_PiXYZ
         private readonly int lodLevel;
         private readonly SceneConversionPathHandler pathHandler;
 
-        public PXZExporter(PXZParams pxzParams, SceneConversionPathHandler pathHandler)
+        public PXZExporter(PXZParams pxzParams, SceneConversionPathHandler pathHandler, SceneConversionInfo sceneConversionInfo)
         {
             this.pathHandler = pathHandler;
             extensions = new List<string>() { ".fbx", ".glb" };
             path = pathHandler.OutputPath;
-            filename = $"{pxzParams.SceneHash}_{pxzParams.LodLevel}";
+            filename = $"{sceneConversionInfo.SceneImporter.GetSceneHash()}_{pxzParams.LodLevel}";
             lodLevel = pxzParams.LodLevel;
         }
         
@@ -69,7 +69,6 @@ namespace DCL_PiXYZ
                 }), 1);
             }
             pxz.IO.ExportScene(Path.Combine(path, $"{filename}{extension}"), pxz.Scene.GetRoot());
-            Console.WriteLine("END PXZ EXPORT ");
        }
     }
 }

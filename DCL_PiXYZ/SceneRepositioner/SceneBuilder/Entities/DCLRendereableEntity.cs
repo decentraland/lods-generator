@@ -49,13 +49,13 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
             this.pxz = pxz;
         }
 
-        public PXZModel PositionAndInstantiteMesh(Dictionary<string, string> contentTable, Dictionary<int, DCLRendereableEntity> renderableEntities, SceneConversionPathHandler pathHandler, int lodLevel)
+        public PXZModel PositionAndInstantiteMesh(Dictionary<string, string> contentTable, Dictionary<int, DCLRendereableEntity> renderableEntities, SceneConversionPathHandler pathHandler)
         {
             InstantiateTransform(renderableEntities);
             if (rendereableMesh != null)
             {
                 uint material = dclMaterial.GetMaterial(pxz, entityID.ToString(), contentTable);
-                return rendereableMesh.InstantiateMesh(pxz, entityID.ToString(), instantiatedEntity, material, contentTable, pathHandler, lodLevel);
+                return rendereableMesh.InstantiateMesh(pxz, entityID.ToString(), instantiatedEntity, material, contentTable, pathHandler);
             }
             else
                 return PXYZConstants.EMPTY_MODEL;
