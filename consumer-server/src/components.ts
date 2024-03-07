@@ -8,7 +8,6 @@ import { AppComponents, GlobalContext } from './types'
 import { metricDeclarations } from './metrics'
 import { createSqsAdapter } from './adapters/sqs'
 import { createMessagesConsumerComponent } from './logic/message-consumer'
-import { buildLicense } from './utils/license-builder'
 import { createLodGeneratorComponent } from './logic/lod-generator'
 import { createMessageHandlerComponent } from './logic/message-handler'
 import { createCloudStorageAdapter } from './adapters/storage'
@@ -40,8 +39,6 @@ export async function initComponents(): Promise<AppComponents> {
   const messageHandler = createMessageHandlerComponent({ logs, lodGenerator, storage })
 
   const messageConsumer = await createMessagesConsumerComponent({ logs, queue, messageHandler })
-
-  //await buildLicense({ config, logs })
 
   return {
     config,
