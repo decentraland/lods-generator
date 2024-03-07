@@ -62,7 +62,6 @@ namespace DCL_PiXYZ
                         SetResult(sceneDefinitions[0].id);
                     }
                 }
-                Console.WriteLine("END SCENE DEFINITION DOWNLOAD");
             }
             catch (Exception e)
             {
@@ -103,7 +102,6 @@ namespace DCL_PiXYZ
                     return false;
                 }
             }
-            Console.WriteLine("END FILE CONTENT DOWNLOAD");
             return true;
         }
 

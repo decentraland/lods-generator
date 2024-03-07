@@ -1,0 +1,83 @@
+name: Test LOD Conversion
+
+on:
+  pull_request:
+
+jobs:
+  build-and-run:
+    runs-on: windows-2019
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        lfs: true
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '3.1.x'
+
+    - name: Publish with dotnet
+      run:  dotnet publish -c Release -r win10-x64 -o ./publish --self-contained true 
+      
+    - name: Copy manifest builder to publish directory
+      run: |
+        Copy-Item -Path "${{ github.workspace }}\DCL_PiXYZ\bin\Release\netcoreapp3.1\win10-x64\scene-lod-entities-manifest-builder" -Destination "${{ github.workspace }}\publish\scene-lod-entities-manifest-builder" -Recurse
+      shell: pwsh
+      
+    - name: Copy road coordinates
+      run: |
+          Copy-Item -Path "${{ github.workspace }}\DCL_PiXYZ\bin\Release\netcoreapp3.1\win10-x64\RoadCoordinates.json" -Destination "${{ github.workspace }}\publish"
+      shell: pwsh
+
+    - name: Install Vulkan SDK
+      uses: jakoch/install-vulkan-sdk-action@v1.0.0
+      with:
+        vulkan_version: 1.3.268.0
+        optional_components: com.lunarg.vulkan.vma
+        install_runtime: true
+        cache: true
+        destination: ${{ github.workspace }}/vulkan-sdt
+
+    - name: Move Vulkan DLL to output directory
+      run: |
+        mv ./vulkan-sdt/1.3.268.0/runtime/x64/vulkan-1.dll ./publish/
+      shell: bash
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18.14.2'
+
+    - name: Run the application
+      env:
+       PIXYZPRODUCTNAME: ${{ secrets.PIXYZPRODUCTNAME }}
+       PIXYZTOKEN: ${{ secrets.PIXYZTOKEN }}
+      run: .\publish\DCL_PiXYZ.exe "coords" "5,19" "${{ github.workspace }}\publish\OutputDirectoryPath" "${{ github.workspace }}\publish\scene-lod-entities-manifest-builder" "false" "true"
+
+    - name: Check Output Files with Size Tolerance in KB
+      run: |
+        $basePath = "${{ github.workspace }}\publish\OutputDirectoryPath\5,19"
+        $files = @(
+          "bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_0.fbx", # Hash output for 5,19
+          "bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_1.fbx",
+          "bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_2.fbx"
+        )
+        $expectedSizesB = @(6210224, 631424, 219776 ) # Expected sizes in bytes
+        $toleranceB = 3000 # 2 KB tolerance
+
+        foreach ($i in 0..2) {
+          $filePath = Join-Path -Path $basePath -ChildPath $files[$i]
+          if (-Not (Test-Path $filePath)) {
+            throw "File not found: $filePath"
+          }
+
+          $fileSizeInBytes = (Get-Item $filePath).length
+          $lowerBoundB = $expectedSizesB[$i] - $toleranceB
+          $upperBoundB = $expectedSizesB[$i] + $toleranceB
+          if ($fileSizeInBytes -lt $lowerBoundB -or $fileSizeInBytes -gt $upperBoundB) {
+            throw "File size mismatch for $filePath. Expected: $($expectedSizesB[$i]) B (+/- 3000 B), Found: $fileSizeInBytes bytes"
+          }
+        }
+        Write-Host "All files exist and are within the acceptable size range in KB."
+      shell: pwsh

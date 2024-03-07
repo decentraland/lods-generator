@@ -42,7 +42,6 @@ namespace DCL_PiXYZ
                 pxz.Scene.GetPolygonCount(new OccurrenceList(new uint[] { pxz.Scene.GetRoot() }), true);
             pxz.Algo.DecimateTarget(new OccurrenceList(new uint[]{pxz.Scene.GetRoot()}), decimate);
             WriteFinalVertexAmount(pxz.Scene.GetPolygonCount(new OccurrenceList(new uint[] { pxz.Scene.GetRoot() }),true));
-            Console.WriteLine("END PXZ MODIFIER DECIMATOR");
         }
         
         private void WriteFinalVertexAmount(ulong polygonCount)

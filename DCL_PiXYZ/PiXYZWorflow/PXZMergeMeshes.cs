@@ -53,7 +53,6 @@ namespace DCL_PiXYZ
             {
                 Console.WriteLine(e);
             }
-            Console.WriteLine("END PXZ MERGE MESHES");
         }
 
         private void MergeSubMeshes(OccurrenceList listToMerge, bool isOpaque)
@@ -103,7 +102,6 @@ namespace DCL_PiXYZ
             
             uint combineMeshes = pxz.Algo.CombineMeshes(toMerge, bakeOption);
             pxz.Core.SetProperty(combineMeshes, "Name", $"MERGED MESH {index} {(isOpaque ? "OPAQUE" : "FORCED_TRANSPARENT")}");
-            Console.WriteLine("End merging meshes ");
 
             Console.WriteLine("Copying Material");
             //Apply a copy of the material not to lose the reference

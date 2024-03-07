@@ -18,114 +18,128 @@ namespace AssetBundleConverter.LODs
 {
     public class DCLGLTFMesh : DCLMesh
     {
-        private SceneConversionPathHandler _pathHandler;
+        private SceneConversionPathHandler pathHandler;
 
-        private string src;
+        private readonly string src;
 
         public DCLGLTFMesh(string src)
         {
             this.src = src;
         }
-
-        public override PXZModel InstantiateMesh(PiXYZAPI pxz, string entityID, uint parent, uint material, Dictionary<string, string> contentTable, SceneConversionPathHandler pathHandler, int lodLevel)
+        
+        public override PXZModel InstantiateMesh(PiXYZAPI pxz, string entityID, uint parent, uint material, Dictionary<string, string> contentTable, SceneConversionPathHandler pathHandler)
         {
+            this.pathHandler = pathHandler;
+            
             if (!contentTable.TryGetValue(src.ToLower(), out string modelPath))
             {
-                Console.WriteLine($"ERROR: GLTF {src} file not found in sceneContent");
+                LogError($"ERROR: GLTF {src} file not found in sceneContent");
                 return PXYZConstants.EMPTY_MODEL;
             }
 
-            bool modelWorkSuccessfull = true;
+            bool modelRecreatedSuccessfully = true;
+            
             try
             {
-                var readSettings = new ReadSettings(ValidationMode.TryFix);
-                var model = ModelRoot.Load(modelPath, readSettings);
-                foreach (var gltfMaterial in model.LogicalMaterials)
-                {
-                    if (gltfMaterial.Alpha != AlphaMode.OPAQUE && !gltfMaterial.Name.Contains("FORCED_TRANSPARENT"))
-                        gltfMaterial.Name += "FORCED_TRANSPARENT";
-                }
-
-                if (Path.GetExtension(modelPath).Contains("glb", StringComparison.OrdinalIgnoreCase))
-                    model.SaveGLB(modelPath);
-                else
-                    model.SaveGLTF(modelPath);
+                ModifyModelMaterials(modelPath);
+                ExportModifiedModel(modelPath);
             }
             catch (Exception e)
             {
-                //PXZEntryPoint.WriteToFile($"MODEL FAILED A {modelPath} {e}", "FAILEDIMPORTMODELS.txt");
-                Console.WriteLine($"ERROR pre-processing GLTF material: {e}");
+                LogError($"ERROR pre-processing GLTF with GLTFSharp for file {src}: {e}");
+                modelRecreatedSuccessfully = false;
             }
-                try
-                {
-                    ReadSettings readSettings = new ReadSettings(ValidationMode.TryFix);
-                    var model = ModelRoot.Load(modelPath, readSettings);
-                    ModelRoot modelRoot = ModelRoot.CreateModel();
-                    Scene sceneModel = modelRoot.UseScene("Default");
-                    foreach (var modelLogicalNode in model.LogicalNodes)
-                    {
-                        if (modelLogicalNode.Mesh != null)
-                        {
-                            foreach(MeshPrimitive meshPrimitive in modelLogicalNode.Mesh.Primitives)
-                            {
-                                Mesh meshToExport = modelRoot.CreateMesh(modelLogicalNode.Name);
-                                var positions = meshPrimitive.GetVertexAccessor("POSITION").AsVector3Array().ToArray();
-                                var normals = meshPrimitive.GetVertexAccessor("NORMAL").AsVector3Array().ToArray();
-                                var indices = (int[])(object)meshPrimitive.GetIndexAccessor().AsIndicesArray().ToArray();
-                                if (meshPrimitive.GetVertexAccessor("TEXCOORD_0") != null)
-                                {
-                                    var texcoord = meshPrimitive.GetVertexAccessor("TEXCOORD_0").AsVector2Array().ToArray();
-                                    meshToExport.CreatePrimitive()
-                                        .WithVertexAccessor("POSITION", positions)
-                                        .WithVertexAccessor("NORMAL", normals)
-                                        .WithVertexAccessor("TEXCOORD_0", texcoord)
-                                        .WithIndicesAccessor(PrimitiveType.TRIANGLES, indices)
-                                        .WithMaterial(modelRoot.CreateMaterial(meshPrimitive.Material.ToMaterialBuilder()));
-                                }
-                                else
-                                {
-                                    meshToExport.CreatePrimitive()
-                                        .WithVertexAccessor("POSITION", positions)
-                                        .WithVertexAccessor("NORMAL", normals)
-                                        .WithIndicesAccessor(PrimitiveType.TRIANGLES, indices)
-                                        .WithMaterial(modelRoot.CreateMaterial(meshPrimitive.Material.ToMaterialBuilder()));
-                                }
-                                Node node = sceneModel.CreateNode(modelLogicalNode.Name).WithMesh(meshToExport);
-                                node.WorldMatrix = modelLogicalNode.WorldMatrix;
-                            }
-                        }
-                    }
-                    modelRoot.SaveGLB(modelPath + "_EDITED.glb");
-                }
-                catch (Exception e)
-                {
-                    //PXZEntryPoint.WriteToFile($"MODEL FAILED B {modelPath} {e}", "FAILEDIMPORTMODELS.txt");
-                    modelWorkSuccessfull =  false;
-                    Console.WriteLine($"ERROR pre-processing GLTF: {e}");
-                }
-                try
-                {
-                    if (lodLevel != 0)
-                    {
-                        uint importedFileOccurrence = pxz.IO.ImportScene(modelPath);
-                        pxz.Scene.SetParent(importedFileOccurrence, parent);
-                        return new PXZModel(true, importedFileOccurrence);
-                    }
-                    else
-                    {
-                        uint importedFileOccurrence = pxz.IO.ImportScene(modelWorkSuccessfull ? modelPath + "_EDITED.glb" : modelPath);
-                        pxz.Scene.SetParent(importedFileOccurrence, parent);
-                        return new PXZModel(true, importedFileOccurrence);
-                    }
-                }
-                catch(Exception e)
-                {
-                    Console.WriteLine($"ERROR: Importing GLTF {src} failed with error {e}");
-                    return PXYZConstants.EMPTY_MODEL;
-                }
 
+            try
+            {
+                uint importedFileOccurrence = pxz.IO.ImportScene(modelRecreatedSuccessfully ? modelPath + "_EDITED.glb" : modelPath);
+                pxz.Scene.SetParent(importedFileOccurrence, parent);
+                return new PXZModel(true, importedFileOccurrence);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"ERROR: Importing GLTF {src} failed with error {e}");
+                return PXYZConstants.EMPTY_MODEL;
+            }
         }
 
+        private void ModifyModelMaterials(string modelPath)
+        {
+            var readSettings = new ReadSettings(ValidationMode.TryFix);
+            var model = ModelRoot.Load(modelPath, readSettings);
+            foreach (var gltfMaterial in model.LogicalMaterials)
+            {
+                if (gltfMaterial.Alpha != AlphaMode.OPAQUE && !gltfMaterial.Name.Contains("FORCED_TRANSPARENT"))
+                    gltfMaterial.Name += "FORCED_TRANSPARENT";
+            }
+
+            SaveModel(model, modelPath);
+        }
+        
+        private void SaveModel(ModelRoot model, string modelPath)
+        {
+            if (Path.GetExtension(modelPath).Contains("glb", StringComparison.OrdinalIgnoreCase))
+                model.SaveGLB(modelPath);
+            else
+                model.SaveGLTF(modelPath);
+        }
+        
+        private void ExportModifiedModel(string modelPath)
+        {
+            // Determine the output file path based on the original model path
+            string outputFile = $"{modelPath}_EDITED.glb";
+
+            // Check if the file already exists
+            if (File.Exists(outputFile))
+            {
+                Console.WriteLine($"The file {outputFile} already exists. Skipping export.");
+                return;
+            }
+
+            var readSettings = new ReadSettings(ValidationMode.TryFix);
+            var model = ModelRoot.Load(modelPath, readSettings);
+            var modelRoot = ModelRoot.CreateModel();
+            var sceneModel = modelRoot.UseScene("Default");
+            foreach (var modelLogicalNode in model.LogicalNodes)
+            {
+                if (modelLogicalNode.Mesh != null)
+                {
+                    foreach (var meshPrimitive in modelLogicalNode.Mesh.Primitives)
+                    {
+                        var meshToExport = modelRoot.CreateMesh(modelLogicalNode.Name);
+                        BuildMesh(meshToExport.CreatePrimitive(), meshPrimitive.GetVertexAccessor("POSITION"),
+                            meshPrimitive.GetVertexAccessor("NORMAL"),
+                            meshPrimitive.GetVertexAccessor("TEXCOORD_0"),
+                            (int[])(object)meshPrimitive.GetIndexAccessor().AsIndicesArray().ToArray(),
+                            modelRoot.CreateMaterial(meshPrimitive.Material.ToMaterialBuilder()));
+                        var node = sceneModel.CreateNode(modelLogicalNode.Name).WithMesh(meshToExport);
+                        node.WorldMatrix = modelLogicalNode.WorldMatrix;
+                    }
+                }
+            }
+
+            modelRoot.SaveGLB(modelPath + "_EDITED.glb");
+        }
+        
+        private void BuildMesh(MeshPrimitive meshToExport, Accessor positions, Accessor normals, Accessor texcoord, int[] indices, Material material)
+        {
+            if (positions != null)
+                meshToExport.WithVertexAccessor("POSITION", positions.AsVector3Array().ToArray());
+
+            if (normals != null)
+                meshToExport.WithVertexAccessor("NORMAL", normals.AsVector3Array().ToArray());
+
+            if (texcoord != null)
+                meshToExport.WithVertexAccessor("TEXCOORD_0", texcoord.AsVector2Array().ToArray());
+
+            meshToExport.WithIndicesAccessor(PrimitiveType.TRIANGLES, indices);
+            meshToExport.WithMaterial(material);
+        }
+        
+        private void LogError(string message)
+        {
+            FileWriter.WriteToFile(message, pathHandler.FailGLBImporterFile);
+        }
         
 
     }

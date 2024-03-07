@@ -91,7 +91,6 @@ namespace DCL_PiXYZ
             {
                 pxz.Core.SetProperty(occurence, "Name", "DecimateTargetBake " + pxz.Core.GetProperty(occurence, "Id"));
             }*/
-            Console.WriteLine("END PXZ DECIMATE AND BAKE");
         }
     }
 }
