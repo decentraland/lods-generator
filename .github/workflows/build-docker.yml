@@ -1,7 +1,11 @@
-name: Docker build
+name: Manual CI/CD on PRs
 
 on:
-  pull_request:
+  workflow_dispatch:
+    inputs:
+      branch_name:
+        description: 'The name of the branch to build from'
+        required: true
 
 jobs:
   build:
@@ -11,6 +15,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
       with:
+        ref: ${{ github.event.inputs.branch_name }}
         lfs: true
 
     - name: Install Vulkan SDK
@@ -22,6 +27,19 @@ jobs:
         cache: true
         destination: ${{ github.workspace }}/vulkan-sdt
 
-    - name: Build Docker image
-      run: docker build -t lods --build-arg VULKAN_DLL_PATH=./vulkan-sdt/1.3.268.0/runtime/x64/vulkan-1.dll .
-      
+    - name: Get latest commit SHA of the branch
+      id: get_commit_sha
+      run: echo "::set-output name=sha::$(git rev-parse HEAD)"
+
+    - name: Login to DockerHub
+      uses: docker/login-action@v2
+      with:
+        registry: quay.io
+        username: ${{ secrets.QUAY_USERNAME }}
+        password: ${{ secrets.QUAY_TOKEN }}
+
+    - name: Build and push
+      id: docker_build
+      run: |
+        docker build --no-cache --build-arg COMMIT_HASH=${{ steps.get_commit_sha.outputs.sha }} --build-arg VULKAN_DLL_PATH=./vulkan-sdt/1.3.268.0/runtime/x64/vulkan-1.dll -t quay.io/decentraland/lods-generator:${{ steps.get_commit_sha.outputs.sha }} .
+        docker push quay.io/decentraland/lods-generator:${{ steps.get_commit_sha.outputs.sha }}
