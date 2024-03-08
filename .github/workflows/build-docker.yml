@@ -1,6 +1,7 @@
 name: Manual CI/CD on PRs
 
 on:
+  pull_request:
   workflow_dispatch:
     inputs:
       branch_name:
