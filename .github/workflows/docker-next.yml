@@ -23,15 +23,17 @@ jobs:
           install_runtime: true
           cache: true
           destination: ${{ github.workspace }}/vulkan-sdt
+
       - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_TOKEN }}
-      - name: Build and push
-        id: docker_build
+
+      - name: Mark published image as next
         run: |
-          docker build --no-cache --build-arg COMMIT_HASH=${{ github.sha }} --build-arg VULKAN_DLL_PATH=./vulkan-sdt/1.3.268.0/runtime/x64/vulkan-1.dll -t quay.io/decentraland/lods-generator:next -t quay.io/decentraland/lods-generator:${{ github.sha }} .
+          COMMIT_HASH=$(git rev-parse HEAD^)
+          docker pull quay.io/decentraland/lods-generator:${COMMIT_HASH}
+          docker tag quay.io/decentraland/lods-generator:${COMMIT_HASH} quay.io/decentraland/lods-generator:next
           docker push quay.io/decentraland/lods-generator:next
-          docker push quay.io/decentraland/lods-generator:${{ github.sha }}
