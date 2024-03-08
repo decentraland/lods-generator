@@ -9,6 +9,7 @@ import type {
 import { metricDeclarations } from './metrics'
 
 import { Message } from '@aws-sdk/client-sqs'
+import { Response } from '@well-known-components/interfaces'
 
 export type GlobalContext = {
   components: BaseComponents
@@ -25,6 +26,7 @@ export type BaseComponents = {
   storage: StorageComponent
   fetcher: IFetchComponent
   sceneFetcher: SceneFetcherComponent
+  bundleTriggerer: BundleTriggererComponent
 }
 
 // components used in runtime
@@ -83,8 +85,16 @@ export type LodGeneratorComponent = {
   generate(basePointer: string): Promise<LodGenerationResult>
 }
 
+export type BundleTriggererComponent = {
+  queueGeneration(entityId: string, lods: string[]): Promise<Response>
+}
+
+export type MessageHandlerComponent = {
+  handle(message: QueueMessage): Promise<void>
+}
+
 export type StorageComponent = {
-  storeFiles(filePaths: string[], prefix: string): Promise<void>
+  storeFiles(filePaths: string[], prefix: string): Promise<string[]>
 }
 
 export type SceneFetcherComponent = {
