@@ -102,8 +102,6 @@ namespace DCL_PiXYZ
                 
                 GC.Collect();
                 Console.WriteLine("END SCENE CONVERSION FOR " + sceneConversionInfo.SceneImporter.GetSceneBasePointer());
-                AssetBundleUtils.RunAssetBundleConversion(runAssetBundleConversion, 4, pathHandler, "bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4");
-                UpdateConvertedScenesFile(isDebug, convertedScenes);
             }
             DoManifestCleanup(isDebug, pathHandler);
         }
