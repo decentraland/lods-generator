@@ -94,7 +94,7 @@ namespace DCL_PiXYZ
             bakeOption.resolution = 1024;
             if (lodLevel == 1 && currentVertexCount < 150000)
                 bakeOption.resolution = 512;
-            else if (lodLevel == 2 && currentVertexCount < 150000)
+            else if (lodLevel >= 2 && currentVertexCount < 150000)
                 bakeOption.resolution = 256;
             
             Console.WriteLine($"Merging meshes {(isOpaque ? "OPAQUE" : "TRANSPARENT")} {toMerge.list.Length} vertex count {currentVertexCount}");
