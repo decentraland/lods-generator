@@ -62,9 +62,10 @@ jobs:
         $files = @(
           "bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_0.fbx", # Hash output for 5,19
           "bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_1.fbx",
-          "bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_2.fbx"
+          "bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_2.fbx",
+          "bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_3.fbx"
         )
-        $expectedSizesB = @(6210224, 631424, 219776 ) # Expected sizes in bytes
+        $expectedSizesB = @(6210224, 631424, 219776, 128128) # Expected sizes in bytes
         $toleranceB = 3000 # 2 KB tolerance
 
         foreach ($i in 0..2) {
