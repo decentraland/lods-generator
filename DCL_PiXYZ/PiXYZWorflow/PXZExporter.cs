@@ -22,7 +22,7 @@ namespace DCL_PiXYZ
         {
             this.pathHandler = pathHandler;
             extensions = new List<string>() { ".fbx", ".glb" };
-            path = pathHandler.OutputPath;
+            path = pathHandler.OutputPathWithBasePointer;
             filename = $"{sceneConversionInfo.SceneImporter.GetSceneHash()}_{pxzParams.LodLevel}";
             lodLevel = pxzParams.LodLevel;
         }

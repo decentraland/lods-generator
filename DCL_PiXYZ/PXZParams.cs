@@ -89,7 +89,8 @@ namespace DCL_PiXYZ
         public string FailFile;
         public string PolygonCountFile;
         public string FailGLBImporterFile;
-        public string OutputPath;
+        public string OutputPathWithBasePointer;
+        public string OutputPathWithAssetBundle;
         public string ManifestOutputJsonFile;
         public string ManifestOutputJsonDirectory;
         public string ManifestProjectDirectory;
@@ -101,6 +102,7 @@ namespace DCL_PiXYZ
         {
             DefaultOutputPath = defaultOutputPath;
             ManifestProjectDirectory = manifestProjectDirectory;
+            OutputPathWithAssetBundle = Path.Combine(DefaultOutputPath, "built-lods-ab");
             if (isDebug)
             {
                 SuccessFile = Path.Combine(defaultOutputPath, successFile);
@@ -117,19 +119,19 @@ namespace DCL_PiXYZ
                 FailGLBImporterFile =  Path.Combine(defaultOutputPath, pathWithBasePointer);
             }
 
-            OutputPath = "";
+            OutputPathWithBasePointer = "";
             ManifestOutputJsonFile = "";
             ManifestOutputJsonDirectory = "";
         }
 
         public void SetOutputPath(SceneImporter sceneSceneImporter)
         {
-            OutputPath = Path.Combine(DefaultOutputPath, sceneSceneImporter.GetSceneBasePointer());
+            OutputPathWithBasePointer = Path.Combine(DefaultOutputPath, sceneSceneImporter.GetSceneBasePointer());
             ManifestOutputJsonDirectory = Path.Combine(ManifestProjectDirectory, "output-manifests");
             ManifestOutputJsonFile = Path.Combine(ManifestOutputJsonDirectory, sceneSceneImporter.GetSceneHash() + "-lod-manifest.json");
 
             Directory.CreateDirectory(DefaultOutputPath);
-            Directory.CreateDirectory(OutputPath);
+            Directory.CreateDirectory(OutputPathWithBasePointer);
         }
         
     }
