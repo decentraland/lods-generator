@@ -4,9 +4,18 @@ using System.IO;
 
 namespace DCL_PiXYZ.Utils
 {
-    public class AssetBundleUtils
+    public class AssetBundleBuilder
     {
-        public static void RunAssetBundleConversion(bool runAssetBundleConversion, int finalLodLevel, SceneConversionPathHandler pathHandler, string sceneHash)
+        private readonly string unityPath;
+        private readonly string assetBundleConverterPath;
+
+        public AssetBundleBuilder(string unityPath, string assetBundleConverterPath)
+        {
+            this.unityPath = unityPath;
+            this.assetBundleConverterPath = assetBundleConverterPath;
+        }
+
+        public void RunAssetBundleConversion(bool runAssetBundleConversion, int finalLodLevel, SceneConversionPathHandler pathHandler, string sceneHash)
         {
             if (!runAssetBundleConversion)
                 return;
@@ -21,9 +30,9 @@ namespace DCL_PiXYZ.Utils
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    FileName = "powershell", Arguments = "Start-Process -FilePath 'C:\\Program Files\\Unity\\Hub\\Editor\\2022.3.12f1\\Editor\\Unity.exe'" +
+                    FileName = "powershell", Arguments = $"Start-Process -FilePath '{unityPath}'" +
                                                          $"-ArgumentList '-projectPath','asset-bundle-converter','-batchmode','-executeMethod','DCL.ABConverter.LODClient.ExportURLLODsToAssetBundles','-lods','{lodsPath}','-output','{pathHandler.OutputPathWithAssetBundle}','-logFile','./tmp/log.txt' -Wait", // replace with your npm command
-                    WorkingDirectory = "C:\\Users\\juani\\Documents\\Decentraland\\asset-bundle-converter-clean", RedirectStandardError = true, RedirectStandardOutput = true, UseShellExecute = false,
+                    WorkingDirectory = assetBundleConverterPath, RedirectStandardError = true, RedirectStandardOutput = true, UseShellExecute = false,
                     CreateNoWindow = true
                 },
                 EnableRaisingEvents = true

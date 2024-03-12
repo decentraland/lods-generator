@@ -91,6 +91,15 @@ namespace DCL_PiXYZ
                     await DoConversion(pxzParams, sceneConversionInfo, pathHandler);
                     pxzParams.LodLevel += 1;
                 }
+
+                if (runAssetBundleConversion)
+                {
+                    var assetBundleBuilder = new AssetBundleBuilder(Environment.GetEnvironmentVariable("ASSETBUNDLECONVERTERUNITYPATH"), Environment.GetEnvironmentVariable("ASSETBUNDLECONVERTERPATH"));
+                    assetBundleBuilder.RunAssetBundleConversion(runAssetBundleConversion, pxzParams.LodLevel, pathHandler, sceneConversionInfo.SceneImporter.GetSceneHash());
+                }
+
+                UpdateConvertedScenesFile(isDebug, convertedScenes);
+                
                 GC.Collect();
                 Console.WriteLine("END SCENE CONVERSION FOR " + sceneConversionInfo.SceneImporter.GetSceneBasePointer());
                 AssetBundleUtils.RunAssetBundleConversion(runAssetBundleConversion, 4, pathHandler, "bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4");
