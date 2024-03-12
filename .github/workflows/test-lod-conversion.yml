@@ -2,6 +2,7 @@ name: Test LOD Conversion
 
 on:
   pull_request:
+    types: [edited, opened, reopened, synchronize]
 
 jobs:
   build-and-run:
