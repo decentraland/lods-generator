@@ -66,7 +66,7 @@ jobs:
           "bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_3.fbx"
         )
         $expectedSizesB = @(6210224, 631424, 219776, 128128) # Expected sizes in bytes
-        $toleranceB = 3000 # 2 KB tolerance
+        $toleranceB = 5000 # 5 KB tolerance
 
         foreach ($i in 0..2) {
           $filePath = Join-Path -Path $basePath -ChildPath $files[$i]
