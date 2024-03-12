@@ -29,7 +29,7 @@ namespace DCL_PiXYZ
 
             bool isDebug = true;
             bool installNPM = true;
-            bool runAssetBundleConversion = true;
+            bool runAssetBundleConversion = false;
 
             if (args.Length > 0)
             {
