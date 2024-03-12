@@ -47,7 +47,7 @@ namespace DCL_PiXYZ
             //PiXYZ was crashing and exiting the application if it was called form the same program
 
             //Scenes param is single coordinates or bulk value. Single scenes are separated by 
-            var sceneConversionInfo = new SceneConversionInfo("7000;3000;1000", "triangle", "coords", "single", defaultScene);
+            var sceneConversionInfo = new SceneConversionInfo("7000;3000;1000;500", "triangle", "coords", "single", defaultScene);
             var pathHandler = new SceneConversionPathHandler(isDebug, defaultOutputPath, defaultSceneLodManifestDirectory, "SuccessScenes.txt", "FailScenes.txt", "PolygonCount.txt" , "FailedGLBImport.txt" , defaultScene);
 
             List<string> roadCoordinates = LoadRoads();
