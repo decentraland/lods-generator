@@ -15,7 +15,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.inputs.branch_name }}
           lfs: true
 
       - name: Login to DockerHub
@@ -27,7 +26,7 @@ jobs:
 
       - name: Mark published image as next
         run: |
-          COMMIT_HASH=$(git rev-parse HEAD^)
+          COMMIT_HASH=$(git rev-parse HEAD)
           docker pull quay.io/decentraland/lods-generator:${COMMIT_HASH}
           docker tag quay.io/decentraland/lods-generator:${COMMIT_HASH} quay.io/decentraland/lods-generator:next
           docker push quay.io/decentraland/lods-generator:next
