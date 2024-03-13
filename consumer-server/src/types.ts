@@ -86,7 +86,7 @@ export type LodGeneratorComponent = {
 }
 
 export type BundleTriggererComponent = {
-  queueGeneration(entityId: string, lods: string[]): Promise<Response>
+  queueGeneration(entityId: string, lods: string[], abServer: string): Promise<Response>
 }
 
 export type MessageHandlerComponent = {
