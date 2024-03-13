@@ -5,10 +5,12 @@ import { sleep } from '../utils/timer'
 
 export async function createMessagesConsumerComponent({
   logs,
+  config,
   queue,
   lodGenerator,
-  storage
-}: Pick<AppComponents, 'logs' | 'queue' | 'lodGenerator' | 'storage'>): Promise<QueueWorker> {
+  storage,
+  bundleTriggerer
+}: Pick<AppComponents, 'logs' | 'config' | 'queue' | 'lodGenerator' | 'storage' | 'bundleTriggerer'>): Promise<QueueWorker> {
   const logger = logs.getLogger('messages-consumer')
   let isRunning = false
 
@@ -18,6 +20,7 @@ export async function createMessagesConsumerComponent({
   }
 
   async function start() {
+    const abServers = (await config.requireString('AB_SERVERS')).split(';')
     logger.info('Starting to listen messages from queue')
     isRunning = true
     while (isRunning) {
@@ -76,7 +79,8 @@ export async function createMessagesConsumerComponent({
             result.lodsFiles,
             `${base}/LOD/Sources/${parsedMessage.entity.entityTimestamp.toString()}`
           )
-          
+
+          await Promise.all(abServers.map((abServer) => bundleTriggerer.queueGeneration(entityId, result.lodsFiles, abServer)))
           fs.rmSync(result.outputPath, { recursive: true, force: true })
         } catch (error: any) {
           logger.error('Failed while handling message from queue', {
