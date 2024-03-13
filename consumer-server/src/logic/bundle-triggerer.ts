@@ -11,7 +11,7 @@ export async function createBundleTriggererComponent({
 
   async function queueGeneration(entityId: string, lods: string[]): Promise<Response> {
     const body = JSON.stringify({
-      lods,
+      lods: lods.map((lod) => lod.replace('%2C', ',')),
       entity: {
         entityId,
         authChain: [
