@@ -1,18 +1,17 @@
 import { createSceneComponent } from '../adapters/scene'
-import {getGameDataFromLocalScene, getGameDataFromRemoteSceneByCoords, getGameDataFromRemoteSceneByID} from './sceneFetcher'
 import { BaseComponents } from '../types'
 
-export async function loadOrReload({ config, fetch }: BaseComponents, loadingType: string, targetScene: string, doneBySceneID : boolean) {
+export async function loadOrReload({ sceneFetcher }: BaseComponents, loadingType: string, targetScene: string, doneBySceneID : boolean) {
   let hash: string
   let sourceCode: string
   if (loadingType === 'localScene') {
-    sourceCode = await getGameDataFromLocalScene(targetScene)
+    sourceCode = await sceneFetcher.getGameDataFromLocalScene(targetScene)
     hash = 'localScene'
   } else {
     if(doneBySceneID){
-      sourceCode = await getGameDataFromRemoteSceneByID(fetch, targetScene)
+      sourceCode = await sceneFetcher.getGameDataFromRemoteSceneByID(targetScene)
     }else{
-      sourceCode = await getGameDataFromRemoteSceneByCoords(fetch, targetScene)
+      sourceCode = await sceneFetcher.getGameDataFromRemoteSceneByCoords(targetScene)
     }
     hash = 'remoteScene'
   }
