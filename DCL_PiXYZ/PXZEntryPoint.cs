@@ -101,8 +101,8 @@ namespace DCL_PiXYZ
             if (!isDebug)
                 return;
             
-            if (!string.IsNullOrEmpty(pathHandler.ManifestOutputJsonDirectory) 
-                && Directory.Exists(pathHandler.ManifestOutputJsonDirectory)) return;
+            if (string.IsNullOrEmpty(pathHandler.ManifestOutputJsonDirectory) 
+                || Directory.Exists(pathHandler.ManifestOutputJsonDirectory)) return;
             
             var dir = new DirectoryInfo(pathHandler.ManifestOutputJsonDirectory);
 
