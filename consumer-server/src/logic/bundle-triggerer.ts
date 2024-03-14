@@ -24,7 +24,7 @@ export async function createBundleTriggererComponent({
     })
     const headers = { 'Content-Type': 'application/json', Authorization: abToken }
 
-    return await fetcher.fetch(`${abServer}/queue-task`, { method: 'POST', body, headers })
+    return await fetcher.fetch(`${abServer}/queue-task`, { method: 'POST', body, headers, attempts: 3, retryDelay: 1000 })
   }
 
   return { queueGeneration }
