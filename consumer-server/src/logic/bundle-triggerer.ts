@@ -6,12 +6,11 @@ export async function createBundleTriggererComponent({
   fetcher,
   config
 }: Pick<AppComponents, 'fetcher' | 'config'>): Promise<BundleTriggererComponent> {
-  const abServer = await config.requireString('AB_SERVER')
   const abToken = (await config.requireString('AB_TOKEN'))
 
-  async function queueGeneration(entityId: string, lods: string[]): Promise<Response> {
+  async function queueGeneration(entityId: string, lods: string[], abServer: string): Promise<Response> {
     const body = JSON.stringify({
-      lods,
+      lods: lods.map((lod) => lod.replace('%2C', ',')),
       entity: {
         entityId,
         authChain: [

@@ -52,7 +52,7 @@ namespace DCL_PiXYZ
             var pathHandler = new SceneConversionPathHandler(isDebug, defaultOutputPath, defaultSceneLodManifestDirectory, "SuccessScenes.txt", "FailScenes.txt", "PolygonCount.txt" , "FailedGLBImport.txt" , defaultScene);
 
             List<string> roadCoordinates = LoadRoads();
-            var convertedScenes = LoadConvertedScenes();
+            var convertedScenes = LoadConvertedScenes(isDebug);
             CreateDirectories(sceneConversionInfo);
             FrameworkInitialization(pathHandler.ManifestProjectDirectory, installNPM);
 
@@ -101,8 +101,8 @@ namespace DCL_PiXYZ
             if (!isDebug)
                 return;
             
-            if (string.IsNullOrEmpty(pathHandler.ManifestOutputJsonDirectory) 
-                || !Directory.Exists(pathHandler.ManifestOutputJsonDirectory)) return;
+            if (!string.IsNullOrEmpty(pathHandler.ManifestOutputJsonDirectory) 
+                && Directory.Exists(pathHandler.ManifestOutputJsonDirectory)) return;
             
             var dir = new DirectoryInfo(pathHandler.ManifestOutputJsonDirectory);
 
@@ -262,13 +262,14 @@ namespace DCL_PiXYZ
             return JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(filePath));
         }
 
-        private static List<string> LoadConvertedScenes()
+        private static List<string> LoadConvertedScenes(bool isDebug)
         {
+            if(!isDebug)
+                return new List<string>();
+            
             string convertedScenePathFile = Path.Combine(Directory.GetCurrentDirectory(), "ConvertedScenes.json");
             if (File.Exists(convertedScenePathFile))
-            {
                 return JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(convertedScenePathFile));
-            }
 
             return new List<string>();
         }
