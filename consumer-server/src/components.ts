@@ -38,7 +38,7 @@ export async function initComponents(): Promise<AppComponents> {
   const storage = await createCloudStorageAdapter({ config })
   const bundleTriggerer = await createBundleTriggererComponent({ fetcher, config })
 
-  const messageConsumer = await createMessagesConsumerComponent({ logs, queue, lodGenerator, storage })
+  const messageConsumer = await createMessagesConsumerComponent({ logs, config, queue, lodGenerator, storage, bundleTriggerer })
 
   return {
     config,
