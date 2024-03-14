@@ -230,8 +230,7 @@ namespace DCL_PiXYZ
                 modifiers.Add(new PXZDeleteByName(".*collider.*"));
                 modifiers.Add(new PXZDecimator(sceneConversionInfo.SceneImporter.GetSceneBasePointer(), pxzParams.DecimationType,
                     pxzParams.DecimationValue, pxzParams.ParcelAmount, pathHandler));
-                modifiers.Add(new PXZBakeVertexColor());
-                //modifiers.Add(new PXZMergeMeshes(pxzParams.LodLevel));
+                modifiers.Add(new PXZMergeMeshes(pxzParams.LodLevel));
             }
 
             modifiers.Add(new PXZExporter(pxzParams, pathHandler, sceneConversionInfo));
