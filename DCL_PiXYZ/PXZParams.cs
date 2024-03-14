@@ -103,6 +103,7 @@ namespace DCL_PiXYZ
             ManifestProjectDirectory = manifestProjectDirectory;
             if (isDebug)
             {
+                Directory.CreateDirectory(DefaultOutputPath);
                 SuccessFile = Path.Combine(defaultOutputPath, successFile);
                 FailFile = Path.Combine(defaultOutputPath, failFile);
                 PolygonCountFile =  Path.Combine(defaultOutputPath, vertexCountFile);
@@ -110,6 +111,8 @@ namespace DCL_PiXYZ
             }
             else
             {
+                //TODO: Clean this directory issue
+                Directory.CreateDirectory(Path.Combine(defaultOutputPath, scene));
                 string pathWithBasePointer = $"{scene}/output.txt";
                 SuccessFile = Path.Combine(defaultOutputPath, pathWithBasePointer);
                 FailFile = Path.Combine(defaultOutputPath, pathWithBasePointer);
