@@ -2,8 +2,8 @@ import { IFetchComponent } from '@well-known-components/interfaces'
 import { existsSync, readFileSync } from 'fs'
 import { manifestFileDir, manifestFileNameEnd } from "./scene-runtime/apis";
 
-export const contentFetchBaseUrl = 'https://peer.decentraland.org/content/contents/'
-const mappingsUrl = 'https://peer.decentraland.org/content/entities/active'
+export const contentFetchBaseUrl = `${process.env.CATALYST_URL}/content/contents/`
+const mappingsUrl = `${process.env.CATALYST_URL}/content/entities/active`
 const mainCRDTFileName = 'main.crdt'
 export let sdk6SceneContent: any
 export let sdk6FetchComponent: any
