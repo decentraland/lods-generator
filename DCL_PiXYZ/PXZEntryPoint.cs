@@ -40,6 +40,7 @@ namespace DCL_PiXYZ
                 bool.TryParse(args[5], out installNPM);
             }
 
+
             //Conversion type can be single or bulk
             //If its single, we pass as many scenes as we want to parse separated by ;
             //If its bulk, a single number will represent a square to parse, going from -value to value.
@@ -97,9 +98,12 @@ namespace DCL_PiXYZ
 
         private static void DoManifestCleanup(bool isDebug, SceneConversionPathHandler pathHandler)
         {
-            if (isDebug)
+            if (!isDebug)
                 return;
-
+            
+            if (string.IsNullOrEmpty(pathHandler.ManifestOutputJsonDirectory) 
+                || !Directory.Exists(pathHandler.ManifestOutputJsonDirectory)) return;
+            
             var dir = new DirectoryInfo(pathHandler.ManifestOutputJsonDirectory);
 
             foreach (var fi in dir.GetFiles())
@@ -226,7 +230,8 @@ namespace DCL_PiXYZ
                 modifiers.Add(new PXZDeleteByName(".*collider.*"));
                 modifiers.Add(new PXZDecimator(sceneConversionInfo.SceneImporter.GetSceneBasePointer(), pxzParams.DecimationType,
                     pxzParams.DecimationValue, pxzParams.ParcelAmount, pathHandler));
-                modifiers.Add(new PXZMergeMeshes(pxzParams.LodLevel));
+                modifiers.Add(new PXZBakeVertexColor());
+                //modifiers.Add(new PXZMergeMeshes(pxzParams.LodLevel));
             }
 
             modifiers.Add(new PXZExporter(pxzParams, pathHandler, sceneConversionInfo));
