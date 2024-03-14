@@ -97,6 +97,9 @@ namespace DCL_PiXYZ
 
         private static void DoManifestCleanup(bool isDebug, SceneConversionPathHandler pathHandler)
         {
+            if (isDebug)
+                return;
+            
             if (!string.IsNullOrEmpty(pathHandler.ManifestOutputJsonDirectory) 
                 && Directory.Exists(pathHandler.ManifestOutputJsonDirectory)) return;
             
