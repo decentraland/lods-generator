@@ -65,14 +65,21 @@ export async function createMessagesConsumerComponent({
 
           const result: LodGenerationResult = await lodGenerator.generate(base)
 
-          if (result.error) {
+          if (result.error || result.lodsFiles.length === 0) {
             logger.error('LOD generation failed', {
               entityId,
               messageHandle: ReceiptHandle!,
-              error: result.error.message?.replace(/\n|\r\n/g, '') || 'Unexpected failure'
+              error: result?.error?.message?.replace(/\n|\r\n/g, '') || 'Unexpected failure'
             })
             await storage.storeFiles([result.logFile], `Failures/${entityId}`)
             continue
+          } else {
+            logger.info('LOD generation succeeded', {
+              entityId,
+              messageHandle: ReceiptHandle!,
+              files: result.lodsFiles.join(', ')
+            })
+            await storage.storeFiles([result.logFile], `${base}/LOD/Sources/${parsedMessage.entity.entityTimestamp.toString()}`)
           }
 
           logger.info(`About to upload files to bucket`, { entityId, files: result.lodsFiles.join(', ') })
