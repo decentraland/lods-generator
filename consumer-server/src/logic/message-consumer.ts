@@ -75,6 +75,8 @@ export async function createMessagesConsumerComponent({
             continue
           }
 
+          logger.info(`About to upload files to bucket`, { entityId, files: result.lodsFiles.join(', ') })
+
           const uploadedFiles = await storage.storeFiles(
             result.lodsFiles,
             `${base}/LOD/Sources/${parsedMessage.entity.entityTimestamp.toString()}`
