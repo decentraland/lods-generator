@@ -34,8 +34,7 @@ export async function createCloudStorageAdapter({ config }: Pick<AppComponents, 
             ContentType: file.contentType
           }
         })
-        await upload.done()
-        return `${bucketEndpoint}/${bucket}/${prefix}/${file.name}`
+        return await upload.done().then(() => `${bucketEndpoint}/${bucket}/${prefix}/${file.name}`)
       })
     )
 
