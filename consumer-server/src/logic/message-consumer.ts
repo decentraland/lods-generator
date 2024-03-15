@@ -75,14 +75,14 @@ export async function createMessagesConsumerComponent({
             continue
           }
 
-          await storage.storeFiles(
+          const uploadedFiles = await storage.storeFiles(
             result.lodsFiles,
             `${base}/LOD/Sources/${parsedMessage.entity.entityTimestamp.toString()}`
           )
 
-          logger.info('Files uploaded to bucket', { entityId, files: result.lodsFiles.map((file) => file.split('/').pop()).join(', '), path: `${base}/LOD/Sources/${parsedMessage.entity.entityTimestamp.toString()}` })
+          logger.info('Files uploaded to bucket', { entityId, files: uploadedFiles.join(', ') })
 
-          await Promise.all(abServers.map((abServer) => bundleTriggerer.queueGeneration(entityId, result.lodsFiles, abServer)))
+          await Promise.all(abServers.map((abServer) => bundleTriggerer.queueGeneration(entityId, uploadedFiles, abServer)))
           logger.info('Message published to AssetBundle converter', { entityId })
           fs.rmSync(result.outputPath, { recursive: true, force: true })
         } catch (error: any) {
