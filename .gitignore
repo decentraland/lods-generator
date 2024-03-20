@@ -71,4 +71,6 @@ validation-errors.json
 
 .idea/
 
-bin/lods/
+consumer-server/bin/lods/
+
+.env.admin
