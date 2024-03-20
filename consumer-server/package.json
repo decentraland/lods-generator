@@ -6,7 +6,12 @@
     "build": "tsc -p tsconfig.json",
     "start": "node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict dist/index.js",
     "lint:fix": "eslint --fix --ext .ts src",
-    "test": "jest --forceExit --detectOpenHandles --verbose"
+    "test": "jest --forceExit --detectOpenHandles --verbose",
+    "admin:purge": "tsc ./bin/purge-bucket.ts && node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict ./bin/purge-bucket.js",
+    "admin:lod0": "tsc ./bin/generate-zip.ts && node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict ./bin/generate-zip.js 0",
+    "admin:lod1": "tsc ./bin/generate-zip.ts && node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict ./bin/generate-zip.js 1",
+    "admin:lod2": "tsc ./bin/generate-zip.ts && node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict ./bin/generate-zip.js 2",
+    "admin:lod3": "tsc ./bin/generate-zip.ts && node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict ./bin/generate-zip.js 3"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.499.0",
@@ -27,9 +32,11 @@
   "devDependencies": {
     "@dcl/catalyst-storage": "^4.1.0",
     "@dcl/eslint-config": "^1.1.13",
+    "@types/archiver": "^6.0.2",
     "@types/mime-types": "^2.1.4",
     "@types/node": "^20.10.6",
     "@well-known-components/test-helpers": "^1.5.5",
+    "archiver": "^7.0.1",
     "mock-aws-s3": "^4.0.2",
     "typescript": "^5.3.3"
   }
