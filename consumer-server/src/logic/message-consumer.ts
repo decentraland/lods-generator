@@ -91,8 +91,11 @@ export async function createMessagesConsumerComponent({
 
           logger.info('Files uploaded to bucket', { entityId, files: uploadedFiles.join(', ') })
 
-          await Promise.all(abServers.map((abServer) => bundleTriggerer.queueGeneration(entityId, uploadedFiles, abServer)))
-          logger.info('Message published to AssetBundle converter', { entityId })
+          if (!!uploadedFiles.length) {
+            await Promise.all(abServers.map((abServer) => bundleTriggerer.queueGeneration(entityId, uploadedFiles, abServer)))
+            logger.info('Message published to AssetBundle converter', { entityId })
+          }
+          
           fs.rmSync(result.outputPath, { recursive: true, force: true })
         } catch (error: any) {
           logger.error('Failed while handling message from queue', {
