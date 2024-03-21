@@ -63,11 +63,12 @@ export type QueueMessage = {
         base: string
       }
     }
-  }
+  },
+  _retry: number | undefined
 }
 
 export type QueueComponent = {
-  send(message: QueueMessage): Promise<void>
+  send(message: QueueMessage): Promise<string | void>
   receiveSingleMessage(): Promise<Message[]>
   deleteMessage(receiptHandle: string): Promise<void>
 }

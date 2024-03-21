@@ -1,6 +1,6 @@
 import fs from 'fs'
 
-import { AppComponents, LodGenerationResult, QueueWorker } from '../types'
+import { AppComponents, LodGenerationResult, QueueMessage, QueueWorker } from '../types'
 import { sleep } from '../utils/timer'
 
 export async function createMessagesConsumerComponent({
@@ -19,6 +19,7 @@ export async function createMessagesConsumerComponent({
     await queue.deleteMessage(messageHandle)
   }
 
+
   async function start() {
     const abServers = (await config.requireString('AB_SERVERS')).split(';')
     logger.info('Starting to listen messages from queue')
@@ -27,13 +28,14 @@ export async function createMessagesConsumerComponent({
       const messages = await queue.receiveSingleMessage()
 
       if (messages.length === 0) {
+        logger.info('No messages received, waiting 20 seconds before trying again')
         await sleep(20 * 1000)
         continue
       }
 
       for (const message of messages) {
         const { MessageId, Body, ReceiptHandle } = message
-        let parsedMessage = undefined
+        let parsedMessage: QueueMessage
 
         try {
           parsedMessage = JSON.parse(JSON.parse(Body!).Message)
