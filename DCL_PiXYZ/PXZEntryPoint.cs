@@ -94,6 +94,7 @@ namespace DCL_PiXYZ
                 UpdateConvertedScenesFile(convertedScenes);
             }
             DoManifestCleanup(isDebug, pathHandler);
+            pxz.Core.ResetSession();
         }
 
         private static void DoManifestCleanup(bool isDebug, SceneConversionPathHandler pathHandler)

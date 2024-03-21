@@ -109,6 +109,7 @@ export async function createMessagesConsumerComponent({
             id: MessageId!
           })
           await removeMessageFromQueue(ReceiptHandle!, parsedMessage.entity.entityId)
+          await sleep(2000)
         }
       }
     }
