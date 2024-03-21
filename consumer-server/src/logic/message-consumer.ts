@@ -19,7 +19,6 @@ export async function createMessagesConsumerComponent({
     await queue.deleteMessage(messageHandle)
   }
 
-
   async function start() {
     const abServers = (await config.requireString('AB_SERVERS')).split(';')
     logger.info('Starting to listen messages from queue')
@@ -39,6 +38,7 @@ export async function createMessagesConsumerComponent({
 
         try {
           parsedMessage = JSON.parse(JSON.parse(Body!).Message)
+          console.log({ parsedMessage })
         } catch (error: any) {
           logger.error('Failed while parsing message from queue', {
             messageHandle: ReceiptHandle!,
@@ -54,6 +54,7 @@ export async function createMessagesConsumerComponent({
               entityType: parsedMessage.entity.entityType,
               entityId: parsedMessage.entity.entityId
             })
+            await removeMessageFromQueue(ReceiptHandle!, parsedMessage.entity.entityId)
             continue
           }
 
@@ -73,7 +74,16 @@ export async function createMessagesConsumerComponent({
               messageHandle: ReceiptHandle!,
               error: result?.error?.message?.replace(/\n|\r\n/g, '') || 'Unexpected failure'
             })
-            await storage.storeFiles([result.logFile], `Failures/${entityId}`)
+
+            await removeMessageFromQueue(ReceiptHandle!, parsedMessage.entity.entityId)
+            if (parsedMessage._retry && parsedMessage._retry >= 3) {
+              console.log('Stop retrying')
+              await storage.storeFiles([result.logFile], `Failures/${entityId}`)
+            } else {
+              console.log('Retrying 2')
+              await queue.send({ ...parsedMessage, _retry: (parsedMessage._retry || 0) + 1 })
+            }
+
             continue
           } else {
             logger.info('LOD generation succeeded', {
@@ -83,7 +93,7 @@ export async function createMessagesConsumerComponent({
             })
             await storage.storeFiles([result.logFile], `${base}/LOD/Sources/${parsedMessage.entity.entityTimestamp.toString()}`)
           }
-
+ 
           logger.info(`About to upload files to bucket`, { entityId, files: result.lodsFiles.join(', ') })
 
           const uploadedFiles = await storage.storeFiles(
@@ -99,6 +109,7 @@ export async function createMessagesConsumerComponent({
           }
           
           fs.rmSync(result.outputPath, { recursive: true, force: true })
+          await removeMessageFromQueue(ReceiptHandle!, parsedMessage.entity.entityId)
         } catch (error: any) {
           logger.error('Failed while handling message from queue', {
             messageHandle: ReceiptHandle!,
@@ -110,7 +121,6 @@ export async function createMessagesConsumerComponent({
             entityId: parsedMessage.entity.entityId,
             id: MessageId!
           })
-          await removeMessageFromQueue(ReceiptHandle!, parsedMessage.entity.entityId)
         }
       }
     }

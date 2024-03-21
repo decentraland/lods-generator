@@ -26,20 +26,55 @@ describe('message-consumer', () => {
     it('should remove message from queue at third attempt to generate lods', async () => {
         const { eventEmitter, ...components } = getComponentsAndEmitter()
         const spyRemoveMessageFromQueue = jest.spyOn(components.queue, 'deleteMessage')
-        components.lodGenerator.generate = jest.fn().mockResolvedValue(() => Promise.resolve({ lodsFiles: [], logFile: 'test', error: { message: 'test', detailedError: 'unit-test' }, outputPath: os.tmpdir() } as LodGenerationResult))
+        const spySendMessage = jest.spyOn(components.queue, 'send')
+        components.lodGenerator.generate = jest.fn().mockResolvedValue({ lodsFiles: [], logFile: 'test', error: { message: 'test', detailedError: 'unit-test' }, outputPath: os.tmpdir() } as LodGenerationResult)
         
         const messageConsumer = await createMessagesConsumerComponent(components)
         const receiptId = await components.queue.send({ entity: { entityType: 'scene', entityId: 'test-id-1', metadata: { scene: { base: '0,0' }} } } as any)
-        const spySendMessage = jest.spyOn(components.queue, 'send')
+        spySendMessage.mockClear()
 
         messageConsumer.start({} as any)
         
-        
+        let auxCount = 0
         await new Promise(resolve => {
             eventEmitter.on('messageDeleted', () => {
-                expect(spySendMessage).toHaveBeenCalledTimes(3)
-                expect(spyRemoveMessageFromQueue).toHaveBeenCalledWith(receiptId)
-                resolve(undefined)
+                if (auxCount <= 2) {
+                    auxCount++
+                    return
+                } else {
+                    expect(spySendMessage).toHaveBeenCalledTimes(3)
+                    expect(spyRemoveMessageFromQueue).toHaveBeenCalledWith(receiptId)
+                    resolve(undefined)
+                }
+            })
+        })
+
+        await messageConsumer.stop()
+    })
+
+    it.only('should remove message from queue at third attempt and store log fail', async () => {
+        const { eventEmitter, ...components } = getComponentsAndEmitter()
+        const spyStoreFiles = jest.spyOn(components.storage, 'storeFiles')
+        components.lodGenerator.generate = jest.fn().mockResolvedValue({ lodsFiles: [], logFile: 'test', error: { message: 'test', detailedError: 'unit-test' }, outputPath: os.tmpdir() } as LodGenerationResult)
+        
+        const messageConsumer = await createMessagesConsumerComponent(components)
+        await components.queue.send({ entity: { entityType: 'scene', entityId: 'test-id-1', metadata: { scene: { base: '0,0' }} } } as any)
+
+        messageConsumer.start({} as any)
+        
+        let auxCount = 0
+        await new Promise(resolve => {
+            eventEmitter.on('messageDeleted', () => {
+                console.log('Arrived', { auxCount })
+                if (auxCount <= 2) {
+                    console.log('Here')
+                    auxCount++
+                    return
+                } else {
+                    console.log('or Here')
+                    expect(spyStoreFiles).toHaveBeenCalledTimes(1)
+                    resolve(undefined)
+                }
             })
         })
 
@@ -65,7 +100,7 @@ function getComponentsAndEmitter() {
         generate: jest.fn().mockResolvedValue({} as any)
     }
     const storage: StorageComponent = {
-        storeFiles: jest.fn().mockResolvedValue('')
+        storeFiles: jest.fn().mockResolvedValue([''])
     }
     const bundleTriggerer: BundleTriggererComponent = {
         queueGeneration: jest.fn().mockResolvedValue('')

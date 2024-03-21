@@ -23,8 +23,11 @@ export function createMemoryQueueAdapter(eventEmitter: EventEmitter = new EventE
   }
 
   async function deleteMessage(receiptHandle: string): Promise<void> {
+    console.log('Check')
     queue.delete(receiptHandle)
+    console.log('Check 2', { eventEmitter })
     eventEmitter.emit('messageDeleted', receiptHandle)
+    console.log('Check 3')
   }
 
   return { send, receiveSingleMessage, deleteMessage }
