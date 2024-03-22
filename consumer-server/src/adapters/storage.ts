@@ -6,7 +6,7 @@ import mime from 'mime-types'
 import { AppComponents, StorageComponent } from '../types'
 
 export async function createCloudStorageAdapter({ config }: Pick<AppComponents, 'config'>): Promise<StorageComponent> {
-  const bucket = await config.getString('BUCKET')
+  const bucket = await config.requireString('BUCKET')
   const bucketEndpoint = (await config.getString('BUCKET_ENDPOINT')) || 'https://s3.amazonaws.com'
   const region = (await config.getString('AWS_REGION')) || 'us-east-1'
 

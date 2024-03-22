@@ -22,6 +22,7 @@ export type BaseComponents = {
   metrics: IMetricsComponent<keyof typeof metricDeclarations>
   queue: QueueComponent
   messageConsumer: QueueWorker
+  messageProcessor: MessageProcessorComponent
   lodGenerator: LodGeneratorComponent
   storage: StorageComponent
   fetcher: IFetchComponent
@@ -64,6 +65,12 @@ export type QueueMessage = {
       }
     }
   }
+  /**
+   * This metadata property keeps track of the number of times the same message has been retried.
+   * 'undefined' means that the message was not retried yet.
+   * @type {(number | undefined)}
+   */
+  _retry?: number
 }
 
 export type QueueComponent = {
@@ -89,8 +96,8 @@ export type BundleTriggererComponent = {
   queueGeneration(entityId: string, lods: string[], abServer: string): Promise<Response>
 }
 
-export type MessageHandlerComponent = {
-  handle(message: QueueMessage): Promise<void>
+export type MessageProcessorComponent = {
+  process(message: QueueMessage, receiptMessageHandle: string): Promise<void>
 }
 
 export type StorageComponent = {
