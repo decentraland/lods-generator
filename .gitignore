@@ -20,7 +20,7 @@ DCL_PiXYZ/obj/
 CLI_Tool/
 
 # Nuget Folder
-local_pacjes/
+local_packages/
 
 old
 *.sw[a-z]
