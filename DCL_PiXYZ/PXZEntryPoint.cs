@@ -297,9 +297,8 @@ namespace DCL_PiXYZ
             foreach (string s in pxz.Core.ListTokens().list)
                 pxz.Core.AddWantedToken(s);
             
-            // if no license is found, try to configure a license server
             if (!pxz.Core.CheckLicense())
-                pxz.Core.ConfigureLicenseServer("18.204.36.86", 27000);
+                pxz.Core.InstallLicense("pixyzsdk-30032024.lic");
         }
 
         private static void CreateDirectories(SceneConversionInfo sceneConversionInfo)
