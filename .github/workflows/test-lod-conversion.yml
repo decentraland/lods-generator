@@ -11,6 +11,14 @@ jobs:
     - uses: actions/checkout@v2
       with:
         lfs: true
+        
+    - name: Checkout NuGet PiXYZ package
+      uses: actions/checkout@v2
+      with:
+        repository: 'decentraland/PiXYZ-NuGetPackage'
+        token: ${{ secrets.PAT_NUGET_TOKEN }}
+        path: 'PiXYZ-NuGetPackage'  
+        lfs: true
 
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
