@@ -44,6 +44,7 @@ export async function createMessageProcesorComponent({
           entityType: message.entity.entityType,
           entityId: message.entity.entityId
         })
+        await queue.deleteMessage(receiptMessageHandle)
         return
       }
 
@@ -75,6 +76,7 @@ export async function createMessageProcesorComponent({
           await storage.storeFiles([lodGenerationResult.logFile], `failures/${base}`)
         }
 
+        await queue.deleteMessage(receiptMessageHandle)
         return
       }
 
@@ -91,6 +93,7 @@ export async function createMessageProcesorComponent({
 
       logger.info('Publishing message to AssetBundle converter', { entityId, base })
       await Promise.all(abServers.map((abServer) => bundleTriggerer.queueGeneration(entityId, uploadedFiles, abServer)))
+      await queue.deleteMessage(receiptMessageHandle)
     } catch (error: any) {
       logger.error('Unexpected failure while handling message from queue', {
         entityId: message.entity.entityId,
@@ -101,11 +104,11 @@ export async function createMessageProcesorComponent({
       if (retry < 3) {
         await reQueue(message)
       }
+      await queue.deleteMessage(receiptMessageHandle)
     } finally {
       if (outputPath && fs.existsSync(outputPath)) {
         fs.rmSync(outputPath, { recursive: true, force: true })
       }
-      await queue.deleteMessage(receiptMessageHandle)
     }
   }
 
