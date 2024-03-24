@@ -89,7 +89,7 @@ export type LodGenerationResult = {
 }
 
 export type LodGeneratorComponent = {
-  generate(basePointer: string): Promise<LodGenerationResult>
+  generate(basePointer: string, timeout: number): Promise<LodGenerationResult>
 }
 
 export type BundleTriggererComponent = {

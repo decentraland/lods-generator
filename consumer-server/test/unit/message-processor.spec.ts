@@ -193,7 +193,7 @@ describe('message-processor', () => {
     expect(fs.rmSync).toHaveBeenCalledWith('outputPath', { recursive: true, force: true })
   })
 
-  it('store log file when lod generation fails on third attempt', async () => {
+  it('should store log file when lod generation fails on third attempt', async () => {
     const components = getMessageProcessorMockComponents()
     components.lodGenerator.generate.mockResolvedValue({
         lodsFiles: [],
@@ -223,6 +223,93 @@ describe('message-processor', () => {
     expect(components.queue.deleteMessage).toHaveBeenCalledWith('receiptHandle-5')
     expect(components.storage.storeFiles).toHaveBeenCalledWith(['logFile.txt'], 'failures/0,0')
     expect(components.queue.send).not.toHaveBeenCalled()
+  })
+
+  it('should call lod generator with a timeout of 20 minutes on first attempt', async () => {
+    const components = getMessageProcessorMockComponents()
+    const messageProcessor = await createMessageProcesorComponent(components)
+    const message = {
+      entity: {
+        entityType: 'scene',
+        entityId: 'randomId',
+        entityTimestamp: 0,
+        metadata: {
+          scene: {
+            base: '0,0'
+          }
+        }
+      }
+    }
+
+    await messageProcessor.process(message, 'receiptHandle-6')
+
+    expect(components.lodGenerator.generate).toHaveBeenCalledWith('0,0', 20)
+  })
+  
+  it('should call lod generator with a timeout of 40 minutes on second attempt', async () => {
+    const components = getMessageProcessorMockComponents()
+    const messageProcessor = await createMessageProcesorComponent(components)
+    const message = {
+      entity: {
+        entityType: 'scene',
+        entityId: 'randomId',
+        entityTimestamp: 0,
+        metadata: {
+          scene: {
+            base: '0,0'
+          }
+        }
+      },
+      _retry: 1
+    }
+
+    await messageProcessor.process(message, 'receiptHandle-7')
+
+    expect(components.lodGenerator.generate).toHaveBeenCalledWith('0,0', 40)
+  })
+
+  it('should call lod generator with a timeout of 60 minutes on third attempt', async () => {
+    const components = getMessageProcessorMockComponents()
+    const messageProcessor = await createMessageProcesorComponent(components)
+    const message = {
+      entity: {
+        entityType: 'scene',
+        entityId: 'randomId',
+        entityTimestamp: 0,
+        metadata: {
+          scene: {
+            base: '0,0'
+          }
+        }
+      },
+      _retry: 2
+    }
+
+    await messageProcessor.process(message, 'receiptHandle-7')
+
+    expect(components.lodGenerator.generate).toHaveBeenCalledWith('0,0', 60)
+  })
+
+  it('should call lod generator with a timeout of 80 minutes on fourth attempt', async () => {
+    const components = getMessageProcessorMockComponents()
+    const messageProcessor = await createMessageProcesorComponent(components)
+    const message = {
+      entity: {
+        entityType: 'scene',
+        entityId: 'randomId',
+        entityTimestamp: 0,
+        metadata: {
+          scene: {
+            base: '0,0'
+          }
+        }
+      },
+      _retry: 3
+    }
+
+    await messageProcessor.process(message, 'receiptHandle-7')
+
+    expect(components.lodGenerator.generate).toHaveBeenCalledWith('0,0', 80)
   })
 })
 

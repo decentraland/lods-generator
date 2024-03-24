@@ -36,8 +36,8 @@ export async function createMessageProcesorComponent({
   }
 
   async function process(message: QueueMessage, receiptMessageHandle: string): Promise<void> {
-    const retry = (message._retry || 0)
-    let outputPath: string | undefined 
+    const retry = message._retry || 0
+    let outputPath: string | undefined
     try {
       if (message.entity.entityType !== 'scene') {
         logger.debug(`Entity is not a scene, will not be processed`, {
@@ -55,14 +55,15 @@ export async function createMessageProcesorComponent({
         base
       })
 
-      const lodGenerationResult = await lodGenerator.generate(base)
+      const timeoutInMinutes = (retry + 1) * 20
+      const lodGenerationResult = await lodGenerator.generate(base, timeoutInMinutes)
       outputPath = lodGenerationResult.outputPath
 
       if (lodGenerationResult.error) {
         logger.error('Error while generating LOD', {
           entityId,
           base,
-          error: lodGenerationResult?.error?.message.replace(/\n|\r\n/g, '') || 'Check log bucket for more details'
+          error: lodGenerationResult?.error?.message.replace(/\n|\r\n/g, ' ') || 'Check log bucket for more details'
         })
 
         if (retry < 3) {
