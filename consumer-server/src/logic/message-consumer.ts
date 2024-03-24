@@ -21,6 +21,7 @@ export async function createMessagesConsumerComponent({
       const messages = await queue.receiveSingleMessage()
 
       if (messages.length === 0) {
+        logger.info('No messages found in queue, waiting 20 seconds to check again')
         await sleep(20 * 1000)
         continue
       }
@@ -41,6 +42,8 @@ export async function createMessagesConsumerComponent({
         }
 
         await messageProcessor.process(parsedMessage, ReceiptHandle!)
+        // sleep 2 seconds to release license server
+        await sleep(2000)
       }
     }
   }
