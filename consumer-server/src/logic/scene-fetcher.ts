@@ -6,11 +6,7 @@ export async function createEntityFetcherComponent({
   config,
   fetcher
 }: Pick<AppComponents, 'config' | 'fetcher'>): Promise<SceneFetcherComponent> {
-  const catalystUrl = await config.getString('CATALYST_URL')
-
-  if (!catalystUrl) {
-    throw new Error('Failed while bootstraping entity fetcher component: CATALYST_URL is not defined')
-  }
+  const catalystUrl = await config.requireString('CATALYST_URL')
 
   const contentClient = await createCatalystClient({ url: catalystUrl, fetcher }).getContentClient()
 

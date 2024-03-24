@@ -14,7 +14,7 @@ export function createLodGeneratorComponent(): LodGeneratorComponent {
     fs.mkdirSync(outputPath, { recursive: true })
   }
 
-  async function generate(basePointer: string): Promise<LodGenerationResult> {
+  async function generate(basePointer: string, timeoutInMinutes: number): Promise<LodGenerationResult> {
     const processOutput = `${outputPath}/${basePointer}`
     let result: LodGenerationResult = {
       error: undefined,
@@ -26,24 +26,44 @@ export function createLodGeneratorComponent(): LodGeneratorComponent {
     const commandToExecute = `${lodGeneratorProgram} "coords" "${basePointer}" "${outputPath}" "${sceneLodEntitiesManifestBuilder}" "false" "false"`
 
     result = await new Promise((resolve, _) => {
-      exec(commandToExecute, { timeout: 60 * 60 * 1000 }, (error, _, stderr) => {
+      exec(commandToExecute, { timeout: timeoutInMinutes * 60 * 1000 }, (error, _, stderr) => {
         if (error) {
           if (error.killed) {
-            result.error = {
-              message: 'Operation timed out after 10 minutes',
-              detailedError: ((stderr as string) || '').replace('\n', ' ')
-            }
+            resolve({
+              error: {
+                message: 'Operation timed out after',
+                detailedError: 'LOD generation process timeout after ' + timeoutInMinutes + ' minutes'
+              },
+              lodsFiles: [],
+              logFile: '',
+              outputPath: processOutput
+            })
           } else {
-            result.error = {
-              message: error?.message || 'Unexpected error',
-              detailedError: ((stderr as string) || '').replace('\n', ' ')
-            }
+            resolve({
+              error: {
+                message: error?.message || 'Unexpected error',
+                detailedError: ((stderr as string) || '').replace(/\n|\r\n/g, ' ')
+              },
+              lodsFiles: [],
+              logFile: '',
+              outputPath: processOutput
+            })
           }
         }
 
-        if (fs.existsSync(processOutput)) {
+        if (!fs.existsSync(processOutput)) {
+          resolve({
+            error: {
+              message: 'No LODs were generated',
+              detailedError: 'No files found on output directory after LOD generation finished'
+            },
+            lodsFiles: [],
+            logFile: '',
+            outputPath: processOutput
+          })
+        } else {
           const generatedFiles = fs.readdirSync(processOutput)
-          result = generatedFiles.reduce((acc, file) => {
+          const parsedResult = generatedFiles.reduce((acc, file) => {
             if (file.endsWith('output.txt')) {
               acc.logFile = `${processOutput}/${file}`
             } else {
@@ -52,9 +72,14 @@ export function createLodGeneratorComponent(): LodGeneratorComponent {
             return acc
           }, result)
 
-          resolve(result)
-        } else {
-          resolve(result)
+          if (parsedResult.lodsFiles.length === 0) {
+            parsedResult.error = {
+              message: 'No LODs were generated',
+              detailedError: 'No LOD files found on output directory after LOD generation finished'
+            }
+          }
+
+          resolve(parsedResult)
         }
       })
     })

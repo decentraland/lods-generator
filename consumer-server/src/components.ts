@@ -13,6 +13,7 @@ import { createCloudStorageAdapter } from './adapters/storage'
 import { createEntityFetcherComponent } from './logic/scene-fetcher'
 import { createMemoryQueueAdapter } from './adapters/memory-queue'
 import { createBundleTriggererComponent } from './logic/bundle-triggerer'
+import { createMessageProcesorComponent } from './logic/message-processor'
 
 export async function initComponents(): Promise<AppComponents> {
   const config = await createDotEnvConfigComponent(
@@ -32,13 +33,25 @@ export async function initComponents(): Promise<AppComponents> {
   await instrumentHttpServerWithMetrics({ metrics, server, config })
 
   const sceneFetcher = await createEntityFetcherComponent({ config, fetcher })
-  const sqsEndpoint = await config.getString('QUEUE_URL')
+  const sqsEndpoint = await config.requireString('QUEUE_URL')
   const queue = sqsEndpoint ? await createSqsAdapter(sqsEndpoint) : createMemoryQueueAdapter()
   const lodGenerator = createLodGeneratorComponent()
   const storage = await createCloudStorageAdapter({ config })
   const bundleTriggerer = await createBundleTriggererComponent({ fetcher, config })
+  const messageProcessor = await createMessageProcesorComponent({
+    logs,
+    config,
+    queue,
+    lodGenerator,
+    storage,
+    bundleTriggerer
+  })
 
-  const messageConsumer = await createMessagesConsumerComponent({ logs, config, queue, lodGenerator, storage, bundleTriggerer })
+  const messageConsumer = await createMessagesConsumerComponent({
+    logs,
+    queue,
+    messageProcessor
+  })
 
   return {
     config,
@@ -48,6 +61,7 @@ export async function initComponents(): Promise<AppComponents> {
     statusChecks,
     queue,
     messageConsumer,
+    messageProcessor,
     lodGenerator,
     bundleTriggerer,
     storage,
