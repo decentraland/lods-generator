@@ -311,6 +311,43 @@ describe('message-processor', () => {
 
     expect(components.lodGenerator.generate).toHaveBeenCalledWith('0,0', 80)
   })
+
+  it('should not remove neither requeue the message if gets a license server error from LOD process', async () => {
+    const components = getMessageProcessorMockComponents()
+    components.lodGenerator.generate.mockResolvedValue({
+        lodsFiles: [],
+        logFile: '',
+        error: {
+            message: 'License server error',
+            detailedError: 'License server error'
+        },
+        outputPath: ''})
+
+    // mock utils/sleep functions
+    const utils = require('../../src/utils/timer')
+    utils.sleep = jest.fn()
+    const messageProcessor = await createMessageProcesorComponent(components)
+    const message = {
+      entity: {
+        entityType: 'scene',
+        entityId: 'randomId',
+        entityTimestamp: 0,
+        metadata: {
+          scene: {
+            base: '0,0'
+          }
+        }
+      }
+    }
+
+    await messageProcessor.process(message, 'receiptHandle-8')
+
+    expect(components.queue.deleteMessage).not.toHaveBeenCalled()
+    expect(components.queue.send).not.toHaveBeenCalled()
+    expect(utils.sleep).toHaveBeenCalledWith(60 * 1000)
+    // unmock utils/sleep functions
+    jest.unmock('../../src/utils/timer')
+  })
 })
 
 function getMessageProcessorMockComponents() {

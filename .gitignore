@@ -44,6 +44,7 @@ tsconfig.tsbuildinfo
 .DS_Store
 .env
 .env.local
+.env.admin
 .env.development.local
 .env.test.local
 .env.production.local
