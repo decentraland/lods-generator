@@ -1,6 +1,7 @@
 import fs from 'fs'
 
 import { AppComponents, MessageProcessorComponent, QueueMessage } from '../types'
+import { sleep } from '../utils/timer'
 
 export async function createMessageProcesorComponent({
   logs,
@@ -17,19 +18,15 @@ export async function createMessageProcesorComponent({
   const abServers = (await config.requireString('AB_SERVERS')).split(';')
 
   async function reQueue(message: QueueMessage): Promise<void> {
-    const currentAttempt = (message._retry || 0) + 1
+    const retry = (message._retry || 0) + 1
     logger.info('Re-queuing message', {
       entityId: message.entity.entityId,
       base: message.entity.metadata.scene.base,
-      currentAttempt
+      retry
     })
     await queue.send({
       ...message,
-      /* if it is the first try:
-            /* currentAttempt = 1 
-            /* which is the value desired for the _retry property on next iteration
-            /* (meaning that it will be the first retry) */
-      _retry: currentAttempt
+      _retry: retry
     })
 
     return
@@ -52,7 +49,8 @@ export async function createMessageProcesorComponent({
       const base = message.entity.metadata.scene.base
       logger.info('Processing scene deployment', {
         entityId,
-        base
+        base,
+        attempt: retry + 1
       })
 
       const timeoutInMinutes = (retry + 1) * 20
@@ -66,6 +64,13 @@ export async function createMessageProcesorComponent({
           error: lodGenerationResult?.error?.message.replace(/\n|\r\n/g, ' ') || 'Check log bucket for more details'
         })
 
+        if (lodGenerationResult.error.message.toLowerCase().includes('license')) {
+          logger.warn('License server error detected, it will not recover itself. Manual action is required.')
+          logger.info('Retrying message in 1 minute.')
+          await sleep(60 * 1000)
+          return
+        }
+
         if (retry < 3) {
           await reQueue(message)
         } else {
@@ -78,6 +83,7 @@ export async function createMessageProcesorComponent({
         }
 
         await queue.deleteMessage(receiptMessageHandle)
+
         return
       }
 
