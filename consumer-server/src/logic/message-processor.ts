@@ -49,7 +49,8 @@ export async function createMessageProcesorComponent({
       const base = message.entity.metadata.scene.base
       logger.info('Processing scene deployment', {
         entityId,
-        base
+        base,
+        attempt: retry + 1
       })
 
       const timeoutInMinutes = (retry + 1) * 20
