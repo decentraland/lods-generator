@@ -6,7 +6,7 @@ export async function createBundleTriggererComponent({
   fetcher,
   config
 }: Pick<AppComponents, 'fetcher' | 'config'>): Promise<BundleTriggererComponent> {
-  const abToken = (await config.requireString('AB_TOKEN'))
+  const abToken = await config.requireString('AB_TOKEN')
 
   async function queueGeneration(entityId: string, lods: string[], abServer: string): Promise<Response> {
     const body = JSON.stringify({
@@ -24,7 +24,13 @@ export async function createBundleTriggererComponent({
     })
     const headers = { 'Content-Type': 'application/json', Authorization: abToken }
 
-    return await fetcher.fetch(`${abServer}/queue-task`, { method: 'POST', body, headers, attempts: 3, retryDelay: 1000 })
+    return await fetcher.fetch(`${abServer}/queue-task`, {
+      method: 'POST',
+      body,
+      headers,
+      attempts: 3,
+      retryDelay: 1000
+    })
   }
 
   return { queueGeneration }
