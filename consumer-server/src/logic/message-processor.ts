@@ -58,18 +58,18 @@ export async function createMessageProcesorComponent({
       outputPath = lodGenerationResult.outputPath
 
       if (lodGenerationResult.error) {
-        logger.error('Error while generating LOD', {
-          entityId,
-          base,
-          error: lodGenerationResult?.error?.message.replace(/\n|\r\n/g, ' ') || 'Check log bucket for more details'
-        })
-
         if (lodGenerationResult.error.message.toLowerCase().includes('license')) {
           logger.warn('License server error detected, it will not recover itself. Manual action is required.')
           logger.info('Retrying message in 1 minute.')
           await sleep(60 * 1000)
           return
         }
+
+        logger.error('Error while generating LOD', {
+          entityId,
+          base,
+          error: lodGenerationResult?.error?.message.replace(/\n|\r\n/g, ' ') || 'Check log bucket for more details'
+        })
 
         if (retry < 3) {
           await reQueue(message)
