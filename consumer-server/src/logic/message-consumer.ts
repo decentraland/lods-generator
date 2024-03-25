@@ -42,8 +42,8 @@ export async function createMessagesConsumerComponent({
         }
 
         await messageProcessor.process(parsedMessage, ReceiptHandle!)
-        // sleep 2 seconds to release license server
-        await sleep(2000)
+        // sleep 3 seconds to release license server
+        await sleep(3000)
       }
     }
   }
