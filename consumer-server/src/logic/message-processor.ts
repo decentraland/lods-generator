@@ -1,6 +1,6 @@
 import fs from 'fs'
 
-import { AppComponents, MessageProcessorComponent, QueueMessage } from '../types'
+import { AppComponents, HealthState, MessageProcessorComponent, QueueMessage } from '../types'
 import { sleep } from '../utils/timer'
 
 export async function createMessageProcesorComponent({
@@ -65,9 +65,12 @@ export async function createMessageProcesorComponent({
         if (lodGenerationResult.error.message.toLowerCase().includes('license')) {
           logger.warn('License server error detected, it will not recover itself. Manual action is required.')
           logger.info('Retrying message in 1 minute.')
+          metrics.observe('license_server_health', {}, HealthState.Unhealthy)
           await sleep(60 * 1000)
           return
         }
+
+        metrics.observe('license_server_health', {}, HealthState.Healthy)
 
         logger.error('Error while generating LOD', {
           entityId,
@@ -93,7 +96,8 @@ export async function createMessageProcesorComponent({
         return
       }
 
-      metrics.observe('lod_generation_duration', {}, generationProcessDuration / 1000 / 60)
+      metrics.observe('license_server_health', {}, HealthState.Healthy)
+      metrics.observe('lod_generation_duration_minutes', {}, generationProcessDuration / 1000 / 60)
       logger.info('Uploading files to bucket', {
         entityId,
         base,
