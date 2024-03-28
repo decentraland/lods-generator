@@ -3,13 +3,24 @@ import {
   Message,
   ReceiveMessageCommand,
   SQSClient,
-  SendMessageCommand
+  SendMessageCommand,
+  SetQueueAttributesCommand
 } from '@aws-sdk/client-sqs'
 
 import { QueueMessage, QueueComponent } from '../types'
 
 export async function createSqsAdapter(endpoint: string): Promise<QueueComponent> {
   const client = new SQSClient({ endpoint })
+
+  // ensure 14 days of retention
+  await client.send(
+    new SetQueueAttributesCommand({
+      QueueUrl: endpoint,
+      Attributes: {
+        MessageRetentionPeriod: '1209600'
+      }
+    })
+  )
 
   async function send(message: QueueMessage): Promise<void> {
     const sendCommand = new SendMessageCommand({
