@@ -6,13 +6,14 @@ import { sleep } from '../utils/timer'
 export async function createMessageProcesorComponent({
   logs,
   config,
+  metrics,
   queue,
   lodGenerator,
   storage,
   bundleTriggerer
 }: Pick<
   AppComponents,
-  'logs' | 'config' | 'queue' | 'lodGenerator' | 'storage' | 'bundleTriggerer'
+  'logs' | 'config' | 'metrics' | 'queue' | 'lodGenerator' | 'storage' | 'bundleTriggerer'
 >): Promise<MessageProcessorComponent> {
   const logger = logs.getLogger('message-procesor')
   const abServers = (await config.requireString('AB_SERVERS')).split(';')
@@ -45,6 +46,7 @@ export async function createMessageProcesorComponent({
         return
       }
 
+      
       const entityId = message.entity.entityId
       const base = message.entity.metadata.scene.base
       logger.info('Processing scene deployment', {
@@ -52,9 +54,11 @@ export async function createMessageProcesorComponent({
         base,
         attempt: retry + 1
       })
-
+      
       const timeoutInMinutes = (retry + 1) * 20
+      const generationProcessStartTime = Date.now()
       const lodGenerationResult = await lodGenerator.generate(base, timeoutInMinutes)
+      const generationProcessDuration = Date.now() - generationProcessStartTime
       outputPath = lodGenerationResult.outputPath
 
       if (lodGenerationResult.error) {
@@ -73,6 +77,7 @@ export async function createMessageProcesorComponent({
 
         if (retry < 3) {
           await reQueue(message)
+          metrics.increment('lod_generation_count', { status: 'retryable' }, 1)
         } else {
           logger.warn('Max attempts reached, moving to error bucket', {
             entityId,
@@ -80,6 +85,7 @@ export async function createMessageProcesorComponent({
             attempt: retry + 1
           })
           await storage.storeFiles([lodGenerationResult.logFile], `failures/${base}`)
+          metrics.increment('lod_generation_count', { status: 'failed' }, 1)
         }
 
         await queue.deleteMessage(receiptMessageHandle)
@@ -87,6 +93,7 @@ export async function createMessageProcesorComponent({
         return
       }
 
+      metrics.observe('lod_generation_duration', {}, generationProcessDuration / 1000 / 60)
       logger.info('Uploading files to bucket', {
         entityId,
         base,
@@ -101,6 +108,7 @@ export async function createMessageProcesorComponent({
       logger.info('Publishing message to AssetBundle converter', { entityId, base })
       await Promise.all(abServers.map((abServer) => bundleTriggerer.queueGeneration(entityId, uploadedFiles, abServer)))
       await queue.deleteMessage(receiptMessageHandle)
+      metrics.increment('lod_generation_count', { status: 'succeed' }, 1)
     } catch (error: any) {
       logger.error('Unexpected failure while handling message from queue', {
         entityId: message.entity.entityId,
@@ -112,6 +120,7 @@ export async function createMessageProcesorComponent({
         await reQueue(message)
       }
       await queue.deleteMessage(receiptMessageHandle)
+      metrics.increment('lod_generation_count', { status: 'failed' }, 1)
     } finally {
       if (outputPath && fs.existsSync(outputPath)) {
         fs.rmSync(outputPath, { recursive: true, force: true })

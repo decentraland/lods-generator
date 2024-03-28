@@ -1,7 +1,7 @@
 import { createDotEnvConfigComponent } from '@well-known-components/env-config-provider'
 import { createLogComponent } from '@well-known-components/logger'
-import { createServerComponent, createStatusCheckComponent } from '@well-known-components/http-server'
-import { createMetricsComponent, instrumentHttpServerWithMetrics } from '@well-known-components/metrics'
+import { createServerComponent, createStatusCheckComponent, instrumentHttpServerWithPromClientRegistry } from '@well-known-components/http-server'
+import { createMetricsComponent } from '@well-known-components/metrics'
 import { createFetchComponent } from '@well-known-components/fetch-component'
 
 import { AppComponents, GlobalContext } from './types'
@@ -24,13 +24,13 @@ export async function initComponents(): Promise<AppComponents> {
     }
   )
 
-  const metrics = await createMetricsComponent(metricDeclarations, { config })
+  const metrics = await createMetricsComponent({ ...metricDeclarations }, { config })
   const logs = await createLogComponent({ metrics })
   const server = await createServerComponent<GlobalContext>({ config, logs }, {})
   const statusChecks = await createStatusCheckComponent({ server, config })
   const fetcher = createFetchComponent({ defaultHeaders: { Origin: 'lods-generator' } })
 
-  await instrumentHttpServerWithMetrics({ metrics, server, config })
+  await instrumentHttpServerWithPromClientRegistry({ metrics, server, config, registry: metrics.registry! })
 
   const sceneFetcher = await createEntityFetcherComponent({ config, fetcher })
   const sqsEndpoint = await config.requireString('QUEUE_URL')
@@ -41,6 +41,7 @@ export async function initComponents(): Promise<AppComponents> {
   const messageProcessor = await createMessageProcesorComponent({
     logs,
     config,
+    metrics,
     queue,
     lodGenerator,
     storage,
