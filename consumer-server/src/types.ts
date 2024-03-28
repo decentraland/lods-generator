@@ -107,3 +107,8 @@ export type StorageComponent = {
 export type SceneFetcherComponent = {
   fetchByPointers(scenePointers: string[]): Promise<any>
 }
+
+export enum HealthState {
+  Healthy = 1,
+  Unhealthy = 2,
+}
