@@ -115,8 +115,8 @@ export async function createMessageProcesorComponent({
       metrics.increment('lod_generation_count', { status: 'succeed' }, 1)
     } catch (error: any) {
       logger.error('Unexpected failure while handling message from queue', {
-        entityId: message.entity.entityId,
-        base: message.entity.metadata.scene.base,
+        entityId: message.entity?.entityId,
+        base: message.entity?.metadata?.scene?.base,
         attempt: retry + 1,
         error: error.message
       })
