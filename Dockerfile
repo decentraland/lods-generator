@@ -49,7 +49,9 @@ WORKDIR /build
 COPY RoadCoordinates.json ./
 COPY DCL_PiXYZ/ ./DCL_PiXYZ
 COPY nuget.config ./
-COPY local_packages/ ./local_packages
+ARG PIXYZ_PACKAGE
+COPY ${PIXYZ_PACKAGE} ./PiXYZ-NuGetPackage/
+
 COPY PiXYZ.sln ./
 
 RUN dotnet publish -c Release -r win10-x64 -o ./publish --self-contained true
