@@ -19,6 +19,9 @@ DCL_PiXYZ/bin/
 DCL_PiXYZ/obj/
 CLI_Tool/
 
+# Nuget Folder
+PiXYZ-NuGetPackage/
+
 old
 *.sw[a-z]
 /deploy/node_modules

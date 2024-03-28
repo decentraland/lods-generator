@@ -28,6 +28,14 @@ jobs:
       id: get_commit_sha
       run: echo "::set-output name=sha::$(git rev-parse HEAD)"
 
+    - name: Checkout NuGet PiXYZ package
+      uses: actions/checkout@v2
+      with:
+        repository: 'decentraland/PiXYZ-NuGetPackage'
+        token: ${{ secrets.PAT_NUGET_TOKEN }}
+        path: 'PiXYZ-NuGetPackage'  
+        lfs: true
+
     - name: Login to DockerHub
       uses: docker/login-action@v2
       with:
@@ -38,5 +46,5 @@ jobs:
     - name: Build and push
       id: docker_build
       run: |
-        docker build --build-arg COMMIT_HASH=${{ github.sha }} --build-arg VULKAN_DLL_PATH=./vulkan-sdt/1.3.268.0/runtime/x64/vulkan-1.dll -t quay.io/decentraland/lods-generator:${{ github.sha }} .
+        docker build --build-arg COMMIT_HASH=${{ github.sha }} --build-arg PIXYZ_PACKAGE=./PiXYZ-NuGetPackage --build-arg VULKAN_DLL_PATH=./vulkan-sdt/1.3.268.0/runtime/x64/vulkan-1.dll -t quay.io/decentraland/lods-generator:${{ github.sha }} .
         docker push quay.io/decentraland/lods-generator:${{ github.sha }}
