@@ -23,7 +23,8 @@ FROM base as scene-lod-build
 
 WORKDIR /scene-lod
 
-COPY scene-lod-entities-manifest-builder/package*.json ./
+COPY scene-lod-entities-manifest-builder/package.json ./
+COPY scene-lod-entities-manifest-builder/package-lock.json ./
 RUN npm ci && npm cache clean --force
 
 COPY scene-lod-entities-manifest-builder .
@@ -82,7 +83,9 @@ WORKDIR /app
 
 COPY RoadCoordinates.json ./
 COPY --from=scene-lod-build /scene-lod/dist ./scene-lod/dist
-COPY --from=scene-lod-build /scene-lod/package*.json ./scene-lod/
+COPY --from=scene-lod-build /scene-lod/package.json ./scene-lod/
+COPY --from=scene-lod-build /scene-lod/package-lock.json ./scene-lod/
+
 COPY --from=scene-lod-build /scene-lod/node_modules ./scene-lod/node_modules
 COPY --from=scene-lod-build /scene-lod/.env.default ./scene-lod/dist/.env.default
 ARG COMMIT_HASH
