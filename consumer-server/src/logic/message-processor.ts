@@ -18,12 +18,7 @@ export async function createMessageProcesorComponent({
   const logger = logs.getLogger('message-procesor')
   const abServers = (await config.requireString('AB_SERVERS')).split(';')
 
-  async function reQueue(message: QueueMessage): Promise<void> {
-    if (!message.entity?.metadata?.scene?.base || !message.entity?.entityId) {
-      logger.warn('Message will not be re-queued because it is invalid', { message: JSON.stringify(message) })
-      return
-    }
-    
+  async function reQueue(message: QueueMessage): Promise<void> {    
     const retry = (message._retry || 0) + 1
     logger.info('Re-queuing message', {
       entityId: message.entity.entityId,
@@ -38,12 +33,16 @@ export async function createMessageProcesorComponent({
     return
   }
 
+  function isValid(message: QueueMessage): boolean {
+    return message.entity.entityType === 'scene' && !!message.entity.metadata?.scene?.base && !!message.entity.entityId
+  }
+
   async function process(message: QueueMessage, receiptMessageHandle: string): Promise<void> {
     const retry = message._retry || 0
     let outputPath: string | undefined
     try {
-      if (message.entity.entityType !== 'scene') {
-        logger.debug(`Entity is not a scene, will not be processed`, {
+      if (!isValid(message)) {
+        logger.debug(`Message is not valid to be processed`, {
           entityType: message.entity.entityType,
           entityId: message.entity.entityId
         })
