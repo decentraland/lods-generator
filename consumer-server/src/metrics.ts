@@ -9,7 +9,7 @@ export const metricDeclarations = {
   lod_generation_duration_minutes: {
     help: 'Histogram of lods generation duration in minutes',
     type: IMetricsComponent.HistogramType,
-    buckets: [1, 2, 5, 7, 10, 13, 15, 18, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70, 80].map((minutes) => minutes * 60)
+    buckets: [1, 5, 10, 20, 30, 40, 50, 60, 70, 80]
   },
   lod_generation_count: {
     help: 'Count of lods generation',
