@@ -125,9 +125,16 @@ export async function createMessageProcesorComponent({
       })
       if (retry < 3) {
         await reQueue(message)
+        metrics.increment('lod_generation_count', { status: 'retryable' }, 1)
+      } else {
+        logger.warn('Max attempts reached, message will not be retried', {
+          entityId: message.entity.entityId,
+          base: message.entity.metadata.scene.base,
+          attempt: retry 
+        })
+        metrics.increment('lod_generation_count', { status: 'failed' }, 1)
       }
       await queue.deleteMessage(receiptMessageHandle)
-      metrics.increment('lod_generation_count', { status: 'failed' }, 1)
     } finally {
       if (outputPath && fs.existsSync(outputPath)) {
         fs.rmSync(outputPath, { recursive: true, force: true })
