@@ -19,6 +19,11 @@ export async function createMessageProcesorComponent({
   const abServers = (await config.requireString('AB_SERVERS')).split(';')
 
   async function reQueue(message: QueueMessage): Promise<void> {
+    if (!message.entity?.metadata?.scene?.base || !message.entity?.entityId) {
+      logger.warn('Message will not be re-queued because it is invalid', { message: JSON.stringify(message) })
+      return
+    }
+    
     const retry = (message._retry || 0) + 1
     logger.info('Re-queuing message', {
       entityId: message.entity.entityId,
