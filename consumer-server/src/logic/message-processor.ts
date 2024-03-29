@@ -33,18 +33,17 @@ export async function createMessageProcesorComponent({
     return
   }
 
-  function isValid(message: QueueMessage): boolean {
-    return message.entity.entityType === 'scene' && !!message.entity.metadata?.scene?.base && !!message.entity.entityId
+  function isInvalid(message: QueueMessage): boolean {
+    return message.entity.entityType !== 'scene' && !message.entity.metadata?.scene?.base && !message.entity.entityId
   }
 
   async function process(message: QueueMessage, receiptMessageHandle: string): Promise<void> {
     const retry = message._retry || 0
     let outputPath: string | undefined
     try {
-      if (!isValid(message)) {
-        logger.debug(`Message is not valid to be processed`, {
-          entityType: message.entity.entityType,
-          entityId: message.entity.entityId
+      if (isInvalid(message)) {
+        logger.debug(`Discarding message since it is not a valid scene`, {
+          message: JSON.stringify(message)
         })
         await queue.deleteMessage(receiptMessageHandle)
         return
