@@ -34,7 +34,7 @@ export async function createMessageProcesorComponent({
   }
 
   function isInvalid(message: QueueMessage): boolean {
-    return message.entity.entityType !== 'scene' && !message.entity.metadata?.scene?.base && !message.entity.entityId
+    return message.entity.entityType !== 'scene' || !message.entity.metadata?.scene?.base || !message.entity.entityId
   }
 
   async function process(message: QueueMessage, receiptMessageHandle: string): Promise<void> {
