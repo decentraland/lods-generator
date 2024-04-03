@@ -44,7 +44,7 @@ jobs:
     - name: Create License File
       shell: bash
       run: |
-        echo -n "${{ secrets.LICENSE_FILE }}" > "${{ github.workspace }}/pixyzsdk-15042024.lic"      
+        echo -n "${{ secrets.LICENSE_FILE }}" > "${{ github.workspace }}/publish/pixyzsdk-15042024.lic"      
 
     - name: Install Vulkan SDK
       uses: jakoch/install-vulkan-sdk-action@v1.0.0
