@@ -14,11 +14,10 @@ jobs:
         lfs: true
     
     - name: Create License File
-      shell: pwsh
+      shell: bash
       run: |
-        $content = "${{ secrets.LICENSE_FILE }}"
-        $content | Out-File -FilePath "${{ github.workspace }}\publish\pixyzsdk-15042024.lic" -Encoding UTF8    
-        
+        echo -n "${{ secrets.LICENSE_FILE }}" > "${{ github.workspace }}/pixyzsdk-15042024.lic"
+            
     - name: Checkout NuGet PiXYZ package
       uses: actions/checkout@v2
       with:
