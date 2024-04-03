@@ -29,7 +29,8 @@ namespace DCL_PiXYZ
 
             bool isDebug = true;
             bool installNPM = true;
-
+            string decimationValues = "500";
+            int startingLODLevel = 3;
 
             if (args.Length > 0)
             {
@@ -38,6 +39,8 @@ namespace DCL_PiXYZ
                 defaultSceneLodManifestDirectory = args[3];
                 bool.TryParse(args[4], out isDebug);
                 bool.TryParse(args[5], out installNPM);
+                decimationValues = args[6];
+                int.TryParse(args[7], out startingLODLevel);
             }
 
 
@@ -48,7 +51,7 @@ namespace DCL_PiXYZ
             //PiXYZ was crashing and exiting the application if it was called form the same program
 
             //Scenes param is single coordinates or bulk value. Single scenes are separated by 
-            var sceneConversionInfo = new SceneConversionInfo("7000;3000;1000;500", "triangle", "coords", "single", defaultScene);
+            var sceneConversionInfo = new SceneConversionInfo(decimationValues, "triangle", "coords", "single", defaultScene);
             var pathHandler = new SceneConversionPathHandler(isDebug, defaultOutputPath, defaultSceneLodManifestDirectory, "SuccessScenes.txt", "FailScenes.txt", "PolygonCount.txt" , "FailedGLBImport.txt" , defaultScene);
 
             List<string> roadCoordinates = LoadRoads();
@@ -80,7 +83,10 @@ namespace DCL_PiXYZ
                 if (!await sceneConversionInfo.SceneImporter.DownloadAllContent(pathHandler)) continue;
                 var pxzParams = new PXZParams
                 {
-                    DecimationType = sceneConversionInfo.DecimationType, ParcelAmount = sceneConversionInfo.SceneImporter.GetCurrentScenePointersList().Length, SceneContent = sceneConversionInfo.SceneImporter.sceneContent
+                    DecimationType = sceneConversionInfo.DecimationType, 
+                    ParcelAmount = sceneConversionInfo.SceneImporter.GetCurrentScenePointersList().Length, 
+                    SceneContent = sceneConversionInfo.SceneImporter.sceneContent,
+                    LodLevel = startingLODLevel
                 };
                 foreach (var decimationValue in sceneConversionInfo.DecimationToAnalyze)
                 {

@@ -61,7 +61,7 @@ jobs:
       env:
        PIXYZPRODUCTNAME: ${{ secrets.PIXYZPRODUCTNAME }}
        PIXYZTOKEN: ${{ secrets.PIXYZTOKEN }}
-      run: .\publish\DCL_PiXYZ.exe "coords" "5,19" "${{ github.workspace }}\publish\OutputDirectoryPath" "${{ github.workspace }}\publish\scene-lod-entities-manifest-builder" "false" "true"
+      run: .\publish\DCL_PiXYZ.exe "coords" "5,19" "${{ github.workspace }}\publish\OutputDirectoryPath" "${{ github.workspace }}\publish\scene-lod-entities-manifest-builder" "false" "true" "7000;3000;1000;500" "0"
 
     - name: Check Output Files with Size Tolerance in KB
       run: |
