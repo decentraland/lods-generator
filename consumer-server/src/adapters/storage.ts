@@ -1,4 +1,4 @@
-import { S3Client } from '@aws-sdk/client-s3'
+import { ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
 import fs from 'fs/promises'
 import mime from 'mime-types'
@@ -11,6 +11,17 @@ export async function createCloudStorageAdapter({ config }: Pick<AppComponents, 
   const region = (await config.getString('AWS_REGION')) || 'us-east-1'
 
   const s3 = new S3Client({ region, endpoint: bucketEndpoint })
+
+  async function getFiles(prefix: string): Promise<string[]> {
+    const list = await s3.send(
+      new ListObjectsV2Command({
+        Bucket: bucket,
+        Prefix: prefix
+      })
+    )
+
+    return list.Contents?.filter((file) => !file.Key?.endsWith('output.txt')).map((file) => `${bucketEndpoint}/${bucket}/${file.Key}`) || []
+  }
 
   async function storeFiles(filePaths: string[], prefix: string): Promise<string[]> {
     const files = await Promise.all(
@@ -41,5 +52,5 @@ export async function createCloudStorageAdapter({ config }: Pick<AppComponents, 
     return uploadedFiles
   }
 
-  return { storeFiles }
+  return { storeFiles, getFiles }
 }
