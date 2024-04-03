@@ -1,7 +1,8 @@
 name: Test LOD Conversion
 
 on:
-  workflow_dispatch:
+  pull_request:
+    types: [edited, opened, reopened, synchronize]
 
 jobs:
   build-and-run:
@@ -37,6 +38,13 @@ jobs:
       run: |
           Copy-Item -Path "${{ github.workspace }}\DCL_PiXYZ\bin\Release\netcoreapp3.1\win10-x64\RoadCoordinates.json" -Destination "${{ github.workspace }}\publish"
       shell: pwsh
+      
+    - name: Create License File
+      shell: pwsh
+      run: |
+        $path = "${{ github.workspace }}\publish"
+        New-Item -ItemType Directory -Force -Path $path
+        "${{ secrets.LICENSE_FILE }}" | Out-File -FilePath "$path\pixyzsdk-15042024.lic" -Encoding UTF8
 
     - name: Install Vulkan SDK
       uses: jakoch/install-vulkan-sdk-action@v1.0.0

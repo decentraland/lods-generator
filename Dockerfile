@@ -47,6 +47,7 @@ FROM mcr.microsoft.com/dotnet/core/sdk:3.1 as dotnet-build
 WORKDIR /build
 
 COPY RoadCoordinates.json ./
+COPY ./pixyzsdk-15042024.lic ./pixyzsdk-15042024.lic
 COPY DCL_PiXYZ/ ./DCL_PiXYZ
 COPY nuget.config ./
 ARG PIXYZ_PACKAGE
