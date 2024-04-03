@@ -29,8 +29,8 @@ namespace DCL_PiXYZ
 
             bool isDebug = true;
             bool installNPM = true;
-            string decimationValues = "500";
-            int startingLODLevel = 3;
+            string decimationValues = "7000;3000;1000;500";
+            int startingLODLevel = 0;
 
             if (args.Length > 0)
             {
