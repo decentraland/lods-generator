@@ -12,6 +12,12 @@ jobs:
     - uses: actions/checkout@v2
       with:
         lfs: true
+    
+    - name: Create License File
+      shell: pwsh
+      run: |
+        $content = "${{ secrets.LICENSE_FILE }}"
+        $content | Out-File -FilePath "${{ github.workspace }}\publish\pixyzsdk-15042024.lic" -Encoding UTF8    
         
     - name: Checkout NuGet PiXYZ package
       uses: actions/checkout@v2
@@ -39,11 +45,7 @@ jobs:
           Copy-Item -Path "${{ github.workspace }}\DCL_PiXYZ\bin\Release\netcoreapp3.1\win10-x64\RoadCoordinates.json" -Destination "${{ github.workspace }}\publish"
       shell: pwsh
       
-    - name: Create License File
-      shell: pwsh
-      run: |
-        $content = @"${{ secrets.LICENSE_FILE }}"@
-        $content | Out-File -FilePath "${{ github.workspace }}\publish\pixyzsdk-15042024.lic" -Encoding UTF8
+
 
     - name: Install Vulkan SDK
       uses: jakoch/install-vulkan-sdk-action@v1.0.0
