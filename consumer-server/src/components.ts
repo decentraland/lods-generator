@@ -14,6 +14,7 @@ import { createEntityFetcherComponent } from './logic/scene-fetcher'
 import { createMemoryQueueAdapter } from './adapters/memory-queue'
 import { createBundleTriggererComponent } from './logic/bundle-triggerer'
 import { createMessageProcesorComponent } from './logic/message-processor'
+import { buildLicense } from './utils/license-builder'
 
 export async function initComponents(): Promise<AppComponents> {
   const config = await createDotEnvConfigComponent(
@@ -31,6 +32,8 @@ export async function initComponents(): Promise<AppComponents> {
   const fetcher = createFetchComponent({ defaultHeaders: { Origin: 'lods-generator' } })
 
   await instrumentHttpServerWithPromClientRegistry({ metrics, server, config, registry: metrics.registry! })
+
+  await buildLicense(config, undefined)
 
   const sceneFetcher = await createEntityFetcherComponent({ config, fetcher })
   const sqsEndpoint = await config.getString('QUEUE_URL')
