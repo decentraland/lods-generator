@@ -167,7 +167,7 @@ describe('message-processor', () => {
         outputPath: 'outputPath'})
     components.storage.storeFiles.mockRejectedValue(new Error('Error storing files'))
     
-        // mock fs
+    // mock fs
     const fs = require('fs')
     fs.rmSync = jest.fn()
     fs.existsSync = jest.fn().mockReturnValue(true)
@@ -225,7 +225,7 @@ describe('message-processor', () => {
     expect(components.queue.send).not.toHaveBeenCalled()
   })
 
-  it('should call lod generator with a timeout of 20 minutes on first attempt', async () => {
+  it('should call lod generator with a timeout of 120 minutes', async () => {
     const components = getMessageProcessorMockComponents()
     const messageProcessor = await createMessageProcesorComponent(components)
     const message = {
@@ -243,89 +243,12 @@ describe('message-processor', () => {
 
     await messageProcessor.process(message, 'receiptHandle-6')
 
-    expect(components.lodGenerator.generate).toHaveBeenCalledWith('0,0', 20)
-  })
-  
-  it('should call lod generator with a timeout of 40 minutes on second attempt', async () => {
-    const components = getMessageProcessorMockComponents()
-    const messageProcessor = await createMessageProcesorComponent(components)
-    const message = {
-      entity: {
-        entityType: 'scene',
-        entityId: 'randomId',
-        entityTimestamp: 0,
-        metadata: {
-          scene: {
-            base: '0,0'
-          }
-        }
-      },
-      _retry: 1
-    }
-
-    await messageProcessor.process(message, 'receiptHandle-7')
-
-    expect(components.lodGenerator.generate).toHaveBeenCalledWith('0,0', 40)
+    expect(components.lodGenerator.generate).toHaveBeenCalledWith('0,0', 120)
   })
 
-  it('should call lod generator with a timeout of 60 minutes on third attempt', async () => {
+  it('should prevent generating lods if they are already present on storage', async () => {
     const components = getMessageProcessorMockComponents()
-    const messageProcessor = await createMessageProcesorComponent(components)
-    const message = {
-      entity: {
-        entityType: 'scene',
-        entityId: 'randomId',
-        entityTimestamp: 0,
-        metadata: {
-          scene: {
-            base: '0,0'
-          }
-        }
-      },
-      _retry: 2
-    }
-
-    await messageProcessor.process(message, 'receiptHandle-7')
-
-    expect(components.lodGenerator.generate).toHaveBeenCalledWith('0,0', 60)
-  })
-
-  it('should call lod generator with a timeout of 80 minutes on fourth attempt', async () => {
-    const components = getMessageProcessorMockComponents()
-    const messageProcessor = await createMessageProcesorComponent(components)
-    const message = {
-      entity: {
-        entityType: 'scene',
-        entityId: 'randomId',
-        entityTimestamp: 0,
-        metadata: {
-          scene: {
-            base: '0,0'
-          }
-        }
-      },
-      _retry: 3
-    }
-
-    await messageProcessor.process(message, 'receiptHandle-7')
-
-    expect(components.lodGenerator.generate).toHaveBeenCalledWith('0,0', 80)
-  })
-
-  it('should not remove neither requeue the message if gets a license server error from LOD process', async () => {
-    const components = getMessageProcessorMockComponents()
-    components.lodGenerator.generate.mockResolvedValue({
-        lodsFiles: [],
-        logFile: '',
-        error: {
-            message: 'License server error',
-            detailedError: 'License server error'
-        },
-        outputPath: ''})
-
-    // mock utils/sleep functions
-    const utils = require('../../src/utils/timer')
-    utils.sleep = jest.fn()
+    components.storage.getFiles.mockResolvedValue(['file1', 'file2', 'output.txt'])
     const messageProcessor = await createMessageProcesorComponent(components)
     const message = {
       entity: {
@@ -340,18 +263,21 @@ describe('message-processor', () => {
       }
     }
 
-    await messageProcessor.process(message, 'receiptHandle-8')
+    await messageProcessor.process(message, 'receiptHandle-7')
 
-    expect(components.queue.deleteMessage).not.toHaveBeenCalled()
+    expect(components.lodGenerator.generate).not.toHaveBeenCalled()
     expect(components.queue.send).not.toHaveBeenCalled()
-    expect(utils.sleep).toHaveBeenCalledWith(60 * 1000)
-    // unmock utils/sleep functions
-    jest.unmock('../../src/utils/timer')
+    expect(components.bundleTriggerer.queueGeneration).toHaveBeenCalledTimes(2)
+    expect(components.queue.deleteMessage).toHaveBeenCalledWith('receiptHandle-7')
   })
 })
 
 function getMessageProcessorMockComponents() {
   return {
+    metrics: {
+      increment: jest.fn(),
+      observe: jest.fn(),
+    } as any,
     logs: {
       getLogger: jest.fn().mockReturnValue({
         info: jest.fn(),
@@ -373,7 +299,8 @@ function getMessageProcessorMockComponents() {
       generate: jest.fn()
     },
     storage: {
-      storeFiles: jest.fn()
+      storeFiles: jest.fn(),
+      getFiles: jest.fn().mockResolvedValue([])
     },
     bundleTriggerer: {
       queueGeneration: jest.fn()

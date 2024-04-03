@@ -1,7 +1,6 @@
 import fs from 'fs'
 
 import { AppComponents, HealthState, MessageProcessorComponent, QueueMessage } from '../types'
-import { sleep } from '../utils/timer'
 
 export async function createMessageProcesorComponent({
   logs,
@@ -57,24 +56,25 @@ export async function createMessageProcesorComponent({
         base,
         attempt: retry + 1
       })
+
+      const alreadyUploadedFiles = await storage.getFiles(`${base}/LOD/Sources/${message.entity.entityTimestamp.toString()}`)
+      if (!!alreadyUploadedFiles.length) {
+        logger.info('Scene already processed, skipping', {
+          entityId,
+          base
+        })
+        logger.info('Publishing message to AssetBundle converter', { entityId, base })
+        await Promise.all(abServers.map((abServer) => bundleTriggerer.queueGeneration(entityId, alreadyUploadedFiles, abServer)))
+        await queue.deleteMessage(receiptMessageHandle)
+        return
+      }
       
-      const timeoutInMinutes = (retry + 1) * 20
       const generationProcessStartTime = Date.now()
-      const lodGenerationResult = await lodGenerator.generate(base, timeoutInMinutes)
+      const lodGenerationResult = await lodGenerator.generate(base, 120)
       const generationProcessDuration = Date.now() - generationProcessStartTime
       outputPath = lodGenerationResult.outputPath
 
       if (lodGenerationResult.error) {
-        if (lodGenerationResult.error.message.toLowerCase().includes('license')) {
-          logger.warn('License server error detected, it will not recover itself. Manual action is required.')
-          logger.info('Retrying message in 1 minute.')
-          metrics.observe('license_server_health', {}, HealthState.Unhealthy)
-          await sleep(60 * 1000)
-          return
-        }
-
-        metrics.observe('license_server_health', {}, HealthState.Healthy)
-
         logger.error('Error while generating LOD', {
           entityId,
           base,
@@ -95,11 +95,10 @@ export async function createMessageProcesorComponent({
         }
 
         await queue.deleteMessage(receiptMessageHandle)
-
         return
       }
 
-      metrics.observe('license_server_health', {}, HealthState.Healthy)
+      metrics.observe('license_server_health', {}, HealthState.Unused)
       metrics.observe('lod_generation_duration_minutes', {}, generationProcessDuration / 1000 / 60)
       logger.info('Uploading files to bucket', {
         entityId,
@@ -123,6 +122,7 @@ export async function createMessageProcesorComponent({
         attempt: retry + 1,
         error: error.message
       })
+
       if (retry < 3) {
         await reQueue(message)
         metrics.increment('lod_generation_count', { status: 'retryable' }, 1)
@@ -134,6 +134,7 @@ export async function createMessageProcesorComponent({
         })
         metrics.increment('lod_generation_count', { status: 'failed' }, 1)
       }
+
       await queue.deleteMessage(receiptMessageHandle)
     } finally {
       if (outputPath && fs.existsSync(outputPath)) {

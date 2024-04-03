@@ -1,0 +1,22 @@
+name: Build and test consumer server
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ github.event.inputs.branch_name }}
+        lfs: true
+    
+    - name: Install dependencies
+      run: cd consumer-server && yarn && yarn build
+    
+    - name: Run tests
+      run: cd consumer-server && yarn test

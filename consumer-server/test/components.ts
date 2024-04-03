@@ -1,7 +1,6 @@
 // This file is the "test-environment" analogous for src/components.ts
 // Here we define the test components to be used in the testing environment
 import { createLocalFetchCompoment, createRunner } from '@well-known-components/test-helpers'
-import { createInMemoryStorage } from '@dcl/catalyst-storage'
 
 import { main } from '../src/service'
 import { SceneFetcherComponent, QueueComponent, QueueWorker, TestComponents, StorageComponent } from '../src/types'
@@ -31,14 +30,15 @@ async function initComponents(): Promise<TestComponents> {
     {
         HTTP_SERVER_PORT: '3000',
         HTTP_SERVER_HOST: '0.0.0.0',
-        QUEUE_URL: ''
+        QUEUE_URL: undefined
     }
   )
 
   const metrics = createTestMetricsComponent(metricDeclarations)
 
   const storage: StorageComponent = {
-    storeFiles: jest.fn()
+    storeFiles: jest.fn(),
+    getFiles: jest.fn()
   }
   const queue: QueueComponent = {
     deleteMessage: jest.fn(),

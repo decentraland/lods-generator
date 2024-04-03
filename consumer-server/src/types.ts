@@ -101,7 +101,8 @@ export type MessageProcessorComponent = {
 }
 
 export type StorageComponent = {
-  storeFiles(filePaths: string[], prefix: string): Promise<string[]>
+  storeFiles(filePaths: string[], prefix: string): Promise<string[]>,
+  getFiles(prefix: string): Promise<string[]>
 }
 
 export type SceneFetcherComponent = {
@@ -111,4 +112,5 @@ export type SceneFetcherComponent = {
 export enum HealthState {
   Healthy = 1,
   Unhealthy = 2,
+  Unused = 3
 }

@@ -33,7 +33,7 @@ export async function initComponents(): Promise<AppComponents> {
   await instrumentHttpServerWithPromClientRegistry({ metrics, server, config, registry: metrics.registry! })
 
   const sceneFetcher = await createEntityFetcherComponent({ config, fetcher })
-  const sqsEndpoint = await config.requireString('QUEUE_URL')
+  const sqsEndpoint = await config.getString('QUEUE_URL')
   const queue = sqsEndpoint ? await createSqsAdapter(sqsEndpoint) : createMemoryQueueAdapter()
   const lodGenerator = createLodGeneratorComponent()
   const storage = await createCloudStorageAdapter({ config })
