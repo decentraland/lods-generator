@@ -83,7 +83,8 @@ COPY --from=dotnet-build /build/publish/ .
 
 WORKDIR /app
 
-COPY RoadCoordinates.json ./
+COPY RoadCoordinates.json ./RoadCoordinates.json
+COPY ./pixyzsdk-15042024.lic ./pixyzsdk-15042024.lic
 COPY --from=scene-lod-build /scene-lod/dist ./scene-lod/dist
 COPY --from=scene-lod-build /scene-lod/package.json ./scene-lod/
 COPY --from=scene-lod-build /scene-lod/package-lock.json ./scene-lod/
