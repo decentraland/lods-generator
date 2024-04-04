@@ -3,6 +3,7 @@ import path from 'path'
 import fs from 'fs'
 
 import { LodGenerationResult, LodGeneratorComponent } from '../types'
+import { parseMultilineText } from '../utils/text-parser'
 
 export function createLodGeneratorComponent(): LodGeneratorComponent {
   const projectRoot = path.resolve(__dirname, '..', '..', '..') // project root according to Dockerfile bundling
@@ -42,7 +43,7 @@ export function createLodGeneratorComponent(): LodGeneratorComponent {
             resolve({
               error: {
                 message: error?.message || 'Unexpected error',
-                detailedError: ((stderr as string) || '').replace(/\n|\r\n/g, ' ')
+                detailedError: parseMultilineText(stderr)
               },
               lodsFiles: [],
               logFile: '',
@@ -55,7 +56,7 @@ export function createLodGeneratorComponent(): LodGeneratorComponent {
           resolve({
             error: {
               message: 'Output directory do not exists, LODs were not generated',
-              detailedError: stderr.replace(/\n|\r\n/g, ' ')
+              detailedError: parseMultilineText(stderr)
             },
             lodsFiles: [],
             logFile: '',
@@ -75,7 +76,7 @@ export function createLodGeneratorComponent(): LodGeneratorComponent {
           if (parsedResult.lodsFiles.length === 0) {
             parsedResult.error = {
               message: 'LODs are not present in output directory',
-              detailedError: parsedResult.logFile ? fs.readFileSync(parsedResult.logFile, 'utf8').replace(/\n|\r\n/g, ' ') : stderr.replace(/\n|\r\n/g, ' ')
+              detailedError: parsedResult.logFile ? parseMultilineText(fs.readFileSync(parsedResult.logFile, 'utf8')) : parseMultilineText(stderr)
             }
           }
 

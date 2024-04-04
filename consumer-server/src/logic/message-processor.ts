@@ -1,6 +1,7 @@
 import fs from 'fs'
 
 import { AppComponents, HealthState, MessageProcessorComponent, QueueMessage } from '../types'
+import { parseMultilineText } from '../utils/text-parser'
 
 export async function createMessageProcesorComponent({
   logs,
@@ -78,8 +79,8 @@ export async function createMessageProcesorComponent({
         logger.error('Error while generating LOD', {
           entityId,
           base,
-          error: lodGenerationResult.error?.message.replace(/\n|\r\n/g, ' ') || 'Check log bucket for more details',
-          detailedError: lodGenerationResult.error?.detailedError || 'No details found'
+          error: lodGenerationResult.error?.message ? parseMultilineText(lodGenerationResult.error?.message) : 'Check log bucket for more details',
+          detailedError: lodGenerationResult.error?.detailedError ? parseMultilineText(lodGenerationResult.error?.detailedError) : 'No details found'
         })
 
         if (retry < 3) {
