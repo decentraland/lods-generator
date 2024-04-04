@@ -78,7 +78,8 @@ export async function createMessageProcesorComponent({
         logger.error('Error while generating LOD', {
           entityId,
           base,
-          error: lodGenerationResult?.error?.message.replace(/\n|\r\n/g, ' ') || 'Check log bucket for more details'
+          error: lodGenerationResult.error?.message.replace(/\n|\r\n/g, ' ') || 'Check log bucket for more details',
+          detailedError: lodGenerationResult.error?.detailedError || 'No details found'
         })
 
         if (retry < 3) {

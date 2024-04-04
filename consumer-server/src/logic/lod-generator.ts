@@ -54,8 +54,8 @@ export function createLodGeneratorComponent(): LodGeneratorComponent {
         if (!fs.existsSync(processOutput)) {
           resolve({
             error: {
-              message: 'No LODs were generated',
-              detailedError: 'No files found on output directory after LOD generation finished'
+              message: 'Output directory do not exists, LODs were not generated',
+              detailedError: stderr.replace(/\n|\r\n/g, ' ')
             },
             lodsFiles: [],
             logFile: '',
@@ -74,8 +74,8 @@ export function createLodGeneratorComponent(): LodGeneratorComponent {
 
           if (parsedResult.lodsFiles.length === 0) {
             parsedResult.error = {
-              message: 'No LODs were generated',
-              detailedError: 'No LOD files found on output directory after LOD generation finished'
+              message: 'LODs are not present in output directory',
+              detailedError: parsedResult.logFile ? fs.readFileSync(parsedResult.logFile, 'utf8').replace(/\n|\r\n/g, ' ') : stderr.replace(/\n|\r\n/g, ' ')
             }
           }
 
