@@ -5,6 +5,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict dist/index.js",
+    "build-license": "tsc ./bin/build-license.ts && node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict ./bin/build-license.js",
     "lint:fix": "eslint --fix --ext .ts src",
     "test": "jest --forceExit --detectOpenHandles --verbose"
   },
@@ -28,7 +29,7 @@
     "@dcl/catalyst-storage": "^4.1.0",
     "@dcl/eslint-config": "^1.1.13",
     "@types/mime-types": "^2.1.4",
-    "@types/node": "^20.10.6",
+    "@types/node": "^20.12.3",
     "@well-known-components/test-helpers": "^1.5.5",
     "mock-aws-s3": "^4.0.2",
     "typescript": "^5.3.3"
