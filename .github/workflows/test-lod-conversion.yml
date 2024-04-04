@@ -7,7 +7,16 @@ on:
 jobs:
   build-and-run:
     runs-on: windows-2019
-
+    strategy:
+      matrix:
+        include:
+          - lodLevelsToTest: ["500", "3"]
+            files: "bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_3.fbx"
+            sizes: "128128"
+          - lodLevelsToTest: ["7000;3000;1000;500", "0"]
+            files: "bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_0.fbx bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_1.fbx bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_2.fbx bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_3.fbx"
+            sizes: "6210224 631424 219776 128128"
+            
     steps:
     - uses: actions/checkout@v2
       with:
@@ -66,32 +75,30 @@ jobs:
       env:
        PIXYZPRODUCTNAME: ${{ secrets.PIXYZPRODUCTNAME }}
        PIXYZTOKEN: ${{ secrets.PIXYZTOKEN }}
-      run: .\publish\DCL_PiXYZ.exe "coords" "5,19" "${{ github.workspace }}\publish\OutputDirectoryPath" "${{ github.workspace }}\publish\scene-lod-entities-manifest-builder" "false" "true"
+      run: .\publish\DCL_PiXYZ.exe "coords" "5,19" "${{ github.workspace }}\publish\OutputDirectoryPath" "${{ github.workspace }}\publish\scene-lod-entities-manifest-builder" "false" "true" "${{ matrix.lodLevelsToTest[0] }}" "${{ matrix.lodLevelsToTest[1] }}"
 
     - name: Check Output Files with Size Tolerance in KB
       run: |
-        $basePath = "${{ github.workspace }}\publish\OutputDirectoryPath\5,19"
-        $files = @(
-          "bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_0.fbx", # Hash output for 5,19
-          "bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_1.fbx",
-          "bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_2.fbx",
-          "bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_3.fbx"
-        )
-        $expectedSizesB = @(6210224, 631424, 219776, 128128) # Expected sizes in bytes
-        $toleranceB = 5000 # 5 KB tolerance
-
-        foreach ($i in 0..2) {
-          $filePath = Join-Path -Path $basePath -ChildPath $files[$i]
-          if (-Not (Test-Path $filePath)) {
-            throw "File not found: $filePath"
-          }
-
-          $fileSizeInBytes = (Get-Item $filePath).length
-          $lowerBoundB = $expectedSizesB[$i] - $toleranceB
-          $upperBoundB = $expectedSizesB[$i] + $toleranceB
-          if ($fileSizeInBytes -lt $lowerBoundB -or $fileSizeInBytes -gt $upperBoundB) {
-            throw "File size mismatch for $filePath. Expected: $($expectedSizesB[$i]) B (+/- 3000 B), Found: $fileSizeInBytes bytes"
-          }
-        }
-        Write-Host "All files exist and are within the acceptable size range in KB."
-      shell: pwsh
+        basePath="${GITHUB_WORKSPACE}/publish/OutputDirectoryPath/5,19"
+        files=(${{ join(matrix.files, ' ') }})
+        sizes=(${{ join(matrix.sizes, ' ') }})
+        toleranceB=5000 # 5 KB tolerance
+    
+        for i in "${!files[@]}"; do
+          filePath="$basePath/${files[$i]}"
+          if [ ! -f "$filePath" ]; then
+            echo "File not found: $filePath"
+            exit 1
+          fi
+    
+          fileSizeInBytes=$(stat -c %s "$filePath")
+          lowerBoundB=$((${sizes[$i]} - toleranceB))
+          upperBoundB=$((${sizes[$i]} + toleranceB))
+          if [ "$fileSizeInBytes" -lt "$lowerBoundB" ] || [ "$fileSizeInBytes" -gt "$upperBoundB" ]; then
+            echo "File size mismatch for $filePath. Expected: ${sizes[$i]} B (+/- $toleranceB B), Found: $fileSizeInBytes bytes"
+            exit 1
+          fi
+        done
+    
+        echo "All files exist and are within the acceptable size range."
+      shell: bash
