@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using DCL_PiXYZ.SceneRepositioner.JsonParsing;
+using DCL_PiXYZ.Utils;
 using UnityEngine.Pixyz.Algo;
 using UnityEngine.Pixyz.API;
 using UnityEngine.Pixyz.Material;
@@ -42,7 +43,6 @@ namespace DCL_PiXYZ
         public async Task ApplyModification(PiXYZAPI pxz)
         {
             this.pxz = pxz;
-            Console.WriteLine("BEGIN PXZ MERGE MESHES");
             try
             {
                 AddOcurrences(pxz, pxz.Scene.GetSubTree(pxz.Scene.GetRoot()));
@@ -51,7 +51,7 @@ namespace DCL_PiXYZ
             }
             catch(Exception e)
             {
-                Console.WriteLine(e);
+                FileWriter.WriteToConsole(e.Message);
             }
         }
 
@@ -97,13 +97,13 @@ namespace DCL_PiXYZ
             else if (lodLevel >= 2 && currentVertexCount < 150000)
                 bakeOption.resolution = 256;
             
-            Console.WriteLine($"Merging meshes {(isOpaque ? "OPAQUE" : "TRANSPARENT")} {toMerge.list.Length} vertex count {currentVertexCount}");
+            FileWriter.WriteToConsole($"Merging meshes {(isOpaque ? "OPAQUE" : "TRANSPARENT")} {toMerge.list.Length} vertex count {currentVertexCount}");
 
             
             uint combineMeshes = pxz.Algo.CombineMeshes(toMerge, bakeOption);
             pxz.Core.SetProperty(combineMeshes, "Name", $"MERGED MESH {index} {(isOpaque ? "OPAQUE" : "FORCED_TRANSPARENT")}");
 
-            Console.WriteLine("Copying Material");
+            FileWriter.WriteToConsole("Copying Material");
             //Apply a copy of the material not to lose the reference
             MaterialList material = pxz.Scene.GetMaterialsFromSubtree(combineMeshes);
 
@@ -112,7 +112,7 @@ namespace DCL_PiXYZ
                 uint copyMaterial = pxz.Material.CopyMaterial(material.list[0], false);
                 pxz.Core.SetProperty(copyMaterial, "Name", $"MERGE MATERIAL {index} {(isOpaque ? "OPAQUE" : "FORCED_TRANSPARENT")}");
                 pxz.Scene.SetOccurrenceMaterial(combineMeshes,copyMaterial);
-                Console.WriteLine("Setting Material");
+                FileWriter.WriteToConsole("Setting Material");
             }
 
         }

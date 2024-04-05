@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DCL_PiXYZ.SceneRepositioner.JsonParsing;
+using DCL_PiXYZ.Utils;
 using UnityEngine.Pixyz.API;
 using UnityEngine.Pixyz.Scene;
 
@@ -18,7 +19,6 @@ namespace DCL_PiXYZ
         
         public async Task ApplyModification(PiXYZAPI pxz)
         {
-            Console.WriteLine($"BEGIN PXZ MESH REPAIR");
             foreach (var pxzModel in PXZModels)
             {
                 if (pxzModel.needsRepair)

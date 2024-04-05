@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using DCL_PiXYZ.Utils;
 using UnityEngine.Pixyz.Algo;
 using UnityEngine.Pixyz.API;
 using UnityEngine.Pixyz.Geom;
@@ -14,8 +15,6 @@ namespace DCL_PiXYZ
     {
         public async Task ApplyModification(PiXYZAPI pxz)
         {
-            Console.WriteLine("-------------------------");
-            Console.WriteLine("BEGIN PXZ DECIMATE AND BAKE");
             bool OVERRIDE_UVS = true;
             int TEXTURE_RESOLUTION = 1024;
             uint TEXTURE_PADDING = 1;

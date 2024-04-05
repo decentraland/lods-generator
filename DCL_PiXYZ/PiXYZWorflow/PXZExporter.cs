@@ -58,7 +58,7 @@ namespace DCL_PiXYZ
 
         private void DoExportWithExtension(PiXYZAPI pxz, string extension)
         {
-            Console.WriteLine($"BEGIN PXZ EXPORT {filename}{extension}");
+            FileWriter.WriteToConsole($"BEGIN PXZ EXPORT {filename}{extension}");
             //Use it to flatten the hierarchy
             //TODO: This will break all possible skinning. But do we care about it?
             if (lodLevel != 0)

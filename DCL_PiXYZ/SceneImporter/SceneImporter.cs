@@ -41,7 +41,7 @@ namespace DCL_PiXYZ
 
         public async Task DownloadSceneDefinition()
         {
-            Console.WriteLine("BEGIN SCENE DEFINITION DOWNLOAD");
+            FileWriter.WriteToConsole("BEGIN SCENE DEFINITION DOWNLOAD");
             currentPointersList = Array.Empty<string>();
             try
             {
@@ -84,7 +84,7 @@ namespace DCL_PiXYZ
 
         public async Task<bool> DownloadAllContent(SceneConversionPathHandler pathHandler)
         {
-            Console.WriteLine("BEGIN FILE CONTENT DOWNLOAD");
+            FileWriter.WriteToConsole("BEGIN FILE CONTENT DOWNLOAD");
             sceneContent = new Dictionary<string, string>();
             foreach (var content in sceneDefinition.content)
             {

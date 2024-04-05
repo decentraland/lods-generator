@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading.Tasks;
 using DCL_PiXYZ.SceneRepositioner.JsonParsing;
 using DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities;
+using DCL_PiXYZ.Utils;
 using Newtonsoft.Json;
 using UnityEngine.Pixyz.API;
 
@@ -28,7 +29,7 @@ namespace DCL_PiXYZ.SceneRepositioner
     
         public async Task<List<PXZModel>> SetupSceneInPiXYZ()
         {
-            Console.WriteLine("BEGIN REPOSITIONING");
+            FileWriter.WriteToConsole("BEGIN REPOSITIONING");
             List<PXZModel> models = new List<PXZModel>();
             var renderableEntities = JsonConvert.DeserializeObject<List<RenderableEntity>>(File.ReadAllText(sceneManifestJSONPath));
             Dictionary<int, DCLRendereableEntity> renderableEntitiesDictionary = new Dictionary<int, DCLRendereableEntity>();
