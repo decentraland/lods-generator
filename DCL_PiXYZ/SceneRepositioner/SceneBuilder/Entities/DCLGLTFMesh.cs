@@ -58,7 +58,7 @@ namespace AssetBundleConverter.LODs
             }
             catch (Exception e)
             {
-                Console.WriteLine($"ERROR: Importing GLTF {src} failed with error {e}");
+                FileWriter.WriteToConsole($"ERROR: Importing GLTF {src} failed with error {e}");
                 return PXYZConstants.EMPTY_MODEL;
             }
         }
@@ -92,7 +92,7 @@ namespace AssetBundleConverter.LODs
             // Check if the file already exists
             if (File.Exists(outputFile))
             {
-                Console.WriteLine($"The file {outputFile} already exists. Skipping export.");
+                FileWriter.WriteToConsole($"The file {outputFile} already exists. Skipping export.");
                 return;
             }
 

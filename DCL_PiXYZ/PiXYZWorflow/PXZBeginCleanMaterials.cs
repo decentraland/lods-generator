@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using DCL_PiXYZ.Utils;
 using UnityEngine.Pixyz.API;
 using UnityEngine.Pixyz.Material;
 using UnityEngine.Pixyz.Scene;
@@ -21,7 +22,6 @@ namespace DCL_PiXYZ
         
         public async Task ApplyModification(PiXYZAPI pxz)
         {
-            Console.WriteLine("BEGIN PXZ CLEAN MATERIALS");
             pxz.Scene.MergeImages();
             /*
              Merge images seems to solve the issue. Leaving the code here until MergeImages() its 100% proven and fail proof

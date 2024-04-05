@@ -9,12 +9,7 @@ namespace DCL_PiXYZ
     {
         public async Task ApplyModification(PiXYZAPI pxz)
         {
-            Console.WriteLine("-------------------------");
-            Console.WriteLine($"BEGIN PXZ COMBINE BY MATERIAL");
-            
             //pxz.Algo.CombineMeshesByMaterials(new OccurrenceList(new[] { pxz.Scene.GetRoot() }));
-            Console.WriteLine($"BEGIN PXZ COMBINE BY MATERIAL");
-            Console.WriteLine("-------------------------");
         }
     }
 }

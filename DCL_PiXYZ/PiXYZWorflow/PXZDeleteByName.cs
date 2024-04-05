@@ -17,8 +17,6 @@ namespace DCL_PiXYZ
 
         public async Task ApplyModification(PiXYZAPI pxz)
         {
-
-            Console.WriteLine("BEGIN PXZ DELETE BY NAME FOR REGEX " + regex);
             var occurenceToDelete = pxz.Scene.FindOccurrencesByProperty("Name", regex, caseInsensitive: true);
             foreach (uint u in occurenceToDelete.list)
                 pxz.Scene.DeleteComponentByType(ComponentType.Part, u);

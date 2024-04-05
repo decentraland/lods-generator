@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace DCL_PiXYZ.Utils
 {
@@ -8,6 +9,12 @@ namespace DCL_PiXYZ.Utils
         {
             using (StreamWriter file = new StreamWriter(fileName, true))
                 file.WriteLine(message);
+        }
+        
+        public static void WriteToConsole(string message)
+        {
+            string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            Console.WriteLine($"[{timestamp}] {message}");
         }
     }
 }

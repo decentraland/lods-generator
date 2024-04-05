@@ -28,7 +28,7 @@ namespace DCL_PiXYZ.Utils
                 using (StreamReader reader = process.StandardOutput)
                 {
                     string result = reader.ReadToEnd();
-                    Console.WriteLine(result);
+                    FileWriter.WriteToConsole(result);
                 }
 
                 process.WaitForExit(); // Wait for the process to complete
@@ -51,7 +51,7 @@ namespace DCL_PiXYZ.Utils
                 using (StreamReader reader = process.StandardOutput)
                 {
                     string result = reader.ReadToEnd();
-                    Console.WriteLine(result);
+                    FileWriter.WriteToConsole(result);
                 }
 
                 process.WaitForExit(); // Wait for the process to complete

@@ -47,7 +47,7 @@ namespace DCL_PiXYZ.Utils
             string exception;
             string result;
             
-            Console.WriteLine("About to analyze " + analyzedCoords.Count);
+            FileWriter.WriteToConsole("About to analyze " + analyzedCoords.Count);
 
             RandomizeList(analyzedCoords, 12345);
 
@@ -58,7 +58,7 @@ namespace DCL_PiXYZ.Utils
                 if (npmTask.Item2)
                 {
                     result = $"{analyzedCoords[i]}\t{true}\tREADER TIMEOUT\tREADER TIMEOUT";
-                    Console.WriteLine("FINISHED ANALYZING COORD " + i + " READER TIMEOUT");
+                    FileWriter.WriteToConsole("FINISHED ANALYZING COORD " + i + " READER TIMEOUT");
                 }
                 else
                 {
@@ -66,7 +66,7 @@ namespace DCL_PiXYZ.Utils
                     if (!string.IsNullOrEmpty(npmTask.Item1))
                         exception = npmTask.Item1;
                     result = $"{analyzedCoords[i]}\t{true}\t{!exception.Equals("NO ERROR")}\t{exception}";
-                    Console.WriteLine("FINISHED ANALYZING COORD " + i);
+                    FileWriter.WriteToConsole("FINISHED ANALYZING COORD " + i);
                 }
 
                 using (StreamWriter writer = new StreamWriter(destinationPath, true))
@@ -84,13 +84,13 @@ namespace DCL_PiXYZ.Utils
                 if (!string.IsNullOrEmpty(sceneDefinition.metadata.runtimeVersion))
                     isSDK7  = sceneDefinition.metadata.runtimeVersion.Equals("7");
                 string possibleException  = NPMUtils.RunNPMToolAndReturnExceptionIfPresent(sceneManifestDirectory, sceneDefinition.pointers[0]);
-                Console.WriteLine("FINISHED ANALYZING COORD " + sceneDefinition.pointers[0]);
+                FileWriter.WriteToConsole("FINISHED ANALYZING COORD " + sceneDefinition.pointers[0]);
                 results.Add(new ManifestWorldBuilderResult(sceneDefinition.pointers[0], !string.IsNullOrEmpty(possibleException), !string.IsNullOrEmpty(possibleException) ? possibleException : "NO ERROR", isSDK7));
             }
-            Console.WriteLine($"RESULTS PROCESSED SAVING TO FILE {Path.Combine(PXYZConstants.RESOURCES_DIRECTORY, "manifest-world-builder-results.txt")}");
+            FileWriter.WriteToConsole($"RESULTS PROCESSED SAVING TO FILE {Path.Combine(PXYZConstants.RESOURCES_DIRECTORY, "manifest-world-builder-results.txt")}");
 
             SaveResultsToFile(results, Path.Combine(PXYZConstants.RESOURCES_DIRECTORY, "manifest-world-builder-results.txt"));
-            Console.WriteLine($"RESULTS SAVED");*/
+            FileWriter.WriteToConsole($"RESULTS SAVED");*/
         }
         
         private void RandomizeList(List<string> list, int seed)
@@ -111,9 +111,9 @@ namespace DCL_PiXYZ.Utils
             return new List<SceneDefinition>();
             //UNCOMMENT IF YOU NEED TO GENERATE THE LIST
             /*List<ManifestWorldBuilderResult> results = new List<ManifestWorldBuilderResult>();
-            Console.WriteLine("BUILDING ARRAY");
+            FileWriter.WriteToConsole("BUILDING ARRAY");
             List<SceneDefinition> filteredScenes = await BuildSceneArray();
-            Console.WriteLine("ARRAY BUILT PROCESSING " + filteredScenes.Count);
+            FileWriter.WriteToConsole("ARRAY BUILT PROCESSING " + filteredScenes.Count);
             SaveSceneFilteredToFile(filteredScenes, Path.Combine(PXYZConstants.RESOURCES_DIRECTORY, "non-empty-scenes.txt"));*/
         }
         
@@ -142,7 +142,7 @@ namespace DCL_PiXYZ.Utils
                     continue;
                 string rawSceneDefinition = 
                     await webRequestsHandler.PostRequest(activeEntitiesURL, "{\"pointers\":[\"" + coord + "\"]}");
-                Console.WriteLine("FINISHED PROCESSING COORD " + coord);
+                FileWriter.WriteToConsole("FINISHED PROCESSING COORD " + coord);
 
                 List<SceneDefinition> sceneDefinitions
                     = JsonConvert.DeserializeObject<List<SceneDefinition>>(rawSceneDefinition);
