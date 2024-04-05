@@ -1,11 +1,12 @@
-import { exec } from 'child_process'
+import { spawn } from 'child_process'
 import path from 'path'
 import fs from 'fs'
 
-import { LodGenerationResult, LodGeneratorComponent } from '../types'
+import { AppComponents, LodGenerationResult, LodGeneratorComponent } from '../types'
 import { parseMultilineText } from '../utils/text-parser'
 
-export function createLodGeneratorComponent(): LodGeneratorComponent {
+export function createLodGeneratorComponent({ logs }: Pick<AppComponents, 'logs'>): LodGeneratorComponent {
+  const logger = logs.getLogger('lod-generator')
   const projectRoot = path.resolve(__dirname, '..', '..', '..') // project root according to Dockerfile bundling
   const lodGeneratorProgram = path.join(projectRoot, 'api', 'DCL_PiXYZ.exe') // path to the lod generator program
   const sceneLodEntitiesManifestBuilder = path.join(projectRoot, 'scene-lod') // path to the scene lod entities manifest builder
@@ -15,7 +16,7 @@ export function createLodGeneratorComponent(): LodGeneratorComponent {
     fs.mkdirSync(outputPath, { recursive: true })
   }
 
-  async function generate(basePointer: string, timeoutInMinutes: number): Promise<LodGenerationResult> {
+  async function generate(basePointer: string): Promise<LodGenerationResult> {
     const processOutput = `${outputPath}/${basePointer}`
     let result: LodGenerationResult = {
       error: undefined,
@@ -24,64 +25,79 @@ export function createLodGeneratorComponent(): LodGeneratorComponent {
       outputPath: processOutput
     }
 
-    const commandToExecute = `${lodGeneratorProgram} "coords" "${basePointer}" "${outputPath}" "${sceneLodEntitiesManifestBuilder}" "false" "false" "500" "3"`
+    const commandParts = [
+      lodGeneratorProgram,
+      'coords',
+      basePointer,
+      outputPath,
+      sceneLodEntitiesManifestBuilder,
+      'false',
+      'false',
+      '500',
+      '3'
+    ]
+    const childProcess = spawn(commandParts[0], commandParts.slice(1))
 
     result = await new Promise((resolve, _) => {
-      exec(commandToExecute, { timeout: timeoutInMinutes * 60 * 1000 }, (error, _, stderr) => {
-        if (error) {
-          if (error.killed) {
-            resolve({
-              error: {
-                message: 'Operation timed out after',
-                detailedError: 'LOD generation process timeout after ' + timeoutInMinutes + ' minutes'
-              },
-              lodsFiles: [],
-              logFile: '',
-              outputPath: processOutput
-            })
-          } else {
-            resolve({
-              error: {
-                message: error?.message || 'Unexpected error',
-                detailedError: parseMultilineText(stderr)
-              },
-              lodsFiles: [],
-              logFile: '',
-              outputPath: processOutput
-            })
-          }
-        }
+      childProcess.on('error', (error) => {
+        const generatedFiles = fs.readdirSync(processOutput)
+        const logFile = generatedFiles.find((file) => file.endsWith('output.txt')) || ''
 
-        if (!fs.existsSync(processOutput)) {
+        resolve({
+          error: {
+            message: parseMultilineText(error?.message || 'Unexpected error from LOD process'),
+            detailedError: ''
+          },
+          lodsFiles: [],
+          logFile,
+          outputPath: processOutput
+        })
+      })
+
+      childProcess.on('exit', (code) => {
+        const generatedFiles = fs.readdirSync(processOutput)
+        const logFile = generatedFiles.find((file) => file.endsWith('output.txt')) || ''
+        if (code !== 0) {
           resolve({
             error: {
-              message: 'Output directory do not exists, LODs were not generated',
-              detailedError: parseMultilineText(stderr)
+              message: 'LOD process finished with failures',
+              detailedError: `Code received from process ${code}`
             },
             lodsFiles: [],
-            logFile: '',
+            logFile,
             outputPath: processOutput
           })
-        } else {
-          const generatedFiles = fs.readdirSync(processOutput)
-          const parsedResult = generatedFiles.reduce((acc, file) => {
-            if (file.endsWith('output.txt')) {
-              acc.logFile = `${processOutput}/${file}`
-            } else {
-              acc.lodsFiles.push(`${processOutput}/${file}`)
-            }
-            return acc
-          }, result)
-
-          if (parsedResult.lodsFiles.length === 0) {
-            parsedResult.error = {
-              message: 'LODs are not present in output directory',
-              detailedError: parsedResult.logFile ? parseMultilineText(fs.readFileSync(parsedResult.logFile, 'utf8')) : parseMultilineText(stderr)
-            }
-          }
-
-          resolve(parsedResult)
         }
+
+        const parsedResult = generatedFiles.reduce((acc, file) => {
+          if (file.endsWith('output.txt')) {
+            acc.logFile = `${processOutput}/${file}`
+          } else {
+            acc.lodsFiles.push(`${processOutput}/${file}`)
+          }
+          return acc
+        }, result)
+
+        if (parsedResult.lodsFiles.length === 0) {
+          parsedResult.error = {
+            message: 'LOD process finished but files are not present in output directory',
+            detailedError: parsedResult.logFile ? parseMultilineText(fs.readFileSync(parsedResult.logFile, 'utf8')) : ''
+          }
+        }
+
+        resolve(parsedResult)
+      })
+
+      childProcess.stderr.on('data', (data) => {
+        logger.warn(`Error received on LOD process`, {
+          error: parseMultilineText(data.toString())
+        })
+      })
+
+      childProcess.stdout.on('data', (data) => {
+        logger.info('LOD process output', {
+          output: parseMultilineText(data.toString())
+        })
       })
     })
 

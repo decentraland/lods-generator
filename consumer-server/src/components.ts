@@ -1,6 +1,10 @@
 import { createDotEnvConfigComponent } from '@well-known-components/env-config-provider'
 import { createLogComponent } from '@well-known-components/logger'
-import { createServerComponent, createStatusCheckComponent, instrumentHttpServerWithPromClientRegistry } from '@well-known-components/http-server'
+import {
+  createServerComponent,
+  createStatusCheckComponent,
+  instrumentHttpServerWithPromClientRegistry
+} from '@well-known-components/http-server'
 import { createMetricsComponent } from '@well-known-components/metrics'
 import { createFetchComponent } from '@well-known-components/fetch-component'
 
@@ -38,7 +42,7 @@ export async function initComponents(): Promise<AppComponents> {
   const sceneFetcher = await createEntityFetcherComponent({ config, fetcher })
   const sqsEndpoint = await config.getString('QUEUE_URL')
   const queue = sqsEndpoint ? await createSqsAdapter(sqsEndpoint) : createMemoryQueueAdapter()
-  const lodGenerator = createLodGeneratorComponent()
+  const lodGenerator = createLodGeneratorComponent({ logs })
   const storage = await createCloudStorageAdapter({ config })
   const bundleTriggerer = await createBundleTriggererComponent({ fetcher, config })
   const messageProcessor = await createMessageProcesorComponent({

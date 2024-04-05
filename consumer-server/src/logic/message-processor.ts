@@ -2,6 +2,7 @@ import fs from 'fs'
 
 import { AppComponents, HealthState, MessageProcessorComponent, QueueMessage } from '../types'
 import { parseMultilineText } from '../utils/text-parser'
+import RoadCoordinates from '../../../RoadCoordinates.json'
 
 export async function createMessageProcesorComponent({
   logs,
@@ -18,7 +19,7 @@ export async function createMessageProcesorComponent({
   const logger = logs.getLogger('message-procesor')
   const abServers = (await config.requireString('AB_SERVERS')).split(';')
 
-  async function reQueue(message: QueueMessage): Promise<void> {    
+  async function reQueue(message: QueueMessage): Promise<void> {
     const retry = (message._retry || 0) + 1
     logger.info('Re-queuing message', {
       entityId: message.entity.entityId,
@@ -49,38 +50,54 @@ export async function createMessageProcesorComponent({
         return
       }
 
-      
       const entityId = message.entity.entityId
       const base = message.entity.metadata.scene.base
+      if (RoadCoordinates.includes(base)) {
+        logger.debug('Skipping process since it is a road', {
+          entityId,
+          base
+        })
+        await queue.deleteMessage(receiptMessageHandle)
+        return
+      }
+
       logger.info('Processing scene deployment', {
         entityId,
         base,
         attempt: retry + 1
       })
 
-      const alreadyUploadedFiles = await storage.getFiles(`${base}/LOD/Sources/${message.entity.entityTimestamp.toString()}`)
+      const alreadyUploadedFiles = await storage.getFiles(
+        `${base}/LOD/Sources/${message.entity.entityTimestamp.toString()}`
+      )
       if (!!alreadyUploadedFiles.length) {
         logger.info('Scene already processed, skipping', {
           entityId,
           base
         })
         logger.info('Publishing message to AssetBundle converter', { entityId, base })
-        await Promise.all(abServers.map((abServer) => bundleTriggerer.queueGeneration(entityId, alreadyUploadedFiles, abServer)))
+        await Promise.all(
+          abServers.map((abServer) => bundleTriggerer.queueGeneration(entityId, alreadyUploadedFiles, abServer))
+        )
         await queue.deleteMessage(receiptMessageHandle)
         return
       }
-      
+
       const generationProcessStartTime = Date.now()
-      const lodGenerationResult = await lodGenerator.generate(base, 120)
+      const lodGenerationResult = await lodGenerator.generate(base)
       const generationProcessDuration = Date.now() - generationProcessStartTime
       outputPath = lodGenerationResult.outputPath
 
       if (lodGenerationResult.error) {
-        logger.error('Error while generating LOD', {
+        logger.warn('Error while generating LOD', {
           entityId,
           base,
-          error: lodGenerationResult.error?.message ? parseMultilineText(lodGenerationResult.error?.message) : 'Check log bucket for more details',
-          detailedError: lodGenerationResult.error?.detailedError ? parseMultilineText(lodGenerationResult.error?.detailedError) : 'No details found'
+          error: lodGenerationResult.error?.message
+            ? parseMultilineText(lodGenerationResult.error?.message)
+            : 'Check log bucket for more details',
+          detailedError: lodGenerationResult.error?.detailedError
+            ? parseMultilineText(lodGenerationResult.error?.detailedError)
+            : 'No details found'
         })
 
         if (retry < 3) {
@@ -132,7 +149,7 @@ export async function createMessageProcesorComponent({
         logger.warn('Max attempts reached, message will not be retried', {
           entityId: message.entity.entityId,
           base: message.entity.metadata.scene.base,
-          attempt: retry 
+          attempt: retry
         })
         metrics.increment('lod_generation_count', { status: 'failed' }, 1)
       }
