@@ -64,7 +64,7 @@ describe('lod-generator', () => {
         const result = await lodGenerator.generate(base, 20)
 
         expect(result.error).toBeDefined()
-        expect(result.error.message).toEqual('No LODs were generated')
+        expect(result.error.message).toEqual('LODs are not present in output directory')
     })
 
     it('should return a specific error when output file was not created', async () => {
@@ -83,7 +83,7 @@ describe('lod-generator', () => {
         const result = await lodGenerator.generate(base, 20)
 
         expect(result.error).toBeDefined()
-        expect(result.error.message).toEqual('No LODs were generated')
+        expect(result.error.message).toEqual('Output directory do not exists, LODs were not generated')
         expect(fsMock.readdirSync).not.toHaveBeenCalled()
     })
 

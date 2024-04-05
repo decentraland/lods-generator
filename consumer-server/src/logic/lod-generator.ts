@@ -3,6 +3,7 @@ import path from 'path'
 import fs from 'fs'
 
 import { LodGenerationResult, LodGeneratorComponent } from '../types'
+import { parseMultilineText } from '../utils/text-parser'
 
 export function createLodGeneratorComponent(): LodGeneratorComponent {
   const projectRoot = path.resolve(__dirname, '..', '..', '..') // project root according to Dockerfile bundling
@@ -23,7 +24,7 @@ export function createLodGeneratorComponent(): LodGeneratorComponent {
       outputPath: processOutput
     }
 
-    const commandToExecute = `${lodGeneratorProgram} "coords" "${basePointer}" "${outputPath}" "${sceneLodEntitiesManifestBuilder}" "false" "false" "7000;3000;1000;500" "0"`
+    const commandToExecute = `${lodGeneratorProgram} "coords" "${basePointer}" "${outputPath}" "${sceneLodEntitiesManifestBuilder}" "false" "false" "500" "3"`
 
     result = await new Promise((resolve, _) => {
       exec(commandToExecute, { timeout: timeoutInMinutes * 60 * 1000 }, (error, _, stderr) => {
@@ -42,7 +43,7 @@ export function createLodGeneratorComponent(): LodGeneratorComponent {
             resolve({
               error: {
                 message: error?.message || 'Unexpected error',
-                detailedError: ((stderr as string) || '').replace(/\n|\r\n/g, ' ')
+                detailedError: parseMultilineText(stderr)
               },
               lodsFiles: [],
               logFile: '',
@@ -54,8 +55,8 @@ export function createLodGeneratorComponent(): LodGeneratorComponent {
         if (!fs.existsSync(processOutput)) {
           resolve({
             error: {
-              message: 'No LODs were generated',
-              detailedError: 'No files found on output directory after LOD generation finished'
+              message: 'Output directory do not exists, LODs were not generated',
+              detailedError: parseMultilineText(stderr)
             },
             lodsFiles: [],
             logFile: '',
@@ -74,8 +75,8 @@ export function createLodGeneratorComponent(): LodGeneratorComponent {
 
           if (parsedResult.lodsFiles.length === 0) {
             parsedResult.error = {
-              message: 'No LODs were generated',
-              detailedError: 'No LOD files found on output directory after LOD generation finished'
+              message: 'LODs are not present in output directory',
+              detailedError: parsedResult.logFile ? parseMultilineText(fs.readFileSync(parsedResult.logFile, 'utf8')) : parseMultilineText(stderr)
             }
           }
 
