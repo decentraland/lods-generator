@@ -1,4 +1,4 @@
-name: Test LOD Conversion
+name: Dispatch LOD Conversion
 
 on:
   workflow_dispatch:
