@@ -1,0 +1,80 @@
+name: Test LOD Conversion
+
+on:
+  workflow_dispatch:
+    inputs:
+      coords:
+        description: 'Coordinates to process'
+        required: true
+        default: '5,19'
+      lodLevel1:
+        description: 'First LOD level to test'
+        required: true
+        default: '500'
+      lodLevel2:
+        description: 'Second LOD level to test'
+        required: true
+        default: '3'
+
+jobs:
+  build-and-run:
+    runs-on: windows-2019
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        lfs: true
+            
+    - name: Checkout NuGet PiXYZ package
+      uses: actions/checkout@v2
+      with:
+        repository: 'decentraland/PiXYZ-NuGetPackage'
+        token: ${{ secrets.PAT_NUGET_TOKEN }}
+        path: 'PiXYZ-NuGetPackage'  
+        lfs: true
+
+    - name: Build license
+      run: |
+        cd consumer-server && yarn && yarn build-license ${{ secrets.LICENSE_KEY }}
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '3.1.x'
+
+    - name: Publish with dotnet
+      run:  dotnet publish -c Release -r win10-x64 -o ./publish --self-contained true 
+      
+    - name: Copy manifest builder to publish directory
+      run: |
+        Copy-Item -Path "${{ github.workspace }}\DCL_PiXYZ\bin\Release\netcoreapp3.1\win10-x64\scene-lod-entities-manifest-builder" -Destination "${{ github.workspace }}\publish\scene-lod-entities-manifest-builder" -Recurse
+      shell: pwsh
+      
+    - name: Copy road coordinates
+      run: |
+          Copy-Item -Path "${{ github.workspace }}\DCL_PiXYZ\bin\Release\netcoreapp3.1\win10-x64\RoadCoordinates.json" -Destination "${{ github.workspace }}\publish"
+      shell: pwsh 
+
+    - name: Install Vulkan SDK
+      uses: jakoch/install-vulkan-sdk-action@v1.0.0
+      with:
+        vulkan_version: 1.3.268.0
+        optional_components: com.lunarg.vulkan.vma
+        install_runtime: true
+        cache: true
+        destination: ${{ github.workspace }}/vulkan-sdt
+
+    - name: Move Vulkan DLL to output directory
+      run: |
+        mv ./vulkan-sdt/1.3.268.0/runtime/x64/vulkan-1.dll ./publish/
+      shell: bash
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18.14.2'
+
+    - name: Run the application
+      env:
+       PIXYZPRODUCTNAME: ${{ secrets.PIXYZPRODUCTNAME }}
+       PIXYZTOKEN: ${{ secrets.PIXYZTOKEN }}
+      run: .\publish\DCL_PiXYZ.exe "coords" ${{ github.event.inputs.coords }} "${{ github.workspace }}\publish\OutputDirectoryPath" "${{ github.workspace }}\publish\scene-lod-entities-manifest-builder" "false" "true" ${{ github.event.inputs.lodLevel1 }} ${{ github.event.inputs.lodLevel2 }}
