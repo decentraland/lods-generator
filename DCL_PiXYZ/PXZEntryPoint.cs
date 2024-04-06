@@ -79,7 +79,7 @@ namespace DCL_PiXYZ
                 foreach (string pointer in sceneConversionInfo.SceneImporter.GetCurrentScenePointersList())
                     convertedScenes.Add(pointer);
 
-                Console.WriteLine("BEGIN SCENE CONVERSION FOR " + currentScene);
+                FileWriter.WriteToConsole("BEGIN SCENE CONVERSION FOR " + currentScene);
                 if (!await ManifestGeneratedSuccesfully(sceneConversionInfo, pathHandler, currentScene)) continue;
                 if (!await sceneConversionInfo.SceneImporter.DownloadAllContent(pathHandler)) continue;
                 var pxzParams = new PXZParams
@@ -97,7 +97,7 @@ namespace DCL_PiXYZ
                     pxzParams.LodLevel += 1;
                 }
                 GC.Collect();
-                Console.WriteLine("END SCENE CONVERSION FOR " + currentScene);
+                FileWriter.WriteToConsole("END SCENE CONVERSION FOR " + currentScene);
                 UpdateConvertedScenesFile(convertedScenes);
             }
             DoManifestCleanup(isDebug, pathHandler);
@@ -126,7 +126,7 @@ namespace DCL_PiXYZ
             {
                 //Check if they were converted
                 stopwatch.Restart();
-                Console.WriteLine($"BEGIN CONVERTING {scene} WITH {pxzParams.DecimationValue}");
+                FileWriter.WriteToConsole($"BEGIN CONVERTING {scene} WITH {pxzParams.DecimationValue}");
                 await ConvertScene(pxzParams, pathHandler, sceneConversionInfo);
                 stopwatch.Stop();
 
@@ -145,7 +145,7 @@ namespace DCL_PiXYZ
         {
             if (convertedScenes.Contains(scene))
             {
-                Console.WriteLine($"Skipping scene {scene} since its already converted");
+                FileWriter.WriteToConsole($"Skipping scene {scene} since its already converted");
                 return true;
             }
             return false;
@@ -183,7 +183,7 @@ namespace DCL_PiXYZ
             //Check empty scenes
             if (currentPointersList.Length == 0)
             {
-                Console.WriteLine($"Scene {scene} is empty. Ignoring");
+                FileWriter.WriteToConsole($"Scene {scene} is empty. Ignoring");
                 return true;
             }
 
@@ -195,7 +195,7 @@ namespace DCL_PiXYZ
             //Check if the scene has already been analyzed (for bulk conversion)
             if (analyzedScenes.Contains(scene))
             {
-                Console.WriteLine($"Scene {scene} has already been analyzed");
+                FileWriter.WriteToConsole($"Scene {scene} has already been analyzed");
                 return true;
             }
 
@@ -205,7 +205,7 @@ namespace DCL_PiXYZ
 
         private static async Task<bool> GenerateManifest(string sceneType, string sceneValue, string sceneManifestDirectory, List<string> errorsToIgnore, string failFile)
         {
-            Console.WriteLine($"BEGIN MANIFEST GENERATION FOR SCENE {sceneValue}");
+            FileWriter.WriteToConsole($"BEGIN MANIFEST GENERATION FOR SCENE {sceneValue}");
             string possibleError = await NPMUtils.RunNPMTool(sceneManifestDirectory, sceneType, sceneValue);
 
             if (!string.IsNullOrEmpty(possibleError))
@@ -214,7 +214,7 @@ namespace DCL_PiXYZ
                 // If the error is not ignorable, log it and return false.
                 if (!isIgnorableError)
                 {
-                    Console.WriteLine($"MANIFEST ERROR: {possibleError}");
+                    FileWriter.WriteToConsole($"MANIFEST ERROR: {possibleError}");
                     FileWriter.WriteToFile($"{sceneValue}\tMANIFEST ERROR: {possibleError}", failFile);
                     return false; // Early exit if the error cannot be ignored.
                 }
@@ -247,7 +247,9 @@ namespace DCL_PiXYZ
             foreach (var pxzModifier in modifiers)
             {
                 stopwatch.Start();
+                FileWriter.WriteToConsole($"BEGIN {pxzModifier.GetType().Name}");
                 await pxzModifier.ApplyModification(pxz);
+                FileWriter.WriteToConsole($"FINISHED {pxzModifier.GetType().Name}");
                 stopwatch.StopAndPrint(pxzModifier.GetType().Name);
             }
         }
@@ -256,7 +258,7 @@ namespace DCL_PiXYZ
         {
             if (roadCoordinates.Contains(currentScene))
             {
-                Console.WriteLine($"Skipping scene {currentScene} since its a road");
+                FileWriter.WriteToConsole($"Skipping scene {currentScene} since its a road");
                 return true;
             }
 
@@ -291,10 +293,10 @@ namespace DCL_PiXYZ
         {
             if (installAndBuildNPM)
             {
-                Console.WriteLine("INSTALLING AND BUILDING NPM");
+                FileWriter.WriteToConsole("INSTALLING AND BUILDING NPM");
                 NPMUtils.DoNPMInstall(sceneManifestDirectory);
             }
-            Console.WriteLine("INITIALIZING PIXYZ");
+            FileWriter.WriteToConsole("INITIALIZING PIXYZ");
             InitializePiXYZ();
         }
 
@@ -310,6 +312,7 @@ namespace DCL_PiXYZ
         {
             Directory.CreateDirectory(PXYZConstants.RESOURCES_DIRECTORY);
         }
+
 
         public static void CloseApplication(string errorMessage)
         {

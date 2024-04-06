@@ -37,7 +37,6 @@ namespace DCL_PiXYZ
         
         public async Task ApplyModification(PiXYZAPI pxz)
         {
-            Console.WriteLine("BEGIN PXZ MODIFIER DECIMATOR");
             originalPolygonCount =
                 pxz.Scene.GetPolygonCount(new OccurrenceList(new uint[] { pxz.Scene.GetRoot() }), true);
             pxz.Algo.DecimateTarget(new OccurrenceList(new uint[]{pxz.Scene.GetRoot()}), decimate);
