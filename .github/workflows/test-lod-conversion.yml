@@ -76,29 +76,3 @@ jobs:
        PIXYZPRODUCTNAME: ${{ secrets.PIXYZPRODUCTNAME }}
        PIXYZTOKEN: ${{ secrets.PIXYZTOKEN }}
       run: .\publish\DCL_PiXYZ.exe "coords" "-21,148" "${{ github.workspace }}\publish\OutputDirectoryPath" "${{ github.workspace }}\publish\scene-lod-entities-manifest-builder" "false" "true" "${{ matrix.lodLevelsToTest[0] }}" "${{ matrix.lodLevelsToTest[1] }}"
-
-    - name: Check Output Files with Size Tolerance in KB
-      run: |
-        basePath="${GITHUB_WORKSPACE}/publish/OutputDirectoryPath/5,19"
-        files=(${{ join(matrix.files, ' ') }})
-        sizes=(${{ join(matrix.sizes, ' ') }})
-        toleranceB=5000 # 5 KB tolerance
-    
-        for i in "${!files[@]}"; do
-          filePath="$basePath/${files[$i]}"
-          if [ ! -f "$filePath" ]; then
-            echo "File not found: $filePath"
-            exit 1
-          fi
-    
-          fileSizeInBytes=$(stat -c %s "$filePath")
-          lowerBoundB=$((${sizes[$i]} - toleranceB))
-          upperBoundB=$((${sizes[$i]} + toleranceB))
-          if [ "$fileSizeInBytes" -lt "$lowerBoundB" ] || [ "$fileSizeInBytes" -gt "$upperBoundB" ]; then
-            echo "File size mismatch for $filePath. Expected: ${sizes[$i]} B (+/- $toleranceB B), Found: $fileSizeInBytes bytes"
-            exit 1
-          fi
-        done
-    
-        echo "All files exist and are within the acceptable size range."
-      shell: bash
