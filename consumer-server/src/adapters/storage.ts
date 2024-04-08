@@ -20,7 +20,11 @@ export async function createCloudStorageAdapter({ config }: Pick<AppComponents, 
       })
     )
 
-    return list.Contents?.filter((file) => !file.Key?.endsWith('output.txt')).map((file) => `${bucketEndpoint}/${bucket}/${file.Key}`) || []
+    return (
+      list.Contents?.filter((file) => !file.Key?.endsWith('output.txt')).map(
+        (file) => `${bucketEndpoint}/${bucket}/${file.Key}`
+      ) || []
+    )
   }
 
   async function storeFiles(filePaths: string[], prefix: string): Promise<string[]> {

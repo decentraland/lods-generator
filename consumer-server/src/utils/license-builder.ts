@@ -8,9 +8,9 @@ export async function buildLicense(config: IConfigComponent | undefined, token: 
   let licenseKey: string = ''
 
   if (!!config && !token) {
-      licenseKey = await config.getString('LODS_GENERATOR_LICENSE') || ''
+    licenseKey = (await config.getString('LODS_GENERATOR_LICENSE')) || ''
   } else if (!!token) {
-        licenseKey = token
+    licenseKey = token
   }
 
   try {

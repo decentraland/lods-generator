@@ -33,7 +33,11 @@ RUN npm run build
 # build consumer-server
 FROM base as consumer-server-build
 
-WORKDIR /consumer-server
+WORKDIR /app
+
+COPY RoadCoordinates.json ./RoadCoordinates.json
+
+WORKDIR /app/consumer-server
 
 COPY consumer-server/package.json consumer-server/yarn.lock ./
 RUN yarn install --frozen-lockfile
@@ -95,11 +99,11 @@ ARG COMMIT_HASH
 RUN echo "COMMIT_HASH=$COMMIT_HASH" >> ./scene-lod/.env
 RUN echo "COMMIT_HASH=$COMMIT_HASH" >> ./scene-lod/.env.default
 
-COPY --from=consumer-server-build /consumer-server/dist ./consumer-server/dist
-COPY --from=consumer-server-build /consumer-server/package.json ./consumer-server/package.json
-COPY --from=consumer-server-build /consumer-server/yarn.lock ./consumer-server/yarn.lock
-COPY --from=consumer-server-build /consumer-server/node_modules ./consumer-server/node_modules
-COPY --from=consumer-server-build /consumer-server/.env.default ./consumer-server/dist/.env.default
+COPY --from=consumer-server-build /app/consumer-server/dist ./consumer-server/dist
+COPY --from=consumer-server-build /app/consumer-server/package.json ./consumer-server/package.json
+COPY --from=consumer-server-build /app/consumer-server/yarn.lock ./consumer-server/yarn.lock
+COPY --from=consumer-server-build /app/consumer-server/node_modules ./consumer-server/node_modules
+COPY --from=consumer-server-build /app/consumer-server/.env.default ./consumer-server/dist/.env.default
 RUN echo "COMMIT_HASH=$COMMIT_HASH" >> ./consumer-server/.env
 RUN echo "COMMIT_HASH=$COMMIT_HASH" >> ./consumer-server/.env.default
 

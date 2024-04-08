@@ -89,7 +89,7 @@ export type LodGenerationResult = {
 }
 
 export type LodGeneratorComponent = {
-  generate(basePointer: string, timeout: number): Promise<LodGenerationResult>
+  generate(basePointer: string): Promise<LodGenerationResult>
 }
 
 export type BundleTriggererComponent = {
@@ -101,7 +101,7 @@ export type MessageProcessorComponent = {
 }
 
 export type StorageComponent = {
-  storeFiles(filePaths: string[], prefix: string): Promise<string[]>,
+  storeFiles(filePaths: string[], prefix: string): Promise<string[]>
   getFiles(prefix: string): Promise<string[]>
 }
 

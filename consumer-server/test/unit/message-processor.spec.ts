@@ -225,27 +225,6 @@ describe('message-processor', () => {
     expect(components.queue.send).not.toHaveBeenCalled()
   })
 
-  it('should call lod generator with a timeout of 120 minutes', async () => {
-    const components = getMessageProcessorMockComponents()
-    const messageProcessor = await createMessageProcesorComponent(components)
-    const message = {
-      entity: {
-        entityType: 'scene',
-        entityId: 'randomId',
-        entityTimestamp: 0,
-        metadata: {
-          scene: {
-            base: '0,0'
-          }
-        }
-      }
-    }
-
-    await messageProcessor.process(message, 'receiptHandle-6')
-
-    expect(components.lodGenerator.generate).toHaveBeenCalledWith('0,0', 120)
-  })
-
   it('should prevent generating lods if they are already present on storage', async () => {
     const components = getMessageProcessorMockComponents()
     components.storage.getFiles.mockResolvedValue(['file1', 'file2', 'output.txt'])

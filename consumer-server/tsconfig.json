@@ -16,7 +16,8 @@
       "forceConsistentCasingInFileNames": true,
       "skipLibCheck": true,
       "noUnusedLocals": true,
-      "rootDir": "src"
+      "rootDir": "src",
+      "resolveJsonModule": true
     },
     "include": [
       "src"
