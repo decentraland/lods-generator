@@ -77,13 +77,10 @@ jobs:
       env:
        PIXYZPRODUCTNAME: ${{ secrets.PIXYZPRODUCTNAME }}
        PIXYZTOKEN: ${{ secrets.PIXYZTOKEN }}
-      run: .\publish\DCL_PiXYZ.exe "coords" ${{ github.event.inputs.coords }} "${{ github.workspace }}\publish\OutputDirectoryPath" "${{ github.workspace }}\publish\scene-lod-entities-manifest-builder" "false" "true" ${{ github.event.inputs.lodLevel1 }} ${{ github.event.inputs.lodLevel2 }}
-
-      # Upload artifact
-    - name: Upload LOD
-      uses: actions/upload-artifact@v3
+      run: .\publish\DCL_PiXYZ.exe "coords" ${{ github.event.inputs.coords }} "OutputDirectoryPath/" "${{ github.workspace }}\publish\scene-lod-entities-manifest-builder" "false" "true" ${{ github.event.inputs.lodLevel1 }} ${{ github.event.inputs.lodLevel2 }}
+     
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
       with:
         name: LOD-${{ github.event.inputs.coords }}
-        path: |
-          "${{ github.workspace }}\publish\OutputDirectoryPath"
-        if-no-files-found: error
+        path: OutputDirectoryPath/
