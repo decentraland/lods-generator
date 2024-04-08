@@ -85,5 +85,5 @@ jobs:
       with:
         name: LOD-${{ github.event.inputs.coords }}
         path: |
-          "${{ github.workspace }}\publish\OutputDirectoryPath"
+          "${{ github.workspace }}\publish\OutputDirectoryPath\${{ github.event.inputs.coords }}"
         if-no-files-found: error
