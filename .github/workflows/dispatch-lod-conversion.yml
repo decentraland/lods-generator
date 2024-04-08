@@ -8,11 +8,11 @@ on:
         required: true
         default: '5,19'
       lodLevel1:
-        description: 'First LOD level to test'
+        description: 'LOD decimations'
         required: true
         default: '500'
       lodLevel2:
-        description: 'Second LOD level to test'
+        description: 'Starting LOD level'
         required: true
         default: '3'
 
