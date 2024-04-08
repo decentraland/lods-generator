@@ -78,15 +78,9 @@ jobs:
        PIXYZPRODUCTNAME: ${{ secrets.PIXYZPRODUCTNAME }}
        PIXYZTOKEN: ${{ secrets.PIXYZTOKEN }}
       run: .\publish\DCL_PiXYZ.exe "coords" ${{ github.event.inputs.coords }} "OutputDirectoryPath/" "${{ github.workspace }}\publish\scene-lod-entities-manifest-builder" "false" "true" ${{ github.event.inputs.lodLevel1 }} ${{ github.event.inputs.lodLevel2 }}
-
-    - name: List Output Directory Contents
-      run: ls "OutputDirectoryPath"
-      
-    - name: List Output Directory Contents
-      run: ls "OutputDirectoryPath/${{ github.event.inputs.coords }}"
-      
+     
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
       with:
-        name: output-artifacts
+        name: LOD-${{ github.event.inputs.coords }}
         path: OutputDirectoryPath/
