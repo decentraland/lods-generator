@@ -224,31 +224,6 @@ describe('message-processor', () => {
     expect(components.storage.storeFiles).toHaveBeenCalledWith(['logFile.txt'], 'failures/0,0')
     expect(components.queue.send).not.toHaveBeenCalled()
   })
-
-  it('should prevent generating lods if they are already present on storage', async () => {
-    const components = getMessageProcessorMockComponents()
-    components.storage.getFiles.mockResolvedValue(['file1', 'file2', 'output.txt'])
-    const messageProcessor = await createMessageProcesorComponent(components)
-    const message = {
-      entity: {
-        entityType: 'scene',
-        entityId: 'randomId',
-        entityTimestamp: 0,
-        metadata: {
-          scene: {
-            base: '0,0'
-          }
-        }
-      }
-    }
-
-    await messageProcessor.process(message, 'receiptHandle-7')
-
-    expect(components.lodGenerator.generate).not.toHaveBeenCalled()
-    expect(components.queue.send).not.toHaveBeenCalled()
-    expect(components.bundleTriggerer.queueGeneration).toHaveBeenCalledTimes(2)
-    expect(components.queue.deleteMessage).toHaveBeenCalledWith('receiptHandle-7')
-  })
 })
 
 function getMessageProcessorMockComponents() {

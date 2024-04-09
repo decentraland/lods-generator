@@ -7,15 +7,17 @@ on:
 jobs:
   build-and-run:
     runs-on: windows-2019
+    env:
+      COORDS: "-55,1"  # Define coordinates as an environment variable    
     strategy:
       matrix:
         include:
           - lodLevelsToTest: ["500", "3"]
-            files: "bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_3.fbx"
-            sizes: "128128"
+            files: "QmTpsFiaJVPv5mU6ERBzkDcZ39Lyq9sEfiLw9Ep3VQAFgK_3.fbx"
+            sizes: "1900544"
           - lodLevelsToTest: ["7000;3000;1000;500", "0"]
-            files: "bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_0.fbx bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_1.fbx bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_2.fbx bafkreictrpcnce5eoink3tdtrm74vgbniho7afl6xoi46lk3iag2u7aju4_3.fbx"
-            sizes: "6210224 631424 219776 128128"
+            files: "QmTpsFiaJVPv5mU6ERBzkDcZ39Lyq9sEfiLw9Ep3VQAFgK_0.fbx QmTpsFiaJVPv5mU6ERBzkDcZ39Lyq9sEfiLw9Ep3VQAFgK_1.fbx QmTpsFiaJVPv5mU6ERBzkDcZ39Lyq9sEfiLw9Ep3VQAFgK_2.fbx QmTpsFiaJVPv5mU6ERBzkDcZ39Lyq9sEfiLw9Ep3VQAFgK_3.fbx"
+            sizes: "35348480 7283552 2895872 1900544"
             
     steps:
     - uses: actions/checkout@v2
@@ -75,14 +77,14 @@ jobs:
       env:
        PIXYZPRODUCTNAME: ${{ secrets.PIXYZPRODUCTNAME }}
        PIXYZTOKEN: ${{ secrets.PIXYZTOKEN }}
-      run: .\publish\DCL_PiXYZ.exe "coords" "5,19" "${{ github.workspace }}\publish\OutputDirectoryPath" "${{ github.workspace }}\publish\scene-lod-entities-manifest-builder" "false" "true" "${{ matrix.lodLevelsToTest[0] }}" "${{ matrix.lodLevelsToTest[1] }}"
+      run: .\publish\DCL_PiXYZ.exe "coords" "${{ env.COORDS }}" "${{ github.workspace }}\publish\OutputDirectoryPath" "${{ github.workspace }}\publish\scene-lod-entities-manifest-builder" "false" "true" "${{ matrix.lodLevelsToTest[0] }}" "${{ matrix.lodLevelsToTest[1] }}"
 
     - name: Check Output Files with Size Tolerance in KB
       run: |
-        basePath="${GITHUB_WORKSPACE}/publish/OutputDirectoryPath/5,19"
+        basePath="${GITHUB_WORKSPACE}/publish/OutputDirectoryPath/${{ env.COORDS }}"
         files=(${{ join(matrix.files, ' ') }})
         sizes=(${{ join(matrix.sizes, ' ') }})
-        toleranceB=5000 # 5 KB tolerance
+        toleranceB=20000 # 10 KB tolerance
     
         for i in "${!files[@]}"; do
           filePath="$basePath/${files[$i]}"

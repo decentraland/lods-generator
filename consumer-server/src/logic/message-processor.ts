@@ -67,22 +67,6 @@ export async function createMessageProcesorComponent({
         attempt: retry + 1
       })
 
-      const alreadyUploadedFiles = await storage.getFiles(
-        `${base}/LOD/Sources/${message.entity.entityTimestamp.toString()}`
-      )
-      if (!!alreadyUploadedFiles.length) {
-        logger.info('Scene already processed, skipping', {
-          entityId,
-          base
-        })
-        logger.info('Publishing message to AssetBundle converter', { entityId, base })
-        await Promise.all(
-          abServers.map((abServer) => bundleTriggerer.queueGeneration(entityId, alreadyUploadedFiles, abServer))
-        )
-        await queue.deleteMessage(receiptMessageHandle)
-        return
-      }
-
       const generationProcessStartTime = Date.now()
       const lodGenerationResult = await lodGenerator.generate(base)
       const generationProcessDuration = Date.now() - generationProcessStartTime

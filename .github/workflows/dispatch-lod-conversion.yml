@@ -7,11 +7,11 @@ on:
         description: 'Coordinates to process'
         required: true
         default: '5,19'
-      lodLevel1:
+      decimationValues:
         description: 'LOD decimations'
         required: true
         default: '500'
-      lodLevel2:
+      startingLODLevel:
         description: 'Starting LOD level'
         required: true
         default: '3'
@@ -77,7 +77,7 @@ jobs:
       env:
        PIXYZPRODUCTNAME: ${{ secrets.PIXYZPRODUCTNAME }}
        PIXYZTOKEN: ${{ secrets.PIXYZTOKEN }}
-      run: .\publish\DCL_PiXYZ.exe "coords" ${{ github.event.inputs.coords }} "OutputDirectoryPath/" "${{ github.workspace }}\publish\scene-lod-entities-manifest-builder" "false" "true" ${{ github.event.inputs.lodLevel1 }} ${{ github.event.inputs.lodLevel2 }}
+      run: .\publish\DCL_PiXYZ.exe "coords" ${{ github.event.inputs.coords }} "OutputDirectoryPath/" "${{ github.workspace }}\publish\scene-lod-entities-manifest-builder" "false" "true" "${{ github.event.inputs.decimationValues }}" "${{ github.event.inputs.startingLODLevel }}"
      
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
