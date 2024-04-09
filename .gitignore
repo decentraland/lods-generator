@@ -41,6 +41,7 @@ tsconfig.tsbuildinfo
 # production
 /build
 */dist
+/consumer-server/tools
 /tmp
 
 # misc
@@ -71,6 +72,6 @@ validation-errors.json
 
 .idea/
 
-consumer-server/bin/lods/
+**/output-lods/**
 
 .env.admin
