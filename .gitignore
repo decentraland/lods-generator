@@ -70,3 +70,5 @@ validation-errors.json
 *.lic
 
 .idea/
+
+bin/lods/
