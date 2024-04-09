@@ -5,11 +5,10 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict dist/index.js",
-    "build-license": "tsc ./bin/build-license.ts && node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict ./bin/build-license.js",
     "lint:fix": "eslint --fix --ext .ts src",
     "test": "jest --forceExit --detectOpenHandles --verbose",
-    "build:bin": "tsc -p bin.tsconfig.json",
-    "admin:purge": "node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict ./tools/bin/purge-bucket.js",
+    "build:admin": "tsc -p bin.tsconfig.json",
+    "admin:license": "node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict ./tools/bin/build-license.js",
     "admin:lod0": "node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict ./tools/bin/generate-zip.js 0",
     "admin:lod1": "node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict ./tools/bin/generate-zip.js 1",
     "admin:lod2": "node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict ./tools/bin/generate-zip.js 2",
