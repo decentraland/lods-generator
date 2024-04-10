@@ -23,8 +23,7 @@ To use this tool, you'll need to provide credentials for accessing the LOD stora
 1. Ensure NodeJS version 18+ and YARN package manager are installed.
 2. Navigate to the `consumer-server` directory.
 3. Install the project's dependencies by executing `yarn install`.
-4. Build the scripts with `yarn build:admin`.
-5. Based on your specific requirements, run one of the following commands:
+4. Based on your specific requirements, run one of the following commands:
     - `yarn admin:lod0` to generate two compressed files (for each platform) containing all generated LOD 0 files.
     - `yarn admin:lod1` for generating similar files for LOD 1.
     - `yarn admin:lod2` for LOD 2 files.
@@ -53,5 +52,4 @@ This tool is straightforward to use, focusing on security and efficiency in lice
 1. Ensure NodeJS version 18+ and YARN package manager are installed.
 2. Navigate to the `consumer-server` directory.
 3. Install the project's dependencies by executing `yarn install`.
-4. Build the scripts with `yarn build:admin`.
-5. Run the script `yarn admin:license`
+4. Run the script `yarn admin:license`
