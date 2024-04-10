@@ -1,10 +1,11 @@
 import * as path from 'path'
 import * as fs from 'fs'
+import { glob } from 'glob'
 
 import { IConfigComponent } from '@well-known-components/interfaces'
 
 export async function buildLicense(config: IConfigComponent | undefined, token: string | undefined): Promise<void> {
-  const projectRoot = path.resolve(__dirname, '..', '..', '..')
+  const projectRoot = path.resolve(__dirname, '..', '..', '..', '..')
   let licenseKey: string = ''
 
   if (!!config && !token) {
@@ -13,13 +14,13 @@ export async function buildLicense(config: IConfigComponent | undefined, token: 
     licenseKey = token
   }
 
-  try {
-    const licenseKeyPath = path.resolve(projectRoot, 'pixyzsdk-15042024.lic')
-    const licenseKeyFile = fs.readFileSync(licenseKeyPath, 'utf8')
-    const replacedLicenseKey = licenseKeyFile.replace('{LICENSE_KEY}', licenseKey)
+  const filesPath = (await glob("**/pixyzsdk-15042024.lic", { root: projectRoot }))
 
-    fs.writeFileSync(licenseKeyPath, replacedLicenseKey, 'utf8')
-  } catch (error: any) {
-    throw error
+  if (filesPath.length === 0) {
+    throw new Error('License file not found')
   }
+
+  const licenseKeyFile = fs.readFileSync(filesPath[0], 'utf8')
+  const replacedLicenseKey = licenseKeyFile.replace('{LICENSE_KEY}', licenseKey)
+  fs.writeFileSync(filesPath[0], replacedLicenseKey, 'utf8')
 }

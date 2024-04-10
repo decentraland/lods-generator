@@ -28,6 +28,7 @@
     "@well-known-components/metrics": "^2.1.0",
     "@well-known-components/pushable-channel": "^1.0.3",
     "dcl-catalyst-client": "^21.6.1",
+    "glob": "^10.3.12",
     "mime-types": "^2.1.35"
   },
   "devDependencies": {
