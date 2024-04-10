@@ -29,6 +29,10 @@ async function isActiveScene(fileName: string): Promise<boolean> {
   
   const hash = match[1]
 
+  if (hash.startsWith('qm')) {
+    return true
+  }
+
   try {
     // throws if the entity is not found
     await catalyst.fetchEntityById(hash)
@@ -96,6 +100,11 @@ async function downloadLODDirectoryAndCompressIt(
             "GLB",
             path.basename(fileKey)
           )
+        }
+
+        if (fs.existsSync(filePath)) {
+          console.log(`File ${filePath} already exists, skipping`)
+          continue
         }
 
         const data = await s3Client.send(
