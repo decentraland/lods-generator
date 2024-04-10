@@ -5,6 +5,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict dist/index.js",
+    "build-license": "tsc ./bin/build-license.ts && node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict ./bin/build-license.js",
     "lint:fix": "eslint --fix --ext .ts src",
     "test": "jest --forceExit --detectOpenHandles --verbose",
     "build:admin": "tsc -p bin.tsconfig.json",
