@@ -13,13 +13,9 @@ export async function buildLicense(config: IConfigComponent | undefined, token: 
     licenseKey = token
   }
 
-  try {
-    const licenseKeyPath = path.resolve(projectRoot, 'pixyzsdk-15042024.lic')
-    const licenseKeyFile = fs.readFileSync(licenseKeyPath, 'utf8')
-    const replacedLicenseKey = licenseKeyFile.replace('{LICENSE_KEY}', licenseKey)
+  const licenseKeyPath = path.resolve(projectRoot, 'pixyzsdk-15042024.lic')
+  const licenseKeyFile = fs.readFileSync(licenseKeyPath, 'utf8')
+  const replacedLicenseKey = licenseKeyFile.replace('{LICENSE_KEY}', licenseKey)
 
-    fs.writeFileSync(licenseKeyPath, replacedLicenseKey, 'utf8')
-  } catch (error: any) {
-    throw error
-  }
+  fs.writeFileSync(licenseKeyPath, replacedLicenseKey, 'utf8')  
 }

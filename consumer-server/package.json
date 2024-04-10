@@ -5,9 +5,13 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict dist/index.js",
-    "build-license": "tsc ./bin/build-license.ts && node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict ./bin/build-license.js",
+    "test": "jest --forceExit --detectOpenHandles --verbose",
     "lint:fix": "eslint --fix --ext .ts src",
-    "test": "jest --forceExit --detectOpenHandles --verbose"
+    "admin:license": "tsc ./bin/build-license.ts && node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict ./bin/build-license.js",
+    "admin:lod0": "tsc --esModuleInterop ./bin/generate-zip.ts && node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict ./bin/generate-zip.js 0",
+    "admin:lod1": "tsc ./bin/generate-zip.ts && node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict ./bin/generate-zip.js 1",
+    "admin:lod2": "tsc ./bin/generate-zip.ts && node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict ./bin/generate-zip.js 2",
+    "admin:lod3": "tsc ./bin/generate-zip.ts && node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict ./bin/generate-zip.js 3"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.499.0",
@@ -22,15 +26,17 @@
     "@well-known-components/logger": "^3.1.3",
     "@well-known-components/metrics": "^2.1.0",
     "@well-known-components/pushable-channel": "^1.0.3",
-    "dcl-catalyst-client": "^21.5.5",
+    "dcl-catalyst-client": "^21.6.1",
     "mime-types": "^2.1.35"
   },
   "devDependencies": {
     "@dcl/catalyst-storage": "^4.1.0",
     "@dcl/eslint-config": "^1.1.13",
+    "@types/archiver": "^6.0.2",
     "@types/mime-types": "^2.1.4",
     "@types/node": "^20.12.3",
     "@well-known-components/test-helpers": "^1.5.5",
+    "archiver": "^7.0.1",
     "mock-aws-s3": "^4.0.2",
     "typescript": "^5.3.3"
   }
