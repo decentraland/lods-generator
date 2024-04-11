@@ -7,6 +7,8 @@ const Transform = components.Transform(engine)
 const MeshRenderer = components.MeshRenderer(engine)
 const GltfContainer = components.GltfContainer(engine)
 const Material = components.Material(engine)
+const VisibilityComponent = components.VisibilityComponent(engine)
+
 
 export function* serializeCrdtMessages(prefix: string, data: Uint8Array) {
   const buffer = new ReadWriteByteBuffer(data)
@@ -16,7 +18,7 @@ export function* serializeCrdtMessages(prefix: string, data: Uint8Array) {
     if (message.type === CrdtMessageType.PUT_COMPONENT) {
       const { componentId } = message
       const data = 'data' in message ? message.data : undefined
-      if (![Transform.componentId, MeshRenderer.componentId, GltfContainer.componentId, Material.componentId].includes(componentId)) {
+      if (![Transform.componentId, MeshRenderer.componentId, GltfContainer.componentId, Material.componentId, VisibilityComponent.componentId].includes(componentId)) {
         continue
       }
       try {

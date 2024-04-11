@@ -3,11 +3,13 @@ import { contentFetchBaseUrl, mainCrdt, sceneId, sdk6FetchComponent, sdk6SceneCo
 import { writeFile, mkdir } from 'fs'
 import { engine, Entity, PutComponentOperation, Transform } from '@dcl/ecs/dist-cjs'
 import { ReadWriteByteBuffer } from '@dcl/ecs/dist-cjs/serialization/ByteBuffer'
+import {FRAMES_TO_RUN, framesCount} from "../../adapters/scene";
 
 export const manifestFileDir = 'output-manifests'
 export const manifestFileNameEnd = '-lod-manifest.json'
 let savedManifest = false
 
+let savedData: Uint8Array  = new Uint8Array(0)
 function addPlayerEntityTransform() {
   const buffer = new ReadWriteByteBuffer()
   const transform = Transform.create(engine.PlayerEntity)
@@ -49,15 +51,16 @@ export const LoadableApis = {
 
     crdtGetState: async () => ({ hasEntities: mainCrdt !== undefined, data: [addPlayerEntityTransform(), mainCrdt] }),
 
-    crdtSendToRenderer: async ({ data }: { data: Uint8Array }) => {      
+    crdtSendToRenderer: async ({ data }: { data: Uint8Array }) => {
       if (mainCrdt) {
         data = joinBuffers(mainCrdt, data)
       }
+      savedData = joinBuffers(savedData, data)
+      if( framesCount < FRAMES_TO_RUN - 1) return;
 
-      if (savedManifest || data.length == 0) return
-      savedManifest = true
+      if (savedData.length == 0) return
 
-      const outputJSONManifest = JSON.stringify([...serializeCrdtMessages('[msg]: ', data)], null, 2)
+      const outputJSONManifest = JSON.stringify([...serializeCrdtMessages('[msg]: ', savedData)], null, 2)
 
       mkdir(manifestFileDir, { recursive: true },
           err => { if (err) console.log(err) })
@@ -65,7 +68,7 @@ export const LoadableApis = {
       writeFile(`${manifestFileDir}/${sceneId}${manifestFileNameEnd}`, outputJSONManifest,
           err => { if (err) console.log(err) })
       console.log(outputJSONManifest)
-      return { data: [] }
+      return { data: data }
     },
     isServer: async () => ({ isServer: true }),
   },
