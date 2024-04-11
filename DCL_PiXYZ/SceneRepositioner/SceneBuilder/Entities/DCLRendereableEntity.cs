@@ -52,7 +52,8 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
         public PXZModel PositionAndInstantiteMesh(Dictionary<string, string> contentTable, Dictionary<int, DCLRendereableEntity> renderableEntities, SceneConversionPathHandler pathHandler)
         {
             InstantiateTransform(renderableEntities);
-            if (rendereableMesh != null)
+            Vector3 scale = new Vector3(transform.scale.x, transform.scale.y, transform.scale.z);
+            if (rendereableMesh != null && scale.Length() != 0)
             {
                 uint material = dclMaterial.GetMaterial(pxz, entityID.ToString(), contentTable);
                 return rendereableMesh.InstantiateMesh(pxz, entityID.ToString(), instantiatedEntity, material, contentTable, pathHandler);
