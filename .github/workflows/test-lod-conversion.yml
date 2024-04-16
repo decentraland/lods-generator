@@ -32,10 +32,6 @@ jobs:
         path: 'PiXYZ-NuGetPackage'  
         lfs: true
 
-    - name: Build license
-      run: |
-        cd consumer-server && yarn && yarn admin:license ${{ secrets.LICENSE_KEY }}
-
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
@@ -52,6 +48,11 @@ jobs:
     - name: Copy road coordinates
       run: |
           Copy-Item -Path "${{ github.workspace }}\DCL_PiXYZ\bin\Release\netcoreapp3.1\win10-x64\RoadCoordinates.json" -Destination "${{ github.workspace }}\publish"
+      shell: pwsh 
+
+    - name: Copy license file
+      run: |
+          Copy-Item -Path "${{ github.workspace }}\DCL_PiXYZ\bin\Release\netcoreapp3.1\win10-x64\pixyz_license_decentraland.bin" -Destination "${{ github.workspace }}\publish"
       shell: pwsh 
 
     - name: Install Vulkan SDK
