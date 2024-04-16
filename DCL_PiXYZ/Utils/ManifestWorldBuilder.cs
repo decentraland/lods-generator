@@ -26,8 +26,8 @@ namespace DCL_PiXYZ.Utils
             //UNCOMMENT IF YOU NEED TO INSTALL
             //NPMUtils.DoNPMInstall(sceneManifestDirectory);
             
-            string sourcePath = Path.Combine(PXYZConstants.RESOURCES_DIRECTORY, "non-empty-scenes.txt"); // Replace with the path to your source file
-            string destinationPath = Path.Combine(PXYZConstants.RESOURCES_DIRECTORY, "manifest-world-builder-results.txt"); // Replace with the path to your destination file
+            string sourcePath = Path.Combine(PXZConstants.RESOURCES_DIRECTORY, "non-empty-scenes.txt"); // Replace with the path to your source file
+            string destinationPath = Path.Combine(PXZConstants.RESOURCES_DIRECTORY, "manifest-world-builder-results.txt"); // Replace with the path to your destination file
             
             if (!File.Exists(destinationPath))
             {

@@ -13,11 +13,11 @@ namespace DCL_PiXYZ
     public class PXZBeginCleanMaterials : IPXZModifier
     {
 
-        private Dictionary<string, uint> materialDictionary;
+
 
         public PXZBeginCleanMaterials()
         {
-            materialDictionary = new Dictionary<string, uint>();
+
         }
         
         public async Task ApplyModification(PiXYZAPI pxz)

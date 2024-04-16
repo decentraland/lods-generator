@@ -30,7 +30,7 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
 
         public uint GetMaterial(PiXYZAPI pxz, string entityID, Dictionary<string, string> contentTable)
         {
-            uint material = pxz.Material.CreateMaterial($"{PXYZConstants.CUSTOM_MATERIAL_CONVERTED}_{entityID}" , "PBR");
+            uint material = pxz.Material.CreateMaterial($"{PXZConstants.CUSTOM_MATERIAL_CONVERTED}_{entityID}" , "PBR");
             ColorOrTexture albedoColorOrTexture = new ColorOrTexture();
             if (texture?.tex?.src != null)
             {

@@ -32,7 +32,7 @@ namespace DCL_PiXYZ
             this.sceneParam = sceneParam;
             this.webRequestsHandler = webRequestsHandler;
 
-            paramByHash = paramType.Equals(PXYZConstants.HASH_PARAM);
+            paramByHash = paramType.Equals(PXZConstants.HASH_PARAM);
 
             ignoreExtensions = new []{".mp3", ".js", ".lib", ".json", ".md", ".wav"};
             contentsURL = "https://peer.decentraland.org/content/contents/";
@@ -92,7 +92,7 @@ namespace DCL_PiXYZ
                 {
                     if (ignoreExtensions.Contains(Path.GetExtension(content.file)))
                         continue;
-                    string filePath = Path.Combine(PXYZConstants.RESOURCES_DIRECTORY, content.file);
+                    string filePath = Path.Combine(PXZConstants.RESOURCES_DIRECTORY, content.file);
                     await webRequestsHandler.DownloadFileAsync($"{contentsURL}{content.hash}", filePath);
                     sceneContent.Add(content.file.ToLower(), filePath);
                 }

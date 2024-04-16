@@ -58,7 +58,7 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
                 return rendereableMesh.InstantiateMesh(pxz, entityID.ToString(), instantiatedEntity, material, contentTable, pathHandler);
             }
             else
-                return PXYZConstants.EMPTY_MODEL;
+                return PXZConstants.EMPTY_MODEL;
         }
 
         private void InstantiateTransform(Dictionary<int, DCLRendereableEntity> renderableEntities)
