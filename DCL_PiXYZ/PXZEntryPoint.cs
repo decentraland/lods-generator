@@ -64,7 +64,7 @@ namespace DCL_PiXYZ
             {
                 if (IsRoad(roadCoordinates, currentScene)) continue;
 
-                if (HasSceneBeenAnalyzed(convertedScenes, currentScene)) continue;
+                if (HasSceneBeenConverted(convertedScenes, currentScene)) continue;
 
                 sceneConversionInfo.SceneImporter = new SceneImporter(sceneConversionInfo.ConversionType, currentScene, sceneConversionInfo.WebRequestsHandler);
                 if (!await SceneDefinitionDownloadSuccesfully(sceneConversionInfo, currentScene, pathHandler)) continue;
@@ -189,19 +189,6 @@ namespace DCL_PiXYZ
 
             return false;
         }
-
-        private static bool HasSceneBeenAnalyzed(List<string> analyzedScenes, string scene)
-        {
-            //Check if the scene has already been analyzed (for bulk conversion)
-            if (analyzedScenes.Contains(scene))
-            {
-                FileWriter.WriteToConsole($"Scene {scene} has already been analyzed");
-                return true;
-            }
-
-            return false;
-        }
-
 
         private static async Task<bool> GenerateManifest(string sceneType, string sceneValue, string sceneManifestDirectory, List<string> errorsToIgnore, string failFile)
         {
