@@ -10,6 +10,7 @@ export const manifestFileNameEnd = '-lod-manifest.json'
 let savedManifest = false
 
 let savedData: Uint8Array  = new Uint8Array(0)
+let previousSavedData = 0
 function addPlayerEntityTransform() {
   const buffer = new ReadWriteByteBuffer()
   const transform = Transform.create(engine.PlayerEntity)
@@ -52,21 +53,42 @@ export const LoadableApis = {
     crdtGetState: async () => ({ hasEntities: mainCrdt !== undefined, data: [addPlayerEntityTransform(), mainCrdt] }),
 
     crdtSendToRenderer: async ({ data }: { data: Uint8Array }) => {
+      async function ensureDirectoryExists(directory: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+          mkdir(directory, { recursive: true }, err => {
+            if (err) reject(err);
+            else resolve();
+          });
+        });
+      }
+
+      async function writeToFile(filePath: string, content: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+          writeFile(filePath, content, err => {
+            if (err) reject(err);
+            else resolve();
+          });
+        });
+      }
+      
       if (mainCrdt) {
         data = joinBuffers(mainCrdt, data)
       }
       savedData = joinBuffers(savedData, data)
-      if( framesCount < FRAMES_TO_RUN - 1) return;
+      
+      if(savedData.length != previousSavedData){
+        let outputJSONManifest = JSON.stringify([...serializeCrdtMessages('[msg]: ', savedData)], null, 2)
+        await ensureDirectoryExists(manifestFileDir);
+        await writeToFile(`${manifestFileDir}/${sceneId}${manifestFileNameEnd}`, outputJSONManifest);
+        previousSavedData = savedData.length
+      }
 
-      if (savedData.length == 0) return
-
-      const outputJSONManifest = JSON.stringify([...serializeCrdtMessages('[msg]: ', savedData)], null, 2)
-
-      mkdir(manifestFileDir, { recursive: true },
-          err => { if (err) console.log(err) })
-
-      writeFile(`${manifestFileDir}/${sceneId}${manifestFileNameEnd}`, outputJSONManifest,
-          err => { if (err) console.log(err) })
+      if( (framesCount < FRAMES_TO_RUN - 1) && savedData.length == 0) {
+        const emptyOutputJSONManifest = "[]";
+        await ensureDirectoryExists(manifestFileDir);
+        await writeToFile(`${manifestFileDir}/${sceneId}${manifestFileNameEnd}`, emptyOutputJSONManifest);
+      }
+      
       //console.log(outputJSONManifest)
       return { data: [] }
     },
