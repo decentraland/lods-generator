@@ -102,6 +102,10 @@ namespace AssetBundleConverter.LODs
             var sceneModel = modelRoot.UseScene("Default");
             foreach (var modelLogicalNode in model.LogicalNodes)
             {
+                //TODO (JUANI): What are we going to do with skinned mesh renderers?
+                if (modelLogicalNode.Skin != null)
+                    throw new Exception("Model has a skinned mesh renderer");
+                
                 if (modelLogicalNode.Mesh != null)
                 {
                     foreach (var meshPrimitive in modelLogicalNode.Mesh.Primitives)
