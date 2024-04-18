@@ -17,7 +17,7 @@ jobs:
             sizes: "1900544"
           - lodLevelsToTest: ["7000;3000;1000;500", "0"]
             files: "QmTpsFiaJVPv5mU6ERBzkDcZ39Lyq9sEfiLw9Ep3VQAFgK_0.fbx QmTpsFiaJVPv5mU6ERBzkDcZ39Lyq9sEfiLw9Ep3VQAFgK_1.fbx QmTpsFiaJVPv5mU6ERBzkDcZ39Lyq9sEfiLw9Ep3VQAFgK_2.fbx QmTpsFiaJVPv5mU6ERBzkDcZ39Lyq9sEfiLw9Ep3VQAFgK_3.fbx"
-            sizes: "35348480 7283552 2895872 1900544"
+            sizes: "48931120 7283552 2895872 1900544"
             
     steps:
     - uses: actions/checkout@v2
