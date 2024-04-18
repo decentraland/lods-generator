@@ -205,6 +205,16 @@ export const LoadableApis = {
     async getConnectedPlayers() {
       return [{userId: 123}]
     }
+  },
+  Scene:{
+    async getSceneInfo(_req: any, ctx: any){
+      return {
+        cid: '',
+        metadata: '{}',
+        baseUrl:'',
+        contents: []
+      }
+    }
   }
 }
 
