@@ -67,8 +67,8 @@ export const LoadableApis = {
 
       writeFile(`${manifestFileDir}/${sceneId}${manifestFileNameEnd}`, outputJSONManifest,
           err => { if (err) console.log(err) })
-      console.log(outputJSONManifest)
-      return { data: data }
+      //console.log(outputJSONManifest)
+      return { data: [] }
     },
     isServer: async () => ({ isServer: true }),
   },
