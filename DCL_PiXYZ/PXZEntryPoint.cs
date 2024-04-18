@@ -219,6 +219,7 @@ namespace DCL_PiXYZ
             List<IPXZModifier> modifiers = new List<IPXZModifier>();
             modifiers.Add(new PXZBeginCleanMaterials());
             modifiers.Add(new PXZRepairMesh(models));
+            modifiers.Add(new PXZMaterialNameRandomizer());
             
             if (pxzParams.LodLevel != 0)
             {

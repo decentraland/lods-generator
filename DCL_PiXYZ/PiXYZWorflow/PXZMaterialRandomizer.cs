@@ -10,6 +10,8 @@ namespace DCL_PiXYZ
     {
         public void ApplyModification(PiXYZAPI pxz)
         {
+            //There is a bug in the PXZ FBX exporter. If two materials have the same name, they are incorrectly assigned
+            //at export time
             int materialName = 0;
             pxz.Scene.MergeImages();
             PackedTree packedTree = pxz.Scene.GetSubTree(pxz.Scene.GetRoot());
