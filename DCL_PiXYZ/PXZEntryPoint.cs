@@ -235,7 +235,7 @@ namespace DCL_PiXYZ
             {
                 stopwatch.Start();
                 FileWriter.WriteToConsole($"BEGIN {pxzModifier.GetType().Name}");
-                await pxzModifier.ApplyModification(pxz);
+                pxzModifier.ApplyModification(pxz);
                 FileWriter.WriteToConsole($"FINISHED {pxzModifier.GetType().Name}");
                 stopwatch.StopAndPrint(pxzModifier.GetType().Name);
             }

@@ -17,7 +17,7 @@ namespace DCL_PiXYZ
             this.PXZModels = pxzModels;
         }
         
-        public async Task ApplyModification(PiXYZAPI pxz)
+        public void ApplyModification(PiXYZAPI pxz)
         {
             foreach (var pxzModel in PXZModels)
             {
