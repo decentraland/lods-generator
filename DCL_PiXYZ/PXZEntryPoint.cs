@@ -297,7 +297,7 @@ namespace DCL_PiXYZ
 
         private static void CreateDirectories(SceneConversionInfo sceneConversionInfo)
         {
-            Directory.CreateDirectory(PXYZConstants.RESOURCES_DIRECTORY);
+            Directory.CreateDirectory(PXZConstants.RESOURCES_DIRECTORY);
         }
 
 

@@ -9,7 +9,7 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.PrimitiveFactory
         public static void CreateOBJFile(string filePath, int verticesNum, int trisNum, Vector3[] vertices, int[] tris, Vector3[] normals, Vector2[] customUvs)
         {
             var objContent = CreateOBJContent(verticesNum, trisNum, vertices, tris, normals, customUvs);
-            File.WriteAllText(Path.Combine(PXYZConstants.RESOURCES_DIRECTORY, filePath), objContent);
+            File.WriteAllText(Path.Combine(PXZConstants.RESOURCES_DIRECTORY, filePath), objContent);
         }
 
         private static string CreateOBJContent(int verticesNum, int trisNum, Vector3[] vertices, int[] tris, Vector3[] normals, Vector2[] uvs)

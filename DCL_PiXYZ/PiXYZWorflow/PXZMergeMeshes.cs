@@ -101,7 +101,7 @@ namespace DCL_PiXYZ
 
             
             uint combineMeshes = pxz.Algo.CombineMeshes(toMerge, bakeOption);
-            pxz.Core.SetProperty(combineMeshes, "Name", $"MERGED MESH {index} {(isOpaque ? "OPAQUE" : "FORCED_TRANSPARENT")}");
+            pxz.Core.SetProperty(combineMeshes, "Name", $"MERGED MESH {index} {(isOpaque ? "OPAQUE" : PXZConstants.FORCED_TRANSPARENT_MATERIAL)}");
 
             FileWriter.WriteToConsole("Copying Material");
             //Apply a copy of the material not to lose the reference
@@ -110,7 +110,7 @@ namespace DCL_PiXYZ
             if (material.list?.Length > 0)
             {
                 uint copyMaterial = pxz.Material.CopyMaterial(material.list[0], false);
-                pxz.Core.SetProperty(copyMaterial, "Name", $"MERGE MATERIAL {index} {(isOpaque ? "OPAQUE" : "FORCED_TRANSPARENT")}");
+                pxz.Core.SetProperty(copyMaterial, "Name", $"MERGE MATERIAL {index} {(isOpaque ? "OPAQUE" : PXZConstants.FORCED_TRANSPARENT_MATERIAL)}");
                 pxz.Scene.SetOccurrenceMaterial(combineMeshes,copyMaterial);
                 FileWriter.WriteToConsole("Setting Material");
             }
@@ -130,7 +130,7 @@ namespace DCL_PiXYZ
                     {
                         MaterialList material = pxz.Scene.GetMaterialsFromSubtree(packedTreeOccurrence);
                         //A material will be consider transparent only if it has a single material and its name contains "FORCED_TRANSPARENT" added during the material curation
-                        bool isTransparent = material.list.Length == 1 && pxz.Core.GetProperty(material.list[0], "Name").Contains("FORCED_TRANSPARENT");
+                        bool isTransparent = material.list.Length == 1 && pxz.Core.GetProperty(material.list[0], "Name").Contains(PXZConstants.FORCED_TRANSPARENT_MATERIAL);
                         if (isTransparent)
                             transparentsToMerge.AddOccurrence(packedTreeOccurrence);
                         else

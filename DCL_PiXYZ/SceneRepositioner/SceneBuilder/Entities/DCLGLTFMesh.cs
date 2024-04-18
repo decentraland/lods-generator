@@ -34,7 +34,7 @@ namespace AssetBundleConverter.LODs
             if (!contentTable.TryGetValue(src.ToLower(), out string modelPath))
             {
                 LogError($"ERROR: GLTF {src} file not found in sceneContent");
-                return PXYZConstants.EMPTY_MODEL;
+                return PXZConstants.EMPTY_MODEL;
             }
 
             bool modelRecreatedSuccessfully = true;
@@ -59,7 +59,7 @@ namespace AssetBundleConverter.LODs
             catch (Exception e)
             {
                 FileWriter.WriteToConsole($"ERROR: Importing GLTF {src} failed with error {e}");
-                return PXYZConstants.EMPTY_MODEL;
+                return PXZConstants.EMPTY_MODEL;
             }
         }
 
@@ -69,8 +69,8 @@ namespace AssetBundleConverter.LODs
             var model = ModelRoot.Load(modelPath, readSettings);
             foreach (var gltfMaterial in model.LogicalMaterials)
             {
-                if (gltfMaterial.Alpha != AlphaMode.OPAQUE && !gltfMaterial.Name.Contains("FORCED_TRANSPARENT"))
-                    gltfMaterial.Name += "FORCED_TRANSPARENT";
+                if (gltfMaterial.Alpha != AlphaMode.OPAQUE && !gltfMaterial.Name.Contains(PXZConstants.FORCED_TRANSPARENT_MATERIAL))
+                    gltfMaterial.Name += PXZConstants.FORCED_TRANSPARENT_MATERIAL;
             }
 
             SaveModel(model, modelPath);
