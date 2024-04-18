@@ -19,6 +19,8 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
     public abstract class DCLMaterial
     {
         public TextureData texture;
+        public int transparencyMode;
+        public float alphaTest;
         protected virtual Color GetColor()
         {
             Color colorAlpha = new Color();
@@ -50,6 +52,10 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
                     PBRMaterialInfos materialInfos = pxz.Material.GetPBRMaterialInfos(material);
                     materialInfos.albedo = albedoColorOrTexture;
                     pxz.Material.SetPBRMaterialInfos(material, materialInfos);
+                    
+                    //NOTE: We used the transparency mode to determine if this object should be transparent or not
+                    if (transparencyMode.Equals(2))
+                        pxz.Core.SetProperty(material, "Name", $"{pxz.Core.GetProperty(material, "Name")}_FORCED_TRANSPARENT");
                 }
                 else
                 {
