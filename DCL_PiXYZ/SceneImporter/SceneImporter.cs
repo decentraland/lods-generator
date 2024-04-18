@@ -34,7 +34,7 @@ namespace DCL_PiXYZ
 
             paramByHash = paramType.Equals(PXYZConstants.HASH_PARAM);
 
-            ignoreExtensions = new []{".mp3", ".js", ".lib", ".json", ".md", ".wav"};
+            ignoreExtensions = new []{".mp3", ".js", ".lib", ".json", ".md", ".wav", ".mp4"};
             contentsURL = "https://peer.decentraland.org/content/contents/";
             activeEntitiesURL = "https://peer.decentraland.org/content/entities/active";
         }
