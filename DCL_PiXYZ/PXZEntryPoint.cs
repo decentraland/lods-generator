@@ -28,8 +28,9 @@ namespace DCL_PiXYZ
             string defaultSceneLodManifestDirectory = Path.Combine(Directory.GetCurrentDirectory(), "scene-lod-entities-manifest-builder/");
 
             bool isDebug = true;
-            bool installNPM = true;
-            string decimationValues = "7000;3000;1000;500";
+            bool installNPM = false;
+            bool loadConvertedScenesFile = false;
+            string decimationValues = "7000;500";
             int startingLODLevel = 0;
 
 
@@ -56,7 +57,7 @@ namespace DCL_PiXYZ
             var pathHandler = new SceneConversionPathHandler(isDebug, defaultOutputPath, defaultSceneLodManifestDirectory, "SuccessScenes.txt", "FailScenes.txt", "PolygonCount.txt" , "FailedGLBImport.txt" , defaultScene);
 
             List<string> roadCoordinates = LoadRoads();
-            var convertedScenes = LoadConvertedScenes(isDebug);
+            var convertedScenes = LoadConvertedScenes(loadConvertedScenesFile);
             CreateDirectories(sceneConversionInfo);
             FrameworkInitialization(pathHandler.ManifestProjectDirectory, installNPM);
 
@@ -259,15 +260,14 @@ namespace DCL_PiXYZ
             return JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(filePath));
         }
 
-        private static List<string> LoadConvertedScenes(bool isDebug)
+        private static List<string> LoadConvertedScenes(bool loadConvertedScenes)
         {
-            if(!isDebug)
+            if (!loadConvertedScenes)
                 return new List<string>();
             
             string convertedScenePathFile = Path.Combine(Directory.GetCurrentDirectory(), "ConvertedScenes.json");
             if (File.Exists(convertedScenePathFile))
                 return JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(convertedScenePathFile));
-
             return new List<string>();
         }
 

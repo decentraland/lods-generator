@@ -52,10 +52,13 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
         public PXZModel PositionAndInstantiteMesh(Dictionary<string, string> contentTable, Dictionary<int, DCLRendereableEntity> renderableEntities, SceneConversionPathHandler pathHandler)
         {
             InstantiateTransform(renderableEntities);
+
             bool hasZeroScale = HasZeroScaleApplied(renderableEntities);
+            bool isFullyTransparent = dclMaterial.IsFullyTransparent();
             
-            if (rendereableMesh != null  && !hasZeroScale)
+            if (rendereableMesh != null  && !hasZeroScale && !isFullyTransparent)
             {
+                //TODO (Juani): Clean up the amterial logic. If its a GLTFMesh, we dont have a material. This can get confusing for debugging
                 uint material = dclMaterial.GetMaterial(pxz, entityID.ToString(), contentTable);
                 return rendereableMesh.InstantiateMesh(pxz, entityID.ToString(), instantiatedEntity, material, contentTable, pathHandler);
             }
