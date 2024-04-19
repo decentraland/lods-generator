@@ -29,7 +29,6 @@ namespace DCL_PiXYZ
         {
             FileWriter.WriteToConsole($"BEGIN PXZ EXPORT {Path.Combine(path, $"{filename}.fbx")}");
             //Use it to flatten the hierarchy
-            //TODO: This will break all possible skinning. But do we care about it?
             if (lodLevel != 0)
             {
                 pxz.Scene.MergeOccurrencesByTreeLevel(new OccurrenceList(new[]

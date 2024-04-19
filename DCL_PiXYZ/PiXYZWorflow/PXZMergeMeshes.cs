@@ -45,7 +45,7 @@ namespace DCL_PiXYZ
             this.pxz = pxz;
             try
             {
-                AddOcurrences(pxz, pxz.Scene.GetSubTree(pxz.Scene.GetRoot()));
+                AddOcurrences();
                 MergeSubMeshes(opaquesToMerge, true);
                 MergeSubMeshes(transparentsToMerge, false);
             }
@@ -118,15 +118,19 @@ namespace DCL_PiXYZ
         }
 
 
-        private void AddOcurrences(PiXYZAPI pxz, PackedTree packedTree)
+        private void AddOcurrences()
         {
+            PackedTree packedTree = pxz.Scene.GetSubTree(pxz.Scene.GetRoot());
+            OccurrenceList occurrenceListToDelete = new OccurrenceList();
             if (packedTree.occurrences.list != null)
             {
                 for (var i = 0; i < packedTree.occurrences.list.Length; i++)
                 {
-                    //Means it has a mesh component
                     uint packedTreeOccurrence = packedTree.occurrences[i];
-                    if (pxz.Scene.HasComponent(packedTreeOccurrence, ComponentType.Part) && !packedTree.names[i].Contains("collider"))
+                    //Means it has a mesh component
+                    if (pxz.Scene.HasComponent(packedTreeOccurrence, ComponentType.Part) 
+                         && !IsAnimated(packedTreeOccurrence)
+                         && !packedTree.names[i].Contains("collider"))
                     {
                         MaterialList material = pxz.Scene.GetMaterialsFromSubtree(packedTreeOccurrence);
                         //A material will be consider transparent only if it has a single material and its name contains "FORCED_TRANSPARENT" added during the material curation
@@ -136,9 +140,27 @@ namespace DCL_PiXYZ
                         else
                             opaquesToMerge.AddOccurrence(packedTreeOccurrence);
                     }
+
+                    if (pxz.Scene.HasComponent(packedTreeOccurrence, ComponentType.Part)
+                        && IsAnimated(packedTreeOccurrence))
+                    {
+                        occurrenceListToDelete.AddOccurrence(packedTreeOccurrence);
+                    }
                 }
             }
-            
+            pxz.Scene.DeleteOccurrences(occurrenceListToDelete);
+        }
+
+        private bool IsAnimated(uint parentOccurent)
+        {
+            PackedTree packedTree = pxz.Scene.GetSubTree(parentOccurent);
+            for (var i = 0; i < packedTree.occurrences.list.Length; i++)
+            {
+                uint packedTreeOccurrence = packedTree.occurrences[i];
+                if (pxz.Scene.HasComponent(packedTreeOccurrence, ComponentType.Animation))
+                    return true;
+            }
+            return false;
         }
     }
 }
