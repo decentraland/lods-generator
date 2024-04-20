@@ -35,7 +35,7 @@ namespace DCL_PiXYZ
             this.scenePointer = scenePointer;
         } 
         
-        public async Task ApplyModification(PiXYZAPI pxz)
+        public void ApplyModification(PiXYZAPI pxz)
         {
             originalPolygonCount =
                 pxz.Scene.GetPolygonCount(new OccurrenceList(new uint[] { pxz.Scene.GetRoot() }), true);

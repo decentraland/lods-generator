@@ -15,7 +15,7 @@ namespace DCL_PiXYZ
             this.regex = regex;
         }
 
-        public async Task ApplyModification(PiXYZAPI pxz)
+        public void ApplyModification(PiXYZAPI pxz)
         {
             var occurenceToDelete = pxz.Scene.FindOccurrencesByProperty("Name", regex, caseInsensitive: true);
             foreach (uint u in occurenceToDelete.list)
