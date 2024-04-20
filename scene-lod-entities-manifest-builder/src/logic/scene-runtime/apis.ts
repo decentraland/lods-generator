@@ -3,11 +3,14 @@ import { contentFetchBaseUrl, mainCrdt, sceneId, sdk6FetchComponent, sdk6SceneCo
 import { writeFile, mkdir } from 'fs'
 import { engine, Entity, PutComponentOperation, Transform } from '@dcl/ecs/dist-cjs'
 import { ReadWriteByteBuffer } from '@dcl/ecs/dist-cjs/serialization/ByteBuffer'
+import {FRAMES_TO_RUN, framesCount} from "../../adapters/scene";
 
 export const manifestFileDir = 'output-manifests'
 export const manifestFileNameEnd = '-lod-manifest.json'
 let savedManifest = false
 
+let savedData: Uint8Array  = new Uint8Array(0)
+let previousSavedData = 0
 function addPlayerEntityTransform() {
   const buffer = new ReadWriteByteBuffer()
   const transform = Transform.create(engine.PlayerEntity)
@@ -49,22 +52,44 @@ export const LoadableApis = {
 
     crdtGetState: async () => ({ hasEntities: mainCrdt !== undefined, data: [addPlayerEntityTransform(), mainCrdt] }),
 
-    crdtSendToRenderer: async ({ data }: { data: Uint8Array }) => {      
+    crdtSendToRenderer: async ({ data }: { data: Uint8Array }) => {
+      async function ensureDirectoryExists(directory: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+          mkdir(directory, { recursive: true }, err => {
+            if (err) reject(err);
+            else resolve();
+          });
+        });
+      }
+
+      async function writeToFile(filePath: string, content: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+          writeFile(filePath, content, err => {
+            if (err) reject(err);
+            else resolve();
+          });
+        });
+      }
+      
       if (mainCrdt) {
         data = joinBuffers(mainCrdt, data)
       }
+      savedData = joinBuffers(savedData, data)
+      
+      if(savedData.length != previousSavedData){
+        let outputJSONManifest = JSON.stringify([...serializeCrdtMessages('[msg]: ', savedData)], null, 2)
+        await ensureDirectoryExists(manifestFileDir);
+        await writeToFile(`${manifestFileDir}/${sceneId}${manifestFileNameEnd}`, outputJSONManifest);
+        previousSavedData = savedData.length
+      }
 
-      if (savedManifest || data.length == 0) return
-      savedManifest = true
-
-      const outputJSONManifest = JSON.stringify([...serializeCrdtMessages('[msg]: ', data)], null, 2)
-
-      mkdir(manifestFileDir, { recursive: true },
-          err => { if (err) console.log(err) })
-
-      writeFile(`${manifestFileDir}/${sceneId}${manifestFileNameEnd}`, outputJSONManifest,
-          err => { if (err) console.log(err) })
-      console.log(outputJSONManifest)
+      if( (framesCount < FRAMES_TO_RUN - 1) && savedData.length == 0) {
+        const emptyOutputJSONManifest = "[]";
+        await ensureDirectoryExists(manifestFileDir);
+        await writeToFile(`${manifestFileDir}/${sceneId}${manifestFileNameEnd}`, emptyOutputJSONManifest);
+      }
+      
+      //console.log(outputJSONManifest)
       return { data: [] }
     },
     isServer: async () => ({ isServer: true }),
@@ -179,6 +204,16 @@ export const LoadableApis = {
     },
     async getConnectedPlayers() {
       return [{userId: 123}]
+    }
+  },
+  Scene:{
+    async getSceneInfo(_req: any, ctx: any){
+      return {
+        cid: '',
+        metadata: '{}',
+        baseUrl:'',
+        contents: []
+      }
     }
   }
 }

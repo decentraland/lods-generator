@@ -18,6 +18,7 @@ export async function loadOrReload({ sceneFetcher }: BaseComponents, loadingType
 
   const scene = await createSceneComponent()
   console.log(`${loadingType} source code loaded, starting scene`)
-
-  scene.start(hash, sourceCode).catch(console.error)
+  await scene.start(hash, sourceCode).catch(console.error)
+  console.log(`Finished running frames!`)
+  
 }
