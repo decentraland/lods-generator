@@ -68,8 +68,6 @@ validation-errors.json
 
 *code-workspace
 
-*.lic
-
 .idea/
 
 **/output-lods/**

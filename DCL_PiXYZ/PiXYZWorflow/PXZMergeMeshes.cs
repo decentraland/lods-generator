@@ -40,7 +40,7 @@ namespace DCL_PiXYZ
         }
         
         
-        public async Task ApplyModification(PiXYZAPI pxz)
+        public void ApplyModification(PiXYZAPI pxz)
         {
             this.pxz = pxz;
             try

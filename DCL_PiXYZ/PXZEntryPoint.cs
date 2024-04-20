@@ -64,7 +64,7 @@ namespace DCL_PiXYZ
             {
                 if (IsRoad(roadCoordinates, currentScene)) continue;
 
-                if (HasSceneBeenAnalyzed(convertedScenes, currentScene)) continue;
+                if (HasSceneBeenConverted(convertedScenes, currentScene)) continue;
 
                 sceneConversionInfo.SceneImporter = new SceneImporter(sceneConversionInfo.ConversionType, currentScene, sceneConversionInfo.WebRequestsHandler);
                 if (!await SceneDefinitionDownloadSuccesfully(sceneConversionInfo, currentScene, pathHandler)) continue;
@@ -190,19 +190,6 @@ namespace DCL_PiXYZ
             return false;
         }
 
-        private static bool HasSceneBeenAnalyzed(List<string> analyzedScenes, string scene)
-        {
-            //Check if the scene has already been analyzed (for bulk conversion)
-            if (analyzedScenes.Contains(scene))
-            {
-                FileWriter.WriteToConsole($"Scene {scene} has already been analyzed");
-                return true;
-            }
-
-            return false;
-        }
-
-
         private static async Task<bool> GenerateManifest(string sceneType, string sceneValue, string sceneManifestDirectory, List<string> errorsToIgnore, string failFile)
         {
             FileWriter.WriteToConsole($"BEGIN MANIFEST GENERATION FOR SCENE {sceneValue}");
@@ -248,7 +235,7 @@ namespace DCL_PiXYZ
             {
                 stopwatch.Start();
                 FileWriter.WriteToConsole($"BEGIN {pxzModifier.GetType().Name}");
-                await pxzModifier.ApplyModification(pxz);
+                pxzModifier.ApplyModification(pxz);
                 FileWriter.WriteToConsole($"FINISHED {pxzModifier.GetType().Name}");
                 stopwatch.StopAndPrint(pxzModifier.GetType().Name);
             }
@@ -305,7 +292,7 @@ namespace DCL_PiXYZ
             pxz = PiXYZAPI.Initialize(Environment.GetEnvironmentVariable("PIXYZPRODUCTNAME"), Environment.GetEnvironmentVariable("PIXYZTOKEN")); 
 
             if (!pxz.Core.CheckLicense())
-                pxz.Core.InstallLicense("pixyzsdk-15042024.lic");
+                pxz.Core.InstallLicense("pixyz_license_decentraland.bin");
         }
 
         private static void CreateDirectories(SceneConversionInfo sceneConversionInfo)

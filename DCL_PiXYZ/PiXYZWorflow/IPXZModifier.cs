@@ -8,6 +8,6 @@ namespace DCL_PiXYZ
 {
     public interface IPXZModifier
     {
-        Task ApplyModification(PiXYZAPI pxz);
+        void ApplyModification(PiXYZAPI pxz);
     }
 }

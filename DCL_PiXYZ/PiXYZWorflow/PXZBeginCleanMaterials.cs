@@ -20,7 +20,7 @@ namespace DCL_PiXYZ
             materialDictionary = new Dictionary<string, uint>();
         }
         
-        public async Task ApplyModification(PiXYZAPI pxz)
+        public void ApplyModification(PiXYZAPI pxz)
         {
             pxz.Scene.MergeImages();
             /*

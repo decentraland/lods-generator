@@ -13,7 +13,7 @@ namespace DCL_PiXYZ
 {
     public class PXZDecimateAndBake : IPXZModifier
     {
-        public async Task ApplyModification(PiXYZAPI pxz)
+        public void ApplyModification(PiXYZAPI pxz)
         {
             bool OVERRIDE_UVS = true;
             int TEXTURE_RESOLUTION = 1024;
