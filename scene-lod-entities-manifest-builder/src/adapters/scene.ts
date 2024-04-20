@@ -2,7 +2,7 @@ import { customEvalSdk7 } from '../logic/scene-runtime/sandbox'
 import { createModuleRuntime } from '../logic/scene-runtime/sdk7-runtime'
 import { setTimeout } from 'timers/promises'
 
-export const FRAMES_TO_RUN = 120
+export const FRAMES_TO_RUN = 90
 export let framesCount = 1
 
 
