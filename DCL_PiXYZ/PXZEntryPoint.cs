@@ -92,6 +92,8 @@ namespace DCL_PiXYZ
                 };
                 foreach (var decimationValue in sceneConversionInfo.DecimationToAnalyze)
                 {
+                    //TODO (Juani) : PIXYZ very weird bug. IF this await is not here, two run can output different results. Visible in -48,33
+                    await Task.Delay(1000);
                     pxz.Core.ResetSession();
                     pxzParams.DecimationValue = decimationValue;
                     await DoConversion(pxzParams, sceneConversionInfo, currentScene, pathHandler);
@@ -101,6 +103,7 @@ namespace DCL_PiXYZ
                 FileWriter.WriteToConsole("END SCENE CONVERSION FOR " + currentScene);
                 UpdateConvertedScenesFile(convertedScenes);
             }
+            //TODO (Juani): Clear  resources folder
             DoManifestCleanup(isDebug, pathHandler);
             pxz.Core.ResetSession();
         }

@@ -140,7 +140,7 @@ namespace DCL_PiXYZ
                         else
                             opaquesToMerge.AddOccurrence(packedTreeOccurrence);
                     }
-
+                    
                     if (pxz.Scene.HasComponent(packedTreeOccurrence, ComponentType.Part)
                         && IsAnimated(packedTreeOccurrence))
                     {

@@ -49,7 +49,7 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
             this.pxz = pxz;
         }
 
-        public PXZModel PositionAndInstantiteMesh(Dictionary<string, string> contentTable, Dictionary<int, DCLRendereableEntity> renderableEntities, SceneConversionPathHandler pathHandler)
+        public PXZModel PositionAndInstantiteMesh(Dictionary<string, string> contentTable, Dictionary<int, DCLRendereableEntity> renderableEntities, SceneConversionPathHandler pathHandler, int lodLevel)
         {
             InstantiateTransform(renderableEntities);
 
@@ -60,7 +60,7 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
             {
                 //TODO (Juani): Clean up the amterial logic. If its a GLTFMesh, we dont have a material. This can get confusing for debugging
                 uint material = dclMaterial.GetMaterial(pxz, entityID.ToString(), contentTable);
-                return rendereableMesh.InstantiateMesh(pxz, entityID.ToString(), instantiatedEntity, material, contentTable, pathHandler);
+                return rendereableMesh.InstantiateMesh(pxz, entityID.ToString(), instantiatedEntity, material, contentTable, pathHandler, lodLevel);
             }
             else
                 return PXZConstants.EMPTY_MODEL;
