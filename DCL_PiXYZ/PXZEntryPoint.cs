@@ -81,7 +81,8 @@ namespace DCL_PiXYZ
                     convertedScenes.Add(pointer);
 
                 FileWriter.WriteToConsole("BEGIN SCENE CONVERSION FOR " + currentScene);
-                if (!await ManifestGeneratedSuccesfully(sceneConversionInfo, pathHandler, currentScene)) continue;
+                if (!await ManifestGeneratedSuccesfully(sceneConversionInfo, pathHandler)) continue;
+         
                 if (!await sceneConversionInfo.SceneImporter.DownloadAllContent(pathHandler)) continue;
                 var pxzParams = new PXZParams
                 {
@@ -155,16 +156,16 @@ namespace DCL_PiXYZ
             return false;
         }
 
-        private static async Task<bool> ManifestGeneratedSuccesfully(SceneConversionInfo sceneConversionInfo, SceneConversionPathHandler pathHandler, string scene)
+        private static async Task<bool> ManifestGeneratedSuccesfully(SceneConversionInfo sceneConversionInfo, SceneConversionPathHandler pathHandler)
         {
             if (File.Exists(pathHandler.ManifestOutputJsonFile))
                 return true;
 
-            return await GenerateManifest(sceneConversionInfo.SceneType, scene, pathHandler.ManifestProjectDirectory,
+            return await GenerateManifest(pathHandler, sceneConversionInfo,
                 new List<string>
                 {
                     "manifest file already exists", "Failed to load script"
-                }, pathHandler.FailFile);
+                });
         }
 
         private static async Task<bool> SceneDefinitionDownloadSuccesfully(SceneConversionInfo sceneConversionInfo, string scene, SceneConversionPathHandler pathHandler)
@@ -194,24 +195,30 @@ namespace DCL_PiXYZ
             return false;
         }
 
-        private static async Task<bool> GenerateManifest(string sceneType, string sceneValue, string sceneManifestDirectory, List<string> errorsToIgnore, string failFile)
+        private static async Task<bool> GenerateManifest(SceneConversionPathHandler pathHandler, SceneConversionInfo sceneConversionInfo, List<string> errorsToIgnore)
         {
-            FileWriter.WriteToConsole($"BEGIN MANIFEST GENERATION FOR SCENE {sceneValue}");
-            string possibleError = await NPMUtils.RunNPMTool(sceneManifestDirectory, sceneType, sceneValue);
+            FileWriter.WriteToConsole($"BEGIN MANIFEST GENERATION FOR SCENE {sceneConversionInfo.SceneImporter.GetSceneBasePointer()}");
+            string possibleError = await NPMUtils.RunNPMTool(pathHandler.ManifestProjectDirectory, sceneConversionInfo.SceneType, sceneConversionInfo.SceneImporter.GetSceneBasePointer());
 
-            if (!string.IsNullOrEmpty(possibleError))
+            //TODO: Im adding because there were issues were the file was not fully written after  
+            //the NPM tools closes
+            await Task.Delay(2000);
+            if (File.Exists(pathHandler.ManifestOutputJsonFile))
             {
-                bool isIgnorableError = errorsToIgnore.Any(errorToIgnore => possibleError.Contains(errorToIgnore));
+                bool hasError = !string.IsNullOrEmpty(possibleError) &&
+                    errorsToIgnore.Any(errorToIgnore => possibleError.Contains(errorToIgnore));
                 // If the error is not ignorable, log it and return false.
-                if (!isIgnorableError)
+                if (hasError)
                 {
-                    FileWriter.WriteToConsole($"MANIFEST ERROR: {possibleError}");
-                    FileWriter.WriteToFile($"{sceneValue}\tMANIFEST ERROR: {possibleError}", failFile);
-                    return false; // Early exit if the error cannot be ignored.
+                    FileWriter.WriteToConsole($"MANIFEST EXISTS, BUT HAS ERROR: {possibleError}");
+                    FileWriter.WriteToFile($"{sceneConversionInfo.SceneImporter.GetSceneBasePointer()}\tMANIFEST EXISTS, BUT HAS ERROR: {possibleError}", pathHandler.SuccessFile);
                 }
+                return true;
             }
-
-            return true; // Return true as default, indicating success if no unignorable error was found.
+            
+            FileWriter.WriteToConsole($"MANIFEST DOES NOT EXIST: {possibleError}");
+            FileWriter.WriteToFile($"{sceneConversionInfo.SceneImporter.GetSceneBasePointer()}\tMANIFEST ERROR: {possibleError}", pathHandler.FailFile);
+            return false; 
         }
 
         private static async Task ConvertScene(PXZParams pxzParams, SceneConversionPathHandler pathHandler, SceneConversionInfo sceneConversionInfo)
