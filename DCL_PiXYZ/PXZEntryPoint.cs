@@ -205,10 +205,9 @@ namespace DCL_PiXYZ
             await Task.Delay(2000);
             if (File.Exists(pathHandler.ManifestOutputJsonFile))
             {
-                bool hasError = !string.IsNullOrEmpty(possibleError) &&
-                    errorsToIgnore.Any(errorToIgnore => possibleError.Contains(errorToIgnore));
+                bool isIgnorableError = errorsToIgnore.Any(errorToIgnore => !string.IsNullOrEmpty(possibleError) && possibleError.Contains(errorToIgnore));
                 // If the error is not ignorable, log it and return false.
-                if (hasError)
+                if (!isIgnorableError)
                 {
                     FileWriter.WriteToConsole($"MANIFEST EXISTS, BUT HAS ERROR: {possibleError}");
                     FileWriter.WriteToFile($"{sceneConversionInfo.SceneImporter.GetSceneBasePointer()}\tMANIFEST EXISTS, BUT HAS ERROR: {possibleError}", pathHandler.SuccessFile);
