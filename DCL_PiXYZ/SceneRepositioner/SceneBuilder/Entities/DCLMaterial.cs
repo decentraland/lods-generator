@@ -19,6 +19,8 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
     public abstract class DCLMaterial
     {
         public TextureData texture;
+        public int transparencyMode;
+        public int alphaTest;
         protected virtual Color GetColor()
         {
             Color colorAlpha = new Color();
@@ -28,9 +30,14 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
             return colorAlpha;
         }
 
+        protected virtual double GetAlpha()
+        {
+            return 1;
+        }
+
         public uint GetMaterial(PiXYZAPI pxz, string entityID, Dictionary<string, string> contentTable)
         {
-            uint material = pxz.Material.CreateMaterial($"{PXYZConstants.CUSTOM_MATERIAL_CONVERTED}_{entityID}" , "PBR");
+            uint material = pxz.Material.CreateMaterial($"{PXZConstants.CUSTOM_MATERIAL_CONVERTED}_{entityID}" , "PBR");
             ColorOrTexture albedoColorOrTexture = new ColorOrTexture();
             if (texture?.tex?.src != null)
             {
@@ -50,6 +57,10 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
                     PBRMaterialInfos materialInfos = pxz.Material.GetPBRMaterialInfos(material);
                     materialInfos.albedo = albedoColorOrTexture;
                     pxz.Material.SetPBRMaterialInfos(material, materialInfos);
+                    
+                    //NOTE: We used the transparency mode to determine if this object should be transparent or not
+                    if (transparencyMode.Equals(2))
+                        pxz.Core.SetProperty(material, "Name", $"{pxz.Core.GetProperty(material, "Name")}_FORCED_TRANSPARENT");
                 }
                 else
                 {
@@ -62,9 +73,15 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
                 albedoColorOrTexture.color = GetColor();
                 PBRMaterialInfos materialInfos = pxz.Material.GetPBRMaterialInfos(material);
                 materialInfos.albedo = albedoColorOrTexture;
+                //TODO (Juani): Should this be SetMaterialMainColor?
                 pxz.Material.SetPBRMaterialInfos(material, materialInfos);
             }
             return material;
+        }
+        
+        public bool IsFullyTransparent()
+        {
+            return texture?.tex?.src == null && GetAlpha().Equals(0);
         }
 
     }
@@ -93,6 +110,13 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
             color.b = albedoColor.b;
             return color;
         }
+
+        protected override double GetAlpha()
+        {
+            if (albedoColor.a == null)
+                return 1;
+            return albedoColor.a.Value;
+        }
     }
 
     [Serializable]
@@ -111,10 +135,10 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
     [Serializable]
     public class AlbedoColor
     {
-        public int r = 1;
-        public int g = 1;
-        public int b = 1;
-        public int? a = 1;
+        public double r = 1;
+        public double g = 1;
+        public double b = 1;
+        public double? a = 1;
     }
     
 }

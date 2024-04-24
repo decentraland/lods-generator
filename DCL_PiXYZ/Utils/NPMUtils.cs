@@ -95,7 +95,10 @@ namespace DCL_PiXYZ.Utils
                 process.BeginErrorReadLine();
 
                 await Task.Run(() => 
-                {               
+                {     
+                //Timeout is based on the current frame rate (90 frames * 33ms)
+                //No scene should take longer than 2970ms to finish running frame,
+                //but all the setup may take time. So we are leaving a big and safe margin
                 if (!process.WaitForExit(20_000))
                     process.Kill();
                 });

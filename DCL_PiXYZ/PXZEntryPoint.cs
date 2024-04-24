@@ -28,8 +28,9 @@ namespace DCL_PiXYZ
             string defaultSceneLodManifestDirectory = Path.Combine(Directory.GetCurrentDirectory(), "scene-lod-entities-manifest-builder/");
 
             bool isDebug = true;
-            bool installNPM = true;
-            string decimationValues = "7000;3000;1000;500";
+            bool installNPM = false;
+            bool loadConvertedScenesFile = false;
+            string decimationValues = "7000;500";
             int startingLODLevel = 0;
 
 
@@ -56,7 +57,7 @@ namespace DCL_PiXYZ
             var pathHandler = new SceneConversionPathHandler(isDebug, defaultOutputPath, defaultSceneLodManifestDirectory, "SuccessScenes.txt", "FailScenes.txt", "PolygonCount.txt" , "FailedGLBImport.txt" , defaultScene);
 
             List<string> roadCoordinates = LoadRoads();
-            var convertedScenes = LoadConvertedScenes(isDebug);
+            var convertedScenes = LoadConvertedScenes(loadConvertedScenesFile);
             CreateDirectories(sceneConversionInfo);
             FrameworkInitialization(pathHandler.ManifestProjectDirectory, installNPM);
 
@@ -80,7 +81,8 @@ namespace DCL_PiXYZ
                     convertedScenes.Add(pointer);
 
                 FileWriter.WriteToConsole("BEGIN SCENE CONVERSION FOR " + currentScene);
-                if (!await ManifestGeneratedSuccesfully(sceneConversionInfo, pathHandler, currentScene)) continue;
+                if (!await ManifestGeneratedSuccesfully(sceneConversionInfo, pathHandler)) continue;
+         
                 if (!await sceneConversionInfo.SceneImporter.DownloadAllContent(pathHandler)) continue;
                 var pxzParams = new PXZParams
                 {
@@ -91,6 +93,8 @@ namespace DCL_PiXYZ
                 };
                 foreach (var decimationValue in sceneConversionInfo.DecimationToAnalyze)
                 {
+                    //TODO (Juani) : PIXYZ very weird bug. IF this await is not here, two run can output different results. Visible in -48,33
+                    await Task.Delay(1000);
                     pxz.Core.ResetSession();
                     pxzParams.DecimationValue = decimationValue;
                     await DoConversion(pxzParams, sceneConversionInfo, currentScene, pathHandler);
@@ -100,6 +104,7 @@ namespace DCL_PiXYZ
                 FileWriter.WriteToConsole("END SCENE CONVERSION FOR " + currentScene);
                 UpdateConvertedScenesFile(convertedScenes);
             }
+            //TODO (Juani): Clear  resources folder
             DoManifestCleanup(isDebug, pathHandler);
             pxz.Core.ResetSession();
         }
@@ -151,16 +156,16 @@ namespace DCL_PiXYZ
             return false;
         }
 
-        private static async Task<bool> ManifestGeneratedSuccesfully(SceneConversionInfo sceneConversionInfo, SceneConversionPathHandler pathHandler, string scene)
+        private static async Task<bool> ManifestGeneratedSuccesfully(SceneConversionInfo sceneConversionInfo, SceneConversionPathHandler pathHandler)
         {
             if (File.Exists(pathHandler.ManifestOutputJsonFile))
                 return true;
 
-            return await GenerateManifest(sceneConversionInfo.SceneType, scene, pathHandler.ManifestProjectDirectory,
+            return await GenerateManifest(pathHandler, sceneConversionInfo,
                 new List<string>
                 {
                     "manifest file already exists", "Failed to load script"
-                }, pathHandler.FailFile);
+                });
         }
 
         private static async Task<bool> SceneDefinitionDownloadSuccesfully(SceneConversionInfo sceneConversionInfo, string scene, SceneConversionPathHandler pathHandler)
@@ -190,24 +195,29 @@ namespace DCL_PiXYZ
             return false;
         }
 
-        private static async Task<bool> GenerateManifest(string sceneType, string sceneValue, string sceneManifestDirectory, List<string> errorsToIgnore, string failFile)
+        private static async Task<bool> GenerateManifest(SceneConversionPathHandler pathHandler, SceneConversionInfo sceneConversionInfo, List<string> errorsToIgnore)
         {
-            FileWriter.WriteToConsole($"BEGIN MANIFEST GENERATION FOR SCENE {sceneValue}");
-            string possibleError = await NPMUtils.RunNPMTool(sceneManifestDirectory, sceneType, sceneValue);
+            FileWriter.WriteToConsole($"BEGIN MANIFEST GENERATION FOR SCENE {sceneConversionInfo.SceneImporter.GetSceneBasePointer()}");
+            string possibleError = await NPMUtils.RunNPMTool(pathHandler.ManifestProjectDirectory, sceneConversionInfo.SceneType, sceneConversionInfo.SceneImporter.GetSceneBasePointer());
 
-            if (!string.IsNullOrEmpty(possibleError))
+            //TODO: Im adding because there were issues were the file was not fully written after  
+            //the NPM tools closes
+            await Task.Delay(2000);
+            if (File.Exists(pathHandler.ManifestOutputJsonFile))
             {
-                bool isIgnorableError = errorsToIgnore.Any(errorToIgnore => possibleError.Contains(errorToIgnore));
+                bool isIgnorableError = errorsToIgnore.Any(errorToIgnore => !string.IsNullOrEmpty(possibleError) && possibleError.Contains(errorToIgnore));
                 // If the error is not ignorable, log it and return false.
                 if (!isIgnorableError)
                 {
-                    FileWriter.WriteToConsole($"MANIFEST ERROR: {possibleError}");
-                    FileWriter.WriteToFile($"{sceneValue}\tMANIFEST ERROR: {possibleError}", failFile);
-                    return false; // Early exit if the error cannot be ignored.
+                    FileWriter.WriteToConsole($"MANIFEST EXISTS, BUT HAS ERROR: {possibleError}");
+                    FileWriter.WriteToFile($"{sceneConversionInfo.SceneImporter.GetSceneBasePointer()}\tMANIFEST EXISTS, BUT HAS ERROR: {possibleError}", pathHandler.SuccessFile);
                 }
+                return true;
             }
-
-            return true; // Return true as default, indicating success if no unignorable error was found.
+            
+            FileWriter.WriteToConsole($"MANIFEST DOES NOT EXIST: {possibleError}");
+            FileWriter.WriteToFile($"{sceneConversionInfo.SceneImporter.GetSceneBasePointer()}\tMANIFEST ERROR: {possibleError}", pathHandler.FailFile);
+            return false; 
         }
 
         private static async Task ConvertScene(PXZParams pxzParams, SceneConversionPathHandler pathHandler, SceneConversionInfo sceneConversionInfo)
@@ -219,6 +229,7 @@ namespace DCL_PiXYZ
             List<IPXZModifier> modifiers = new List<IPXZModifier>();
             modifiers.Add(new PXZBeginCleanMaterials());
             modifiers.Add(new PXZRepairMesh(models));
+            modifiers.Add(new PXZMaterialNameRandomizer());
             
             if (pxzParams.LodLevel != 0)
             {
@@ -258,15 +269,14 @@ namespace DCL_PiXYZ
             return JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(filePath));
         }
 
-        private static List<string> LoadConvertedScenes(bool isDebug)
+        private static List<string> LoadConvertedScenes(bool loadConvertedScenes)
         {
-            if(!isDebug)
+            if (!loadConvertedScenes)
                 return new List<string>();
             
             string convertedScenePathFile = Path.Combine(Directory.GetCurrentDirectory(), "ConvertedScenes.json");
             if (File.Exists(convertedScenePathFile))
                 return JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(convertedScenePathFile));
-
             return new List<string>();
         }
 
@@ -297,7 +307,7 @@ namespace DCL_PiXYZ
 
         private static void CreateDirectories(SceneConversionInfo sceneConversionInfo)
         {
-            Directory.CreateDirectory(PXYZConstants.RESOURCES_DIRECTORY);
+            Directory.CreateDirectory(PXZConstants.RESOURCES_DIRECTORY);
         }
 
 

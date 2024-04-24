@@ -15,7 +15,10 @@ namespace DCL_PiXYZ.SceneRepositioner.JsonParsing.Parsers
         {
             JObject jsonObject = JObject.Load(reader);
             Texture texture = new Texture();
-            texture.src = jsonObject["texture"]["src"].Value<string>();
+            if (jsonObject["texture"] == null)
+                texture.src = null;
+            else
+                texture.src = jsonObject["texture"]["src"].Value<string>();
             return texture;
         }
 

@@ -49,16 +49,36 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
             this.pxz = pxz;
         }
 
-        public PXZModel PositionAndInstantiteMesh(Dictionary<string, string> contentTable, Dictionary<int, DCLRendereableEntity> renderableEntities, SceneConversionPathHandler pathHandler)
+        public PXZModel PositionAndInstantiteMesh(Dictionary<string, string> contentTable, Dictionary<int, DCLRendereableEntity> renderableEntities, SceneConversionPathHandler pathHandler, int lodLevel)
         {
             InstantiateTransform(renderableEntities);
-            if (rendereableMesh != null)
+
+            bool hasZeroScale = HasZeroScaleApplied(renderableEntities);
+            bool isFullyTransparent = dclMaterial.IsFullyTransparent();
+            
+            if (rendereableMesh != null  && !hasZeroScale && !isFullyTransparent)
             {
+                //TODO (Juani): Clean up the amterial logic. If its a GLTFMesh, we dont have a material. This can get confusing for debugging
                 uint material = dclMaterial.GetMaterial(pxz, entityID.ToString(), contentTable);
-                return rendereableMesh.InstantiateMesh(pxz, entityID.ToString(), instantiatedEntity, material, contentTable, pathHandler);
+                return rendereableMesh.InstantiateMesh(pxz, entityID.ToString(), instantiatedEntity, material, contentTable, pathHandler, lodLevel);
             }
             else
-                return PXYZConstants.EMPTY_MODEL;
+                return PXZConstants.EMPTY_MODEL;
+        }
+        
+        private bool HasZeroScaleApplied(Dictionary<int, DCLRendereableEntity> renderableEntities)
+        {
+            Vector3 scale = new Vector3(transform.scale.x, transform.scale.y, transform.scale.z);
+            if (scale.LengthSquared() == 0)
+                return true;
+
+            if (transform.parent != 0 && renderableEntities.TryGetValue((int)transform.parent, out DCLRendereableEntity rendereableEntity))
+            {
+                // Recursively check parent entity
+                return rendereableEntity.HasZeroScaleApplied(renderableEntities);
+            }
+
+            return false;
         }
 
         private void InstantiateTransform(Dictionary<int, DCLRendereableEntity> renderableEntities)

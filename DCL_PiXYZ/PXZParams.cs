@@ -90,6 +90,7 @@ namespace DCL_PiXYZ
         public string PolygonCountFile;
         public string FailGLBImporterFile;
         public string OutputPath;
+        public string DownloadPath;
         public string ManifestOutputJsonFile;
         public string ManifestOutputJsonDirectory;
         public string ManifestProjectDirectory;
@@ -101,6 +102,7 @@ namespace DCL_PiXYZ
         {
             DefaultOutputPath = defaultOutputPath;
             ManifestProjectDirectory = manifestProjectDirectory;
+            DownloadPath = PXZConstants.RESOURCES_DIRECTORY;
             if (isDebug)
             {
                 Directory.CreateDirectory(DefaultOutputPath);
@@ -127,6 +129,7 @@ namespace DCL_PiXYZ
 
         public void SetOutputPath(SceneImporter sceneSceneImporter)
         {
+            DownloadPath = Path.Combine(PXZConstants.RESOURCES_DIRECTORY, sceneSceneImporter.GetSceneBasePointer());
             OutputPath = Path.Combine(DefaultOutputPath, sceneSceneImporter.GetSceneBasePointer());
             ManifestOutputJsonDirectory = Path.Combine(ManifestProjectDirectory, "output-manifests");
             ManifestOutputJsonFile = Path.Combine(ManifestOutputJsonDirectory, sceneSceneImporter.GetSceneHash() + "-lod-manifest.json");

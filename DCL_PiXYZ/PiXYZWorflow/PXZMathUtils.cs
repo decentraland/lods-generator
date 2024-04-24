@@ -30,12 +30,8 @@ namespace DCL_PiXYZ
         
         public static void Scale(this Matrix4 matrix4, Vector3 scaleFactors)
         {
-            //TODO: Ask Pravus. There are values set as 0 anyways. Whats your opinion here? (Like 828 in Genesis Plaza)
-            // Replace zero values with 1 to avoid collapsing the object
-            scaleFactors = new Vector3(
-                scaleFactors.X == 0 ? 1 : scaleFactors.X,
-                scaleFactors.Y == 0 ? 1 : scaleFactors.Y,
-                scaleFactors.Z == 0 ? 1 : scaleFactors.Z);
+
+            scaleFactors = new Vector3(scaleFactors.X, scaleFactors.Y, scaleFactors.Z);
 
             Matrix4x4 scalingMatrix = Matrix4x4.CreateScale(scaleFactors);
             matrix4.ApplyResult(Matrix4x4.Multiply(matrix4.ToMatrix4x4(), scalingMatrix));

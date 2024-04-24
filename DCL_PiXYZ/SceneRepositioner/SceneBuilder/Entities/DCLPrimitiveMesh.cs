@@ -14,7 +14,7 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
     {
         protected abstract uint GetMesh(PiXYZAPI pxz, string entityID);
 
-        public override PXZModel InstantiateMesh(PiXYZAPI pxz, string entityID, uint parent, uint material, Dictionary<string, string> sceneContent, SceneConversionPathHandler pathHandler)
+        public override PXZModel InstantiateMesh(PiXYZAPI pxz, string entityID, uint parent, uint material, Dictionary<string, string> sceneContent, SceneConversionPathHandler pathHandle, int lodLevel)
         {
             uint mesh = GetMesh(pxz, entityID);
             Matrix4 matrix4 = new Matrix4();
@@ -37,7 +37,7 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
         protected override uint GetMesh(PiXYZAPI pxz, string entityID)
         {
             string boxCreated = BoxFactory.Create(entityID, uvs);
-            return pxz.IO.ImportScene(Path.Combine(PXYZConstants.RESOURCES_DIRECTORY, boxCreated));
+            return pxz.IO.ImportScene(Path.Combine(PXZConstants.RESOURCES_DIRECTORY, boxCreated));
         }
 
     }
@@ -50,7 +50,7 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
         protected override uint GetMesh(PiXYZAPI pxz, string entityID)
         {
             string cylinderCreated = CylinderVariantsFactory.Create(entityID, radiusTop, radiusBottom);
-            return pxz.IO.ImportScene(Path.Combine(PXYZConstants.RESOURCES_DIRECTORY, cylinderCreated));
+            return pxz.IO.ImportScene(Path.Combine(PXZConstants.RESOURCES_DIRECTORY, cylinderCreated));
         }
     }
 
@@ -61,7 +61,7 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
         protected override uint GetMesh(PiXYZAPI pxz, string entityID)
         {
             string planeCreated = PlaneFactory.Create(entityID, uvs);
-            return pxz.IO.ImportScene(Path.Combine(PXYZConstants.RESOURCES_DIRECTORY, planeCreated));
+            return pxz.IO.ImportScene(Path.Combine(PXZConstants.RESOURCES_DIRECTORY, planeCreated));
         }
     }
 
@@ -70,7 +70,7 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
         protected override uint GetMesh(PiXYZAPI pxz, string entityID)
         {
             string sphereCreated = SphereFactory.Create(entityID);
-            return pxz.IO.ImportScene(Path.Combine(PXYZConstants.RESOURCES_DIRECTORY, sphereCreated));
+            return pxz.IO.ImportScene(Path.Combine(PXZConstants.RESOURCES_DIRECTORY, sphereCreated));
         }
     }
     

@@ -3,7 +3,7 @@ using DCL_PiXYZ.SceneRepositioner.JsonParsing;
 
 namespace DCL_PiXYZ
 {
-    public class PXYZConstants
+    public class PXZConstants
     {
         public static string RESOURCES_DIRECTORY = Path.Combine(Directory.GetCurrentDirectory(), "Resources");
 
@@ -14,6 +14,8 @@ namespace DCL_PiXYZ
         public static string HASH_PARAM = "hash";
         
         public static string CUSTOM_MATERIAL_CONVERTED = "CUSTOM_MATERIAL";
+
+        public static string FORCED_TRANSPARENT_MATERIAL = "FORCED_TRANSPARENT";
 
 
     }

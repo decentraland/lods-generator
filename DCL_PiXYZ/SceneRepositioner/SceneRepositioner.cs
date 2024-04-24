@@ -24,7 +24,7 @@ namespace DCL_PiXYZ.SceneRepositioner
             this.sceneContent = sceneContent;
             this.pxz = pxz;
             _pathHandler = pathHandler;
-            //this.lodLevel = lodLevel;
+            this.lodLevel = lodLevel;
         }
     
         public async Task<List<PXZModel>> SetupSceneInPiXYZ()
@@ -50,7 +50,7 @@ namespace DCL_PiXYZ.SceneRepositioner
                 dclRendereableEntity.Value.InitEntity(pxz, rootOccurrence);
 
             foreach (KeyValuePair<int, DCLRendereableEntity> dclRendereableEntity in renderableEntitiesDictionary)
-                models.Add(dclRendereableEntity.Value.PositionAndInstantiteMesh(sceneContent, renderableEntitiesDictionary, _pathHandler));
+                models.Add(dclRendereableEntity.Value.PositionAndInstantiteMesh(sceneContent, renderableEntitiesDictionary, _pathHandler, lodLevel));
 
 
             return models;

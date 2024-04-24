@@ -27,22 +27,24 @@ namespace AssetBundleConverter.LODs
             this.src = src;
         }
         
-        public override PXZModel InstantiateMesh(PiXYZAPI pxz, string entityID, uint parent, uint material, Dictionary<string, string> contentTable, SceneConversionPathHandler pathHandler)
+        public override PXZModel InstantiateMesh(PiXYZAPI pxz, string entityID, uint parent, uint material, Dictionary<string, string> contentTable, SceneConversionPathHandler pathHandler, int lodLevel)
         {
             this.pathHandler = pathHandler;
+            
             
             if (!contentTable.TryGetValue(src.ToLower(), out string modelPath))
             {
                 LogError($"ERROR: GLTF {src} file not found in sceneContent");
-                return PXYZConstants.EMPTY_MODEL;
+                return PXZConstants.EMPTY_MODEL;
             }
 
             bool modelRecreatedSuccessfully = true;
             
             try
             {
+                //TODO (Juani) : This is confusing. If you modify the material and it doesnt fail; but it fails on export of modified model, you wont know it
                 ModifyModelMaterials(modelPath);
-                ExportModifiedModel(modelPath);
+                ExportModifiedModel(modelPath, lodLevel);
             }
             catch (Exception e)
             {
@@ -59,18 +61,17 @@ namespace AssetBundleConverter.LODs
             catch (Exception e)
             {
                 FileWriter.WriteToConsole($"ERROR: Importing GLTF {src} failed with error {e}");
-                return PXYZConstants.EMPTY_MODEL;
+                return PXZConstants.EMPTY_MODEL;
             }
         }
 
         private void ModifyModelMaterials(string modelPath)
         {
-            var readSettings = new ReadSettings(ValidationMode.TryFix);
-            var model = ModelRoot.Load(modelPath, readSettings);
+            var model = ModelRoot.Load(modelPath, new ReadSettings(ValidationMode.Skip));
             foreach (var gltfMaterial in model.LogicalMaterials)
             {
-                if (gltfMaterial.Alpha != AlphaMode.OPAQUE && !gltfMaterial.Name.Contains("FORCED_TRANSPARENT"))
-                    gltfMaterial.Name += "FORCED_TRANSPARENT";
+                if (gltfMaterial.Alpha != AlphaMode.OPAQUE && !gltfMaterial.Name.Contains(PXZConstants.FORCED_TRANSPARENT_MATERIAL))
+                    gltfMaterial.Name += PXZConstants.FORCED_TRANSPARENT_MATERIAL;
             }
 
             SaveModel(model, modelPath);
@@ -79,29 +80,28 @@ namespace AssetBundleConverter.LODs
         private void SaveModel(ModelRoot model, string modelPath)
         {
             if (Path.GetExtension(modelPath).Contains("glb", StringComparison.OrdinalIgnoreCase))
-                model.SaveGLB(modelPath);
+                model.SaveGLB(modelPath, new WriteSettings(ValidationMode.Skip));
             else
-                model.SaveGLTF(modelPath);
+                model.SaveGLTF(modelPath, new WriteSettings(ValidationMode.Skip));
         }
         
-        private void ExportModifiedModel(string modelPath)
+        private void ExportModifiedModel(string modelPath, int lodLevel)
         {
-            // Determine the output file path based on the original model path
-            string outputFile = $"{modelPath}_EDITED.glb";
-
-            // Check if the file already exists
-            if (File.Exists(outputFile))
-            {
-                FileWriter.WriteToConsole($"The file {outputFile} already exists. Skipping export.");
-                return;
-            }
-
-            var readSettings = new ReadSettings(ValidationMode.TryFix);
-            var model = ModelRoot.Load(modelPath, readSettings);
+            var model = ModelRoot.Load(modelPath, new ReadSettings(ValidationMode.Skip));
             var modelRoot = ModelRoot.CreateModel();
             var sceneModel = modelRoot.UseScene("Default");
             foreach (var modelLogicalNode in model.LogicalNodes)
             {
+                //TODO (JUANI): If we are in LOD_0, we want to keep the original file and structure to avoid possible transformation issues.
+                //If we arent, we dont want to throw a SMR to the merge since PiXYZ offers inconsistent results
+                if (modelLogicalNode.Skin != null)
+                {
+                    if (lodLevel == 0)
+                        throw new Exception("Model has a SMR");
+                    else
+                        continue;
+                }
+                
                 if (modelLogicalNode.Mesh != null)
                 {
                     foreach (var meshPrimitive in modelLogicalNode.Mesh.Primitives)
@@ -118,7 +118,7 @@ namespace AssetBundleConverter.LODs
                 }
             }
 
-            modelRoot.SaveGLB(modelPath + "_EDITED.glb");
+            modelRoot.SaveGLB(modelPath + "_EDITED.glb", new WriteSettings(ValidationMode.Skip));
         }
         
         private void BuildMesh(MeshPrimitive meshToExport, Accessor positions, Accessor normals, Accessor texcoord, int[] indices, Material material)
