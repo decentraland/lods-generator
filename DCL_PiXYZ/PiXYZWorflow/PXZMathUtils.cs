@@ -25,7 +25,7 @@ namespace DCL_PiXYZ
         {
             //Transformation from Unity coordinates to PiXYZ coordinates
             Quaternion rightHandedQuaternion = new Quaternion(rotation.X, -rotation.Y, -rotation.Z, -rotation.W);
-            matrix4.ApplyResult(Matrix4x4.Multiply(matrix4.ToMatrix4x4(), Matrix4x4.CreateFromQuaternion(rightHandedQuaternion)));
+            matrix4.ApplyResult(Matrix4x4.Multiply(Matrix4x4.CreateFromQuaternion(rightHandedQuaternion), matrix4.ToMatrix4x4()));
         }
         
         public static void Scale(this Matrix4 matrix4, Vector3 scaleFactors)
