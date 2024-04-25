@@ -57,15 +57,10 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
                     PBRMaterialInfos materialInfos = pxz.Material.GetPBRMaterialInfos(material);
                     materialInfos.albedo = albedoColorOrTexture;
                     pxz.Material.SetPBRMaterialInfos(material, materialInfos);
-                    
-                    //NOTE: We used the transparency mode to determine if this object should be transparent or not
-                    if (transparencyMode.Equals(2))
-                        pxz.Core.SetProperty(material, "Name", $"{pxz.Core.GetProperty(material, "Name")}_FORCED_TRANSPARENT");
                 }
-                else
-                {
-                    //TODO: Download dynamic textures
-                }
+                //NOTE: We used the transparency mode to determine if this object should be transparent or not
+                if (transparencyMode.Equals(2))
+                    pxz.Core.SetProperty(material, "Name", $"{pxz.Core.GetProperty(material, "Name")}_FORCED_TRANSPARENT");
             }
             else
             {

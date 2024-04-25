@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using DCL_PiXYZ.SceneRepositioner.JsonParsing;
+using DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities;
 using DCL_PiXYZ.Utils;
 using Newtonsoft.Json;
 using SceneImporter;
@@ -17,6 +19,7 @@ namespace DCL_PiXYZ
         private WebRequestsHandler webRequestsHandler;
         private SceneDefinition sceneDefinition;
         private string[] ignoreExtensions;
+        private SceneConversionPathHandler pathHandler;
 
         private bool paramByHash;
 
@@ -26,11 +29,18 @@ namespace DCL_PiXYZ
         private string[] currentPointersList;
 
         public Dictionary<string, string> sceneContent;
+        
+        //We ll use ints to set dynamic textures filepath since we cannot use htts names
+        //as it
+        private int dynamicTexturesName;
+        
 
-        public SceneImporter(string paramType, string sceneParam, WebRequestsHandler webRequestsHandler)
+        public SceneImporter(string paramType, string sceneParam, WebRequestsHandler webRequestsHandler, 
+            SceneConversionPathHandler pathHandler)
         {
             this.sceneParam = sceneParam;
             this.webRequestsHandler = webRequestsHandler;
+            this.pathHandler = pathHandler;
 
             paramByHash = paramType.Equals(PXZConstants.HASH_PARAM);
 
@@ -72,7 +82,6 @@ namespace DCL_PiXYZ
         private void SetResult(string setSceneHash)
         {
             this.sceneHash = setSceneHash;
-            //TODO: Change to scene base
             sceneBasePointer = sceneDefinition.metadata.scene.baseParcel;
             currentPointersList = sceneDefinition.pointers;
         }
@@ -99,7 +108,31 @@ namespace DCL_PiXYZ
                 catch (Exception e)
                 {
                     FileWriter.WriteToFile($"{sceneBasePointer}\tDOWNLOAD ERROR: {e.Message}", pathHandler.FailFile);
-                    return false;
+                }
+            }
+            
+            //Dynamic textures
+            var renderableEntities = JsonConvert.DeserializeObject<List<RenderableEntity>>(File.ReadAllText(pathHandler.ManifestOutputJsonFile));
+            foreach (var renderableEntity in renderableEntities)
+            {
+                if (renderableEntity.componentName.Equals(RenderableEntityConstants.Material))
+                {
+                    DCLMaterial material = ((MaterialData)renderableEntity.data).material;
+                    if (material.texture?.tex?.src != null &&
+                        material.texture.tex.src.StartsWith("https://"))
+                    {
+                        try
+                        {
+                            string filePath = Path.Combine(pathHandler.DownloadPath, $"DynamicTexture_{dynamicTexturesName}.png");
+                            await webRequestsHandler.DownloadFileAsync(material.texture.tex.src, filePath); 
+                            sceneContent.TryAdd(material.texture.tex.src, filePath);
+                            dynamicTexturesName++;
+                        }
+                        catch (Exception e)
+                        {
+                            FileWriter.WriteToFile($"{sceneBasePointer}\tDOWNLOAD ERROR: {e.Message}", pathHandler.FailFile);
+                        }
+                    } 
                 }
             }
             return true;
