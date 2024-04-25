@@ -16,7 +16,7 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
         private int entityID;
         private TransformData transform = new TransformData();
         private DCLMesh rendereableMesh;
-        private DCLMaterial dclMaterial = new EmptyMaterial();
+        public DCLMaterial dclMaterial = new EmptyMaterial();
         private PiXYZAPI pxz;
 
 

@@ -67,7 +67,7 @@ namespace DCL_PiXYZ
 
                 if (HasSceneBeenConverted(convertedScenes, currentScene)) continue;
 
-                sceneConversionInfo.SceneImporter = new SceneImporter(sceneConversionInfo.ConversionType, currentScene, sceneConversionInfo.WebRequestsHandler);
+                sceneConversionInfo.SceneImporter = new SceneImporter(sceneConversionInfo.ConversionType, currentScene, sceneConversionInfo.WebRequestsHandler, pathHandler);
                 if (!await SceneDefinitionDownloadSuccesfully(sceneConversionInfo, currentScene, pathHandler)) continue;
 
                 if (HasSceneBeenConverted(convertedScenes, sceneConversionInfo.SceneImporter.GetSceneBasePointer())) continue;
@@ -223,7 +223,7 @@ namespace DCL_PiXYZ
         private static async Task ConvertScene(PXZParams pxzParams, SceneConversionPathHandler pathHandler, SceneConversionInfo sceneConversionInfo)
         {
             SceneRepositioner.SceneRepositioner sceneRepositioner =
-                new SceneRepositioner.SceneRepositioner(pathHandler.ManifestOutputJsonFile, pxzParams.SceneContent, pxz, pathHandler, pxzParams.LodLevel);
+                new SceneRepositioner.SceneRepositioner(pxzParams.SceneContent, pxz, pathHandler, pxzParams.LodLevel);
             List<PXZModel> models = await sceneRepositioner.SetupSceneInPiXYZ();
             
             List<IPXZModifier> modifiers = new List<IPXZModifier>();

@@ -11,19 +11,17 @@ using UnityEngine.Pixyz.API;
 namespace DCL_PiXYZ.SceneRepositioner
 {
     public class SceneRepositioner {
-        private readonly string sceneManifestJSONPath;
+    
         private Dictionary<string, string> sceneContent;
         private PiXYZAPI pxz;
-        private readonly SceneConversionPathHandler _pathHandler;
+        private readonly SceneConversionPathHandler pathHandler;
         private int lodLevel;
 
-        public SceneRepositioner(string sceneManifestJSONPath,
-            Dictionary<string, string> sceneContent, PiXYZAPI pxz, SceneConversionPathHandler pathHandler, int lodLevel)
+        public SceneRepositioner(Dictionary<string, string> sceneContent, PiXYZAPI pxz, SceneConversionPathHandler pathHandler, int lodLevel)
         {
-            this.sceneManifestJSONPath = sceneManifestJSONPath;
             this.sceneContent = sceneContent;
             this.pxz = pxz;
-            _pathHandler = pathHandler;
+            this.pathHandler = pathHandler;
             this.lodLevel = lodLevel;
         }
     
@@ -31,7 +29,7 @@ namespace DCL_PiXYZ.SceneRepositioner
         {
             FileWriter.WriteToConsole("BEGIN REPOSITIONING");
             List<PXZModel> models = new List<PXZModel>();
-            var renderableEntities = JsonConvert.DeserializeObject<List<RenderableEntity>>(File.ReadAllText(sceneManifestJSONPath));
+            var renderableEntities = JsonConvert.DeserializeObject<List<RenderableEntity>>(File.ReadAllText(pathHandler.ManifestOutputJsonFile));
             Dictionary<int, DCLRendereableEntity> renderableEntitiesDictionary = new Dictionary<int, DCLRendereableEntity>();
            
             foreach (var sceneDescriptorRenderableEntity in renderableEntities)
@@ -50,7 +48,7 @@ namespace DCL_PiXYZ.SceneRepositioner
                 dclRendereableEntity.Value.InitEntity(pxz, rootOccurrence);
 
             foreach (KeyValuePair<int, DCLRendereableEntity> dclRendereableEntity in renderableEntitiesDictionary)
-                models.Add(dclRendereableEntity.Value.PositionAndInstantiteMesh(sceneContent, renderableEntitiesDictionary, _pathHandler, lodLevel));
+                models.Add(dclRendereableEntity.Value.PositionAndInstantiteMesh(sceneContent, renderableEntitiesDictionary, pathHandler, lodLevel));
 
 
             return models;
