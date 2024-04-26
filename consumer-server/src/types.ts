@@ -103,6 +103,7 @@ export type MessageProcessorComponent = {
 export type StorageComponent = {
   storeFiles(filePaths: string[], prefix: string): Promise<string[]>
   getFiles(prefix: string): Promise<string[]>
+  deleteFailureDirectory(pointer: string): Promise<void>
 }
 
 export type SceneFetcherComponent = {

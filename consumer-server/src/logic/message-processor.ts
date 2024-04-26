@@ -19,6 +19,10 @@ export async function createMessageProcesorComponent({
   const logger = logs.getLogger('message-procesor')
   const abServers = (await config.requireString('AB_SERVERS')).split(';')
 
+  function isRelatedToAssetBundlePublish(errorMessage: string | undefined): boolean {
+    return !!errorMessage && abServers.some((abServer) => errorMessage.includes(abServer))
+  }
+
   async function reQueue(message: QueueMessage): Promise<void> {
     const retry = (message._retry || 0) + 1
     logger.info('Re-queuing message', {
@@ -86,7 +90,6 @@ export async function createMessageProcesorComponent({
 
         if (retry < 3) {
           await reQueue(message)
-          metrics.increment('lod_generation_count', { status: 'retryable' }, 1)
         } else {
           logger.warn('Max attempts reached, moving to error bucket', {
             entityId,
@@ -118,6 +121,7 @@ export async function createMessageProcesorComponent({
       await Promise.all(abServers.map((abServer) => bundleTriggerer.queueGeneration(entityId, uploadedFiles, abServer)))
       await queue.deleteMessage(receiptMessageHandle)
       metrics.increment('lod_generation_count', { status: 'succeed' }, 1)
+      await storage.deleteFailureDirectory(base)
     } catch (error: any) {
       logger.error('Unexpected failure while handling message from queue', {
         entityId: message.entity.entityId,
@@ -126,16 +130,19 @@ export async function createMessageProcesorComponent({
         error: error.message
       })
 
-      if (retry < 3) {
+      if (isRelatedToAssetBundlePublish(error?.message)) {
         await reQueue(message)
-        metrics.increment('lod_generation_count', { status: 'retryable' }, 1)
       } else {
-        logger.warn('Max attempts reached, message will not be retried', {
-          entityId: message.entity.entityId,
-          base: message.entity.metadata.scene.base,
-          attempt: retry
-        })
-        metrics.increment('lod_generation_count', { status: 'failed' }, 1)
+        if (retry < 3) {
+          await reQueue(message)
+        } else {
+          logger.warn('Max attempts reached, message will not be retried', {
+            entityId: message.entity.entityId,
+            base: message.entity.metadata.scene.base,
+            attempt: retry
+          })
+          metrics.increment('lod_generation_count', { status: 'failed' }, 1)
+        }
       }
 
       await queue.deleteMessage(receiptMessageHandle)
