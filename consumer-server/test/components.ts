@@ -38,7 +38,8 @@ async function initComponents(): Promise<TestComponents> {
 
   const storage: StorageComponent = {
     storeFiles: jest.fn(),
-    getFiles: jest.fn()
+    getFiles: jest.fn(),
+    deleteFailureDirectory: jest.fn()
   }
   const queue: QueueComponent = {
     deleteMessage: jest.fn(),

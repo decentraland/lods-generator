@@ -1,4 +1,4 @@
-import { ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3'
+import { DeleteObjectsCommand, ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
 import fs from 'fs/promises'
 import mime from 'mime-types'
@@ -56,5 +56,31 @@ export async function createCloudStorageAdapter({ config }: Pick<AppComponents, 
     return uploadedFiles
   }
 
-  return { storeFiles, getFiles }
+  async function deleteFailureDirectory(pointer: string): Promise<void> {
+    const listParams = {
+      Bucket: bucket,
+      Prefix: `failures/${pointer}`
+    }
+
+    const listedObjects = await s3.send(new ListObjectsV2Command(listParams))
+
+    if (!listedObjects.Contents || listedObjects.Contents.length === 0) return
+
+    const deleteParams = {
+      Bucket: bucket,
+      Delete: { Objects: [] as { Key: string }[] }
+    }
+
+    listedObjects.Contents.forEach(({ Key }) => {
+      if (Key) {
+        deleteParams.Delete.Objects.push({ Key })
+      }
+    })
+
+    await s3.send(new DeleteObjectsCommand(deleteParams))
+
+    if (listedObjects.IsTruncated) await deleteFailureDirectory(pointer)
+  }
+
+  return { storeFiles, getFiles, deleteFailureDirectory }
 }
