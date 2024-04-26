@@ -33,7 +33,7 @@ export function createLodGeneratorComponent({ logs }: Pick<AppComponents, 'logs'
       sceneLodEntitiesManifestBuilder,
       'false',
       'false',
-      '7000',
+      '7000;500',
       '0'
     ]
     const childProcess = spawn(commandParts[0], commandParts.slice(1))
