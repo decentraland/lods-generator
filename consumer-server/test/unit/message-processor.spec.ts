@@ -254,7 +254,8 @@ function getMessageProcessorMockComponents() {
     },
     storage: {
       storeFiles: jest.fn(),
-      getFiles: jest.fn().mockResolvedValue([])
+      getFiles: jest.fn().mockResolvedValue([]),
+      deleteFailureDirectory: jest.fn()
     },
     bundleTriggerer: {
       queueGeneration: jest.fn()
