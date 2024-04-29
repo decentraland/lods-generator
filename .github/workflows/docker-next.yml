@@ -27,3 +27,17 @@ jobs:
           docker pull quay.io/decentraland/lods-generator:${COMMIT_HASH}
           docker tag quay.io/decentraland/lods-generator:${COMMIT_HASH} quay.io/decentraland/lods-generator:next
           docker push quay.io/decentraland/lods-generator:next
+
+  deployment:
+    needs: [quay-build-push]
+    name: "Deploy to: dev"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger deployment
+        id: deploy
+        uses: decentraland/dcl-deploy-action@main
+        with:
+          dockerImage: "${{ needs.quay-build-push.outputs.registry-path }}"
+          serviceName: lods-generator
+          env: dev
+          token: ${{ secrets.GITHUB_TOKEN }}
