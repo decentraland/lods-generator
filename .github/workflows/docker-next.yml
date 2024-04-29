@@ -1,11 +1,9 @@
 name: CI/CD on main branch
 
 on:
-  workflow_dispatch:
-    inputs:
-      commit_hash:
-        description: 'Commit hash to re-tag'
-        required: true
+  push:
+    branches:
+      - "main"
 
 jobs:
   quay-build-push:
