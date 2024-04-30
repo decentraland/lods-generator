@@ -48,7 +48,7 @@ jobs:
         docker push quay.io/decentraland/lods-generator:next
 
   deployment:
-    needs: [quay-build-push]
+    needs: [build-and-push]
     name: "Deploy to: dev"
     runs-on: ubuntu-latest
     steps:
