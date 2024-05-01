@@ -65,6 +65,29 @@ export async function createMessageProcesorComponent({
         return
       }
 
+      const alreadyUploadedFiles = await storage.getFiles(`${base}/LOD/Sources/${message.entity.entityTimestamp.toString()}`)
+      
+      if (!!alreadyUploadedFiles.length) {
+          const lastUploadDate = alreadyUploadedFiles.reduce((acc, file) => {
+            if (!file.lastModified) return acc
+            return file.lastModified > acc ? file.lastModified : acc
+          }, new Date(0))
+
+          const currentDate = new Date()
+          const diff = currentDate.getTime() - lastUploadDate.getTime()
+          const diffDays = diff / (1000 * 3600 * 24)
+          if (diffDays < 3) {
+            logger.debug('Skipping process since it was already processed within the last 3 days', {
+              entityId,
+              base,
+              lastUploadDate: lastUploadDate.toISOString(),
+              currentDate: currentDate.toISOString()
+            })
+            await queue.deleteMessage(receiptMessageHandle)
+            return
+          }
+      }
+
       logger.info('Processing scene deployment', {
         entityId,
         base,

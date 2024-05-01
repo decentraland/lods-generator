@@ -12,7 +12,7 @@ export async function createCloudStorageAdapter({ config }: Pick<AppComponents, 
 
   const s3 = new S3Client({ region, endpoint: bucketEndpoint })
 
-  async function getFiles(prefix: string): Promise<string[]> {
+  async function getFiles(prefix: string): Promise<{ key: string, lastModified: Date | undefined}[]> {
     const list = await s3.send(
       new ListObjectsV2Command({
         Bucket: bucket,
@@ -22,7 +22,7 @@ export async function createCloudStorageAdapter({ config }: Pick<AppComponents, 
 
     return (
       list.Contents?.filter((file) => !file.Key?.endsWith('output.txt')).map(
-        (file) => `${bucketEndpoint}/${bucket}/${file.Key}`
+        (file) => ({ key: `${bucketEndpoint}/${bucket}/${file.Key}`, lastModified: file.LastModified })
       ) || []
     )
   }

@@ -102,7 +102,7 @@ export type MessageProcessorComponent = {
 
 export type StorageComponent = {
   storeFiles(filePaths: string[], prefix: string): Promise<string[]>
-  getFiles(prefix: string): Promise<string[]>
+  getFiles(prefix: string): Promise<{ key: string, lastModified: Date | undefined}[]>
   deleteFailureDirectory(pointer: string): Promise<void>
 }
 
