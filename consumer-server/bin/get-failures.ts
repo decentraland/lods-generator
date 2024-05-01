@@ -68,7 +68,7 @@ async function main() {
                     const diff = now.getTime() - lastModified.getTime()
                     const days = diff / (1000 * 60 * 60 * 24)
                     console.log('Object modified days ago', days)
-                    if (days > 2) continue
+                    if (days > 5) continue
                 }
                 
                 parsedKey = parseKey(key)

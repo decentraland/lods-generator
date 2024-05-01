@@ -11,7 +11,8 @@
     "admin:lod1": "tsc --esModuleInterop ./bin/generate-zip.ts && node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict ./bin/generate-zip.js 1",
     "admin:lod2": "tsc --esModuleInterop ./bin/generate-zip.ts && node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict ./bin/generate-zip.js 2",
     "admin:lod3": "tsc --esModuleInterop ./bin/generate-zip.ts && node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict ./bin/generate-zip.js 3",
-    "admin:get-failures": "tsc --esModuleInterop ./bin/get-failures.ts && node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict ./bin/get-failures.js"
+    "admin:get-failures": "tsc --esModuleInterop ./bin/get-failures.ts && node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict ./bin/get-failures.js",
+    "admin:publish": "tsc --esModuleInterop ./bin/republish-pointers.ts && node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict ./bin/republish-pointers.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.499.0",

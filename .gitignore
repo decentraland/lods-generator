@@ -73,3 +73,5 @@ validation-errors.json
 **/output-lods/**
 
 .env.admin
+
+failures.log
