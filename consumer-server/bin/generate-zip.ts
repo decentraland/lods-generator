@@ -45,11 +45,12 @@ async function isActiveScene(fileName: string): Promise<boolean> {
 async function downloadLODDirectoryAndCompressIt(
   s3Client: S3Client,
   bucket: string,
-  directory: string
+  directory: string,
+  continuationToken: string | undefined
 ) {
   const params: ListObjectsV2Request = {
     Bucket: bucket,
-    ContinuationToken: undefined,
+    ContinuationToken: continuationToken,
     Prefix: "LOD/" + directory + "/",
   }
 
@@ -67,6 +68,7 @@ async function downloadLODDirectoryAndCompressIt(
   do {
     const command = new ListObjectsV2Command(params)
     fetched = await s3Client.send(command)
+    console.log({ fetched })
     if (fetched.Contents) {
       objectCount += fetched.Contents.length
 
@@ -163,6 +165,7 @@ async function zipFiles(directory: string, downloadDirectory: string) {
 async function main() {
   // grabs first argument passed from script
   const directory = process.argv[2]
+  const continuationToken = process.argv[3]
 
   const config = await createDotEnvConfigComponent({
     path: [".env.default", ".env", ".env.admin"],
@@ -174,6 +177,8 @@ async function main() {
     config.requireString("S3_BUCKET"),
   ])
 
+  console.log({ user, secret, bucket })
+
   const s3Client = new S3Client({
     region: REGION,
     credentials: {
@@ -182,7 +187,7 @@ async function main() {
     },
   })
 
-  await downloadLODDirectoryAndCompressIt(s3Client, bucket, directory)
+  await downloadLODDirectoryAndCompressIt(s3Client, bucket, directory, continuationToken)
 }
 
 main().catch(console.error)
