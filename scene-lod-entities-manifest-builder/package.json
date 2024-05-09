@@ -4,7 +4,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "watch": "tsc -p tsconfig.json --watch",
-    "start": "node --trace-warnings --abort-on-uncaught-exception --unhandled-rejections=strict dist/index.js",
+    "start": "node --trace-warnings dist/index.js",
     "test": "jest --forceExit --detectOpenHandles --coverage --verbose --passWithNoTests",
     "lint:check": "npx eslint . --ext .ts",
     "lint:fix": "npx eslint . --ext .ts --fix"
