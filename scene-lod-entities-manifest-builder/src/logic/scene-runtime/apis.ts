@@ -1,7 +1,7 @@
 import { serializeCrdtMessages } from './logger'
 import { contentFetchBaseUrl, mainCrdt, sceneId, sdk6FetchComponent, sdk6SceneContent } from "../sceneFetcher";
 import { writeFile, mkdir } from 'fs'
-import { engine, Entity, PutComponentOperation, Transform } from '@dcl/ecs/dist-cjs'
+import {engine, Entity, PutComponentOperation, Transform, UiCanvasInformation} from '@dcl/ecs/dist-cjs'
 import { ReadWriteByteBuffer } from '@dcl/ecs/dist-cjs/serialization/ByteBuffer'
 import {FRAMES_TO_RUN, framesCount} from "../../adapters/scene";
 
@@ -18,7 +18,18 @@ function addPlayerEntityTransform() {
   const transformData = buffer.toCopiedBinary()
   buffer.resetBuffer()
   PutComponentOperation.write(1 as Entity, 1, Transform.componentId, transformData, buffer)
-  
+
+  return buffer.toBinary()
+}
+
+function addUICanvasOnRootEntity() {
+  const buffer = new ReadWriteByteBuffer()
+  const uiCanvasInformation = UiCanvasInformation.create(engine.RootEntity)
+  UiCanvasInformation.schema.serialize(uiCanvasInformation, buffer)
+  const uiCanvasComponentData = buffer.toCopiedBinary()
+  buffer.resetBuffer()
+  PutComponentOperation.write(0 as Entity, 1, UiCanvasInformation.componentId, uiCanvasComponentData, buffer)
+
   return buffer.toBinary()
 }
 
@@ -28,16 +39,17 @@ export const LoadableApis = {
   // to avoid compilation errors on very old sdk6 scenes when running their eval to generate the manifest.
   EnvironmentApi: {
     isPreviewMode: async () => ({ isPreview: false }),
-
     getBootstrapData: async () => ({ }),
-
     getPlatform: async () => ({ }),
-
     areUnsafeRequestAllowed: async () => ({ }),
-
     getCurrentRealm: async () => ({ }),
 
-    getExplorerConfiguration: async () => ({ }),
+    getExplorerConfiguration: async () => ({
+      clientUri: "",
+      configurations: {
+        questsServerUrl : "https://quests-api.decentraland.org"
+      },
+    }),
 
     getDecentralandTime: async () => ({ })
   },
@@ -49,9 +61,9 @@ export const LoadableApis = {
   },
   EngineApi: {
     sendBatch: async () => ({ events: [] }),
-
-    crdtGetState: async () => ({ hasEntities: mainCrdt !== undefined, data: [addPlayerEntityTransform(), mainCrdt] }),
-
+    subscribe : async () => ({ events: [] }),
+    unsubscribe : async () => ({ events: [] }),
+    crdtGetState: async () => ({ hasEntities: mainCrdt !== undefined, data: [addPlayerEntityTransform(), addUICanvasOnRootEntity(), mainCrdt] }),
     crdtSendToRenderer: async ({ data }: { data: Uint8Array }) => {
       async function ensureDirectoryExists(directory: string): Promise<void> {
         return new Promise((resolve, reject) => {
@@ -215,6 +227,14 @@ export const LoadableApis = {
         contents: []
       }
     }
+  },
+  SocialController:{
+    registerSocialControllerServiceServerImplementation(port:any) {
+      return{
+        async() {}
+      }
+    },
+
   }
 }
 

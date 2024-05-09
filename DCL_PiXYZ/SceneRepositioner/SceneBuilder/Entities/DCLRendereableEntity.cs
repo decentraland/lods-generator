@@ -15,6 +15,7 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
 
         private int entityID;
         private TransformData transform = new TransformData();
+        private VisibilityData visibilityData;
         private DCLMesh rendereableMesh;
         public DCLMaterial dclMaterial = new EmptyMaterial();
         private PiXYZAPI pxz;
@@ -40,6 +41,9 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
                 case RenderableEntityConstants.Material:
                     dclMaterial = ((MaterialData)renderableEntity.data).material;
                     break;
+                case RenderableEntityConstants.Visibility:
+                    visibilityData = ((VisibilityData)renderableEntity.data);
+                    break;
             }
         }
 
@@ -55,8 +59,9 @@ namespace DCL_PiXYZ.SceneRepositioner.SceneBuilder.Entities
 
             bool hasZeroScale = HasZeroScaleApplied(renderableEntities);
             bool isFullyTransparent = dclMaterial.IsFullyTransparent();
+            bool isHidden = visibilityData is { visible: false };
             
-            if (rendereableMesh != null  && !hasZeroScale && !isFullyTransparent)
+            if (rendereableMesh != null  && !hasZeroScale && !isFullyTransparent && !isHidden)
             {
                 //TODO (Juani): Clean up the amterial logic. If its a GLTFMesh, we dont have a material. This can get confusing for debugging
                 uint material = dclMaterial.GetMaterial(pxz, entityID.ToString(), contentTable);

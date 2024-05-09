@@ -48,7 +48,7 @@ export async function createSceneFetcherComponent({ config, fetch }: Pick<BaseCo
      sdk6SceneContent = sceneData.content
      sdk6FetchComponent = fetch
   
-     let fetchResponse = await fetch.fetch(`https://renderer-artifacts.decentraland.org/sdk7-adaption-layer/main/index.js`)
+     let fetchResponse = await fetch.fetch(`https://renderer-artifacts.decentraland.org/sdk6-adaption-layer/main/index.js`)
      return await fetchResponse.text()
    }
   

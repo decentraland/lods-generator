@@ -4,3 +4,10 @@ import { main } from './service'
 
 // This file is the program entry point, it only calls the Lifecycle function
 Lifecycle.run({ main, initComponents })
+
+process.on('uncaughtException', (err, origin) => {
+    console.log("Uncaught Exception", err)
+});
+process.on('unhandledRejection', (err, origin) => {
+    console.log("Uncaught Rejection", err)
+});

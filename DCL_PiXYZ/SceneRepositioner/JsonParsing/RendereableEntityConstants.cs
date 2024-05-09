@@ -7,6 +7,7 @@ namespace DCL_PiXYZ.SceneRepositioner.JsonParsing
         public const string Material = "core::Material";
         public const string GLTFContainer = "core::GltfContainer";
         public const string MeshRenderer = "core::MeshRenderer";
+        public const string Visibility = "core::VisibilityComponent";
     }
 
     public class MeshConstants

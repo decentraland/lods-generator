@@ -36,6 +36,9 @@ namespace DCL_PiXYZ.SceneRepositioner.JsonParsing.Parsers
                 case RenderableEntityConstants.MeshRenderer:
                     componentData = new MeshRendererData();
                     break;
+                case RenderableEntityConstants.Visibility:
+                    componentData = new VisibilityData();
+                    break;
             }
 
             if (componentData != null)
