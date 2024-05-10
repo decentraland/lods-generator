@@ -65,9 +65,10 @@ export async function createMessageProcesorComponent({
         return
       }
 
+      /*
       const alreadyUploadedFiles = await storage.getFiles(`${base}/LOD/Sources/${message.entity.entityTimestamp.toString()}`)
 
-      /*
+      
       if (!!alreadyUploadedFiles.length) {
           const lastUploadDate = alreadyUploadedFiles.reduce((acc, file) => {
             if (!file.lastModified) return acc
