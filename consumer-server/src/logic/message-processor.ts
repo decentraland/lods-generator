@@ -66,7 +66,8 @@ export async function createMessageProcesorComponent({
       }
 
       const alreadyUploadedFiles = await storage.getFiles(`${base}/LOD/Sources/${message.entity.entityTimestamp.toString()}`)
-      
+
+      /*
       if (!!alreadyUploadedFiles.length) {
           const lastUploadDate = alreadyUploadedFiles.reduce((acc, file) => {
             if (!file.lastModified) return acc
@@ -86,7 +87,7 @@ export async function createMessageProcesorComponent({
             await queue.deleteMessage(receiptMessageHandle)
             return
           }
-      }
+      }*/
 
       logger.info('Processing scene deployment', {
         entityId,
