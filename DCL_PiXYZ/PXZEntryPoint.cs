@@ -265,7 +265,7 @@ namespace DCL_PiXYZ
 
         private static List<string> LoadRoads()
         {
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "RoadCoordinates.json");
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SingleParcelRoadCoordinates.json");
             return JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(filePath));
         }
 
