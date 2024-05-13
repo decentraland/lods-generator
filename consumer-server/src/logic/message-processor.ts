@@ -2,7 +2,7 @@ import fs from 'fs'
 
 import { AppComponents, HealthState, MessageProcessorComponent, QueueMessage } from '../types'
 import { parseMultilineText } from '../utils/text-parser'
-import RoadCoordinates from '../../../RoadCoordinates.json'
+import RoadCoordinates from '../../../SingleParcelRoadCoordinates.json'
 
 export async function createMessageProcesorComponent({
   logs,

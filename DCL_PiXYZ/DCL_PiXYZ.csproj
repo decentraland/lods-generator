@@ -16,7 +16,7 @@
             <SceneLODManifestFolder Include="@(SceneLODManifest->'%(FullPath)')" TargetPath="scene-lod-entities-manifest-builder\%(RecursiveDir)%(Filename)%(Extension)" />
 
             <!-- Addition of a single file with the same relative output path -->
-            <RoadManifest Include="..\RoadCoordinates.json" />
+            <RoadManifest Include="..\SingleParcelRoadCoordinates.json" />
             <RoadCoordinatesFolder Include="@(RoadManifest->'%(FullPath)')" TargetPath="%(Filename)%(Extension)" />
 
             <!-- Addition of a single file with the same relative output path -->

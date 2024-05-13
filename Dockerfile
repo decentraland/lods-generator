@@ -35,7 +35,7 @@ FROM base as consumer-server-build
 
 WORKDIR /app
 
-COPY RoadCoordinates.json ./RoadCoordinates.json
+COPY SingleParcelRoadCoordinates.json ./SingleParcelRoadCoordinates.json
 
 WORKDIR /app/consumer-server
 
@@ -51,7 +51,7 @@ FROM mcr.microsoft.com/dotnet/core/sdk:3.1 as dotnet-build
 WORKDIR /build
 
 COPY ./pixyz_license_decentraland.bin ./
-COPY RoadCoordinates.json ./
+COPY SingleParcelRoadCoordinates.json ./
 COPY DCL_PiXYZ/ ./DCL_PiXYZ
 COPY nuget.config ./
 ARG PIXYZ_PACKAGE
@@ -91,7 +91,7 @@ COPY pixyz_license_decentraland.bin ./pixyz_license_decentraland.bin
 WORKDIR /app
 
 COPY pixyz_license_decentraland.bin ./pixyz_license_decentraland.bin
-COPY RoadCoordinates.json ./RoadCoordinates.json
+COPY SingleParcelRoadCoordinates.json ./SingleParcelRoadCoordinates.json
 COPY --from=scene-lod-build /scene-lod/dist ./scene-lod/dist
 COPY --from=scene-lod-build /scene-lod/package.json ./scene-lod/
 COPY --from=scene-lod-build /scene-lod/package-lock.json ./scene-lod/
