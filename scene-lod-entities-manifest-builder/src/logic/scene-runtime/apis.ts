@@ -5,6 +5,9 @@ import {engine, Entity, PutComponentOperation, Transform, UiCanvasInformation} f
 import { ReadWriteByteBuffer } from '@dcl/ecs/dist-cjs/serialization/ByteBuffer'
 import {FRAMES_TO_RUN, framesCount} from "../../adapters/scene";
 
+import { getUserData, getUserPublicKey } from '~system/UserIdentity'
+import { isPreviewMode } from '~system/EnvironmentApi';
+
 export const manifestFileDir = 'output-manifests'
 export const manifestFileNameEnd = '-lod-manifest.json'
 let savedManifest = false
@@ -32,6 +35,12 @@ function addUICanvasOnRootEntity() {
 
   return buffer.toBinary()
 }
+
+type LoadableApis = {
+  // TODO: add all API's types.
+  // EnvironmentApi: { isPreviewMode: typeof isPreviewMode }
+  UserIdentity: { getUserData: typeof getUserData, getUserPublicKey: typeof getUserPublicKey }
+} & Record<string, unknown>
 
 export const LoadableApis = {
 
@@ -82,12 +91,11 @@ export const LoadableApis = {
           });
         });
       }
-      
+
       if (mainCrdt) {
         data = joinBuffers(mainCrdt, data)
       }
       savedData = joinBuffers(savedData, data)
-      
       if(savedData.length != previousSavedData){
         let outputJSONManifest = JSON.stringify([...serializeCrdtMessages('[msg]: ', savedData)], null, 2)
         await ensureDirectoryExists(manifestFileDir);
@@ -100,24 +108,31 @@ export const LoadableApis = {
         await ensureDirectoryExists(manifestFileDir);
         await writeToFile(`${manifestFileDir}/${sceneId}${manifestFileNameEnd}`, emptyOutputJSONManifest);
       }
-      
+
       //console.log(outputJSONManifest)
       return { data: [] }
     },
     isServer: async () => ({ isServer: true }),
   },
   UserIdentity: {
-    async getUserData()   {
+    async getUserData() {
       return {
-          displayName: "empty",
-          publicKey: "empty",
-          hasConnectedWeb3: true,
-          userId: "empty",
-          version: 0,
-          avatar: {
-            wearables: [],
+        data: {
+            displayName: "empty",
+            publicKey: "empty",
+            hasConnectedWeb3: true,
+            userId: "empty",
+            version: 0,
+            avatar: {
+              wearables: [''],
+              bodyShape: '',
+              skinColor: '',
+              hairColor: '',
+              eyeColor: '',
+              snapshots: { face256: '', body: ''},
+            }
           }
-      }
+        }
     },
     getUserPublicKey: async () => ({})
   },

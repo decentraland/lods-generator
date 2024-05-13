@@ -14,7 +14,7 @@ type SDK7Module = {
 }
 
 export function createModuleRuntime(runtime: Record<string, any>): SDK7Module {
-  const exports: Partial<SceneInterface> = {} 
+  const exports: Partial<SceneInterface> = {}
 
   const module = { exports }
 
@@ -41,6 +41,13 @@ export function createModuleRuntime(runtime: Record<string, any>): SDK7Module {
       trace: () => {},
       warning: () => {},
       error: () => {}
+    }
+  })
+
+  Object.defineProperty(runtime, 'fetch', {
+    value: async (url: string, init: any) => {
+      console.log({ url, init })
+      return { status: 200, json: async () => {{ }}, text: async () => '' }
     }
   })
 
@@ -84,13 +91,21 @@ export function createModuleRuntime(runtime: Record<string, any>): SDK7Module {
     },
     async runStart() {
       if (module.exports.onStart) {
-        await module.exports.onStart()
+        try {
+          await module.exports.onStart()
+        } catch (e) {
+          console.log('[onStart error]: ', e)
+        }
       }
       await runSetImmediate()
     },
     async runUpdate(deltaTime: number) {
       if (module.exports.onUpdate) {
-        await module.exports.onUpdate(deltaTime)
+        try {
+          await module.exports.onUpdate(deltaTime)
+        } catch (e) {
+          console.log('[onUpdate error]: ', e)
+        }
       }
       await runSetImmediate()
     }

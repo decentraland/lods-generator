@@ -20,7 +20,6 @@ export async function createSceneComponent(): Promise<ISceneComponent> {
 
     const runtimeExecutionContext = Object.create(null)
     const sceneModule = createModuleRuntime(runtimeExecutionContext)
-
     try {
       await customEvalSdk7(sourceCode, runtimeExecutionContext)
       //30 FPS
@@ -42,7 +41,7 @@ export async function createSceneComponent(): Promise<ISceneComponent> {
           const dtSecs = dtMillis / 1000
 
           await sceneModule.runUpdate(dtSecs)
-          
+
           // wait for next frame
           const ms = Math.max((updateIntervalMs - (performance.now() - start)) | 0, 0)
           await setTimeout(Math.max(ms | 0, 0), undefined, { signal: abortController.signal })
