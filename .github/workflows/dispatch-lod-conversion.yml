@@ -51,7 +51,7 @@ jobs:
       
     - name: Copy road coordinates
       run: |
-          Copy-Item -Path "${{ github.workspace }}\DCL_PiXYZ\bin\Release\netcoreapp3.1\win10-x64\RoadCoordinates.json" -Destination "${{ github.workspace }}\publish"
+          Copy-Item -Path "${{ github.workspace }}\DCL_PiXYZ\bin\Release\netcoreapp3.1\win10-x64\SingleParcelRoadCoordinates.json" -Destination "${{ github.workspace }}\publish"
       shell: pwsh 
 
     - name: Install Vulkan SDK
