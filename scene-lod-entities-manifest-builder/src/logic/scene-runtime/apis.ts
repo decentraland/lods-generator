@@ -1,16 +1,30 @@
 import { serializeCrdtMessages } from './logger'
-import { contentFetchBaseUrl, mainCrdt, sceneId, sdk6FetchComponent, sdk6SceneContent } from "../sceneFetcher";
+import { contentFetchBaseUrl, mainCrdt, sceneId, sdk6FetchComponent, sdk6SceneContent } from '../sceneFetcher'
 import { writeFile, mkdir } from 'fs'
-import {engine, Entity, PutComponentOperation, Transform, UiCanvasInformation} from '@dcl/ecs/dist-cjs'
+import { engine, Entity, PutComponentOperation, Transform, UiCanvasInformation } from '@dcl/ecs/dist-cjs'
 import { ReadWriteByteBuffer } from '@dcl/ecs/dist-cjs/serialization/ByteBuffer'
-import {FRAMES_TO_RUN, framesCount} from "../../adapters/scene";
+import { FRAMES_TO_RUN, framesCount } from '../../adapters/scene'
+
+import type UserIdentity from '~system/UserIdentity'
+import type CommsApi from '~system/CommsApi'
+import type EnvironmentApi from '~system/EnvironmentApi'
+import type EthereumController from '~system/EthereumController'
+import type EngineApi from '~system/EngineApi'
+import type SignedFetch from '~system/SignedFetch'
+import type Runtime from '~system/Runtime'
+import type RestrictedActions from '~system/RestrictedActions'
+import type CommunicationsController from '~system/CommunicationsController'
+import type PortableExperiences from '~system/PortableExperiences'
+import type UserActionModule from '~system/UserActionModule'
+import type Players from '~system/Players'
+import type Scene from '~system/Scene'
 
 export const manifestFileDir = 'output-manifests'
 export const manifestFileNameEnd = '-lod-manifest.json'
-let savedManifest = false
 
-let savedData: Uint8Array  = new Uint8Array(0)
+let savedData: Uint8Array = new Uint8Array(0)
 let previousSavedData = 0
+
 function addPlayerEntityTransform() {
   const buffer = new ReadWriteByteBuffer()
   const transform = Transform.create(engine.PlayerEntity)
@@ -33,208 +47,212 @@ function addUICanvasOnRootEntity() {
   return buffer.toBinary()
 }
 
-export const LoadableApis = {
+type LoadableApis = {
+  EnvironmentApi: typeof EnvironmentApi
+  UserIdentity: typeof UserIdentity
+  CommsApi: typeof CommsApi
+  EthereumController: typeof EthereumController
+  EngineApi: typeof EngineApi
+  SignedFetch: typeof SignedFetch
+  Runtime: typeof Runtime
+  RestrictedActions: typeof RestrictedActions
+  CommunicationsController: typeof CommunicationsController
+  PortableExperiences: typeof PortableExperiences
+  UserActionModule: typeof UserActionModule
+  Players: typeof Players
+  Scene: typeof Scene
+}
 
+export const LoadableApis: LoadableApis = {
   // Emulating old EnvironmentAPI from browser-interface/kernel at https://github.com/decentraland/unity-renderer/blob/dev/browser-interface/packages/shared/apis/host/EnvironmentAPI.ts#L29%60L77
   // to avoid compilation errors on very old sdk6 scenes when running their eval to generate the manifest.
   EnvironmentApi: {
     isPreviewMode: async () => ({ isPreview: false }),
-    getBootstrapData: async () => ({ }),
-    getPlatform: async () => ({ }),
-    areUnsafeRequestAllowed: async () => ({ }),
-    getCurrentRealm: async () => ({ }),
-
-    getExplorerConfiguration: async () => ({
-      clientUri: "",
-      configurations: {
-        questsServerUrl : "https://quests-api.decentraland.org"
-      },
+    getBootstrapData: async () => ({
+      id: 'string',
+      baseUrl: 'string',
+      entity: undefined,
+      useFPSThrottling: false
     }),
-
-    getDecentralandTime: async () => ({ })
+    getPlatform: async () => ({ platform: 'LOD-generator' }),
+    areUnsafeRequestAllowed: async () => ({ status: false }),
+    getCurrentRealm: async () => ({}),
+    getExplorerConfiguration: async () => ({
+      clientUri: '',
+      configurations: {
+        questsServerUrl: 'https://quests-api.decentraland.org'
+      }
+    }),
+    getDecentralandTime: async () => ({ seconds: Date.now() / 1000 })
   },
   CommsApi: {
-    registerCommsApiServiceServerImplementation: async () => ({})
+    VideoTrackSourceType: {} as any,
+    getActiveVideoStreams: async (_) => ({
+      streams: []
+    })
   },
   EthereumController: {
-    registerEthereumControllerServiceServerImplementation: async () => ({})
+    requirePayment: async () => ({ jsonAnyResponse: '' }),
+    signMessage: async () => ({ message: '', hexEncodedMessage: '', signature: '' }),
+    convertMessageToObject: async () => ({ dict: {} }),
+    sendAsync: async () => ({ jsonAnyResponse: '' }),
+    getUserAccount: async () => ({})
   },
   EngineApi: {
     sendBatch: async () => ({ events: [] }),
-    subscribe : async () => ({ events: [] }),
-    unsubscribe : async () => ({ events: [] }),
-    crdtGetState: async () => ({ hasEntities: mainCrdt !== undefined, data: [addPlayerEntityTransform(), addUICanvasOnRootEntity(), mainCrdt] }),
+    subscribe: async () => ({ events: [] }),
+    unsubscribe: async () => ({ events: [] }),
+    crdtGetState: async () => ({
+      hasEntities: mainCrdt !== undefined,
+      data: [addPlayerEntityTransform(), addUICanvasOnRootEntity(), mainCrdt]
+    }),
+    crdtGetMessageFromRenderer: async () => ({ data: [] }),
     crdtSendToRenderer: async ({ data }: { data: Uint8Array }) => {
       async function ensureDirectoryExists(directory: string): Promise<void> {
         return new Promise((resolve, reject) => {
-          mkdir(directory, { recursive: true }, err => {
-            if (err) reject(err);
-            else resolve();
-          });
-        });
+          mkdir(directory, { recursive: true }, (err) => {
+            if (err) reject(err)
+            else resolve()
+          })
+        })
       }
 
       async function writeToFile(filePath: string, content: string): Promise<void> {
         return new Promise((resolve, reject) => {
-          writeFile(filePath, content, err => {
-            if (err) reject(err);
-            else resolve();
-          });
-        });
+          writeFile(filePath, content, (err) => {
+            if (err) reject(err)
+            else resolve()
+          })
+        })
       }
-      
+
       if (mainCrdt) {
         data = joinBuffers(mainCrdt, data)
       }
       savedData = joinBuffers(savedData, data)
-      
-      if(savedData.length != previousSavedData){
-        let outputJSONManifest = JSON.stringify([...serializeCrdtMessages('[msg]: ', savedData)], null, 2)
-        await ensureDirectoryExists(manifestFileDir);
-        await writeToFile(`${manifestFileDir}/${sceneId}${manifestFileNameEnd}`, outputJSONManifest);
+      if (savedData.length !== previousSavedData) {
+        const outputJSONManifest = JSON.stringify([...serializeCrdtMessages('[msg]: ', savedData)], null, 2)
+        await ensureDirectoryExists(manifestFileDir)
+        await writeToFile(`${manifestFileDir}/${sceneId}${manifestFileNameEnd}`, outputJSONManifest)
         previousSavedData = savedData.length
       }
 
-      if( (framesCount < FRAMES_TO_RUN - 1) && savedData.length == 0) {
-        const emptyOutputJSONManifest = "[]";
-        await ensureDirectoryExists(manifestFileDir);
-        await writeToFile(`${manifestFileDir}/${sceneId}${manifestFileNameEnd}`, emptyOutputJSONManifest);
+      if (framesCount < FRAMES_TO_RUN - 1 && savedData.length === 0) {
+        const emptyOutputJSONManifest = '[]'
+        await ensureDirectoryExists(manifestFileDir)
+        await writeToFile(`${manifestFileDir}/${sceneId}${manifestFileNameEnd}`, emptyOutputJSONManifest)
       }
-      
+
       //console.log(outputJSONManifest)
       return { data: [] }
     },
     isServer: async () => ({ isServer: true }),
+    // Enum types that the compiler thinks we need for the EngineAPI.
+    ECS6ComponentAttachToAvatar_AttachToAvatarAnchorPointId: {} as any,
+    ECS6ComponentCameraModeArea_CameraMode: {} as any,
+    ECS6ComponentNftShape_PictureFrameStyle: {} as any,
+    ECS6ComponentUiContainerStack_UIStackOrientation: {} as any,
+    ECS6ComponentVideoTexture_VideoStatus: {} as any,
+    EventDataType: {} as any,
+    UiValue_UiValueType: {} as any
+    // End of enum types
   },
   UserIdentity: {
-    async getUserData()   {
+    async getUserData() {
       return {
-          displayName: "empty",
-          publicKey: "empty",
+        data: {
+          displayName: 'empty',
+          publicKey: 'empty',
           hasConnectedWeb3: true,
-          userId: "empty",
+          userId: 'empty',
           version: 0,
           avatar: {
-            wearables: [],
+            wearables: [''],
+            bodyShape: '',
+            skinColor: '',
+            hairColor: '',
+            eyeColor: '',
+            snapshots: { face256: '', body: '' }
           }
+        }
       }
     },
     getUserPublicKey: async () => ({})
   },
   SignedFetch: {
-    getHeaders: async () => ({})
+    signedFetch: async () => ({ ok: false, status: 404, statusText: 'invalid lod server', headers: {}, body: '' }),
+    getHeaders: async () => ({ headers: {} })
   },
   Runtime: {
-    getRealm: () => {
-      return { realmInfo: { isPreview: false } }
+    getWorldTime: async () => ({ seconds: Date.now() / 1000 }),
+    getExplorerInformation: async () => ({ agent: 'lod-server', platform: 'lod-server-platform', configurations: {} }),
+    getRealm: async () => {
+      return { realmInfo: undefined }
     },
     // readFile is needed for the adaption-layer bridge to run SDK6 scenes as an SDK7 scene
-    readFile: async ({ fileName }: { fileName: String }) => {
+    readFile: async ({ fileName }: { fileName: string }) => {
       const fileHash = sdk6SceneContent.find(({ file }: any) => file === fileName).hash
       const res = await sdk6FetchComponent.fetch(`${contentFetchBaseUrl}${fileHash}`)
       return {
-        content: await res.arrayBuffer()
+        content: await res.arrayBuffer(),
+        hash: fileHash
       }
     },
-    async getSceneInformation() {
-      return {
-        urn: "https://none",
-        baseUrl: "https://none",
-        content: "https://none",
-        metadataJson: JSON.stringify({
-          "display":{
-            "title":"",
-            "favicon":""
-          },
-          "owner":"",
-          "contact":{
-            "name":"",
-            "email":""
-          },
-          "main":"bin/game.js",
-          "tags":[],
-          "scene":{
-            "parcels":["-,-"],
-            "base":"-,-"
-          }
-        })
-      }
-    }
+    getSceneInformation: async () => ({
+      urn: 'https://none',
+      baseUrl: 'https://none',
+      content: [],
+      metadataJson: JSON.stringify({
+        display: {
+          title: '',
+          favicon: ''
+        },
+        owner: '',
+        contact: {
+          name: '',
+          email: ''
+        },
+        main: 'bin/game.js',
+        tags: [],
+        scene: {
+          parcels: ['-,-'],
+          base: '-,-'
+        }
+      })
+    })
   },
   RestrictedActions: {
-    async triggerEmote() {},
-    async movePlayerTo() {},
-    async changeRealm() {},
-    async openExternalUrl() {},
-    async openNftDialog() {},
-    async setCommunicationsAdapter() {},
-    async teleportTo() {},
-    async triggerSceneEmote() {}
+    triggerEmote: async () => ({}),
+    movePlayerTo: async () => ({}),
+    changeRealm: async () => ({ success: true }),
+    openExternalUrl: async () => ({ success: true }),
+    openNftDialog: async () => ({ success: true }),
+    setCommunicationsAdapter: async () => ({ success: true }),
+    teleportTo: async () => ({}),
+    triggerSceneEmote: async () => ({ success: true })
   },
   CommunicationsController: {
-    async send() {},
-    async sendBinary() {}
+    send: async () => ({}),
+    sendBinary: async () => {
+      return { data: [] }
+    }
   },
   PortableExperiences: {
-    async exit() {},
-    async getPortableExperiencesLoaded() {},
-    async kill() {},
-    async spawn() {}
+    exit: async () => ({ status: true }),
+    getPortableExperiencesLoaded: async () => ({ loaded: [] }),
+    kill: async () => ({ status: true }),
+    spawn: async () => ({ name: 'casla', parentCid: '', pid: '' })
   },
   UserActionModule: {
-    async requestTeleport() {}
-  },
-  ParcelIdentity: {
-    registerParcelIdentityServiceServerImplementation: async () => ({}),
-    async getParcel(_req: any, ctx: any) {
-      return {
-        land: {
-          sceneId: '',
-          sceneJsonData: '{}',
-          baseUrl: '',
-          baseUrlBundles: '',
-          mappingsResponse: {
-            parcelId: '',
-            rootCid: '',
-            contents: []
-          }
-        },
-        cid: ''
-      }
-    }
+    requestTeleport: async () => ({})
   },
   Players: {
-    async getPlayerData(body: any) {
-      return {
-        avatar: null,
-        displayName: "ManifestBuilder",
-        hasConnectedWeb3: false,
-        publicKey: null,
-        userId: 123,
-        version: 123
-      }
-    },
-    async getConnectedPlayers() {
-      return [{userId: 123}]
-    }
+    getPlayerData: async () => ({}),
+    getConnectedPlayers: async () => ({ players: [] }),
+    getPlayersInScene: async () => ({ players: [] })
   },
-  Scene:{
-    async getSceneInfo(_req: any, ctx: any){
-      return {
-        cid: '',
-        metadata: '{}',
-        baseUrl:'',
-        contents: []
-      }
-    }
-  },
-  SocialController:{
-    registerSocialControllerServiceServerImplementation(port:any) {
-      return{
-        async() {}
-      }
-    },
-
+  Scene: {
+    getSceneInfo: async () => ({ cid: '', metadata: '{}', baseUrl: '', contents: [] })
   }
 }
 

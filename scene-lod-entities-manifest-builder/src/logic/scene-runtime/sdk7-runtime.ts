@@ -13,8 +13,29 @@ type SDK7Module = {
   runUpdate(deltaTime: number): Promise<void>
 }
 
+class WebSocket {
+  constructor(url: string) {
+    this.url = url
+  }
+  onmessage() {}
+  send() {}
+  onclose() {}
+  onerror() {}
+  onopen() {}
+  close(_code?: number, _reason?: string) {}
+  readonly url
+  readonly readyState = 0
+  readonly CLOSED = 1
+  readonly CLOSING = 0
+  readonly CONNECTING = 0
+  readonly OPEN = 0
+}
+
+const a = new WebSocket('ws://')
+a.onmessage = () => {}
+
 export function createModuleRuntime(runtime: Record<string, any>): SDK7Module {
-  const exports: Partial<SceneInterface> = {} 
+  const exports: Partial<SceneInterface> = {}
 
   const module = { exports }
 
@@ -42,6 +63,20 @@ export function createModuleRuntime(runtime: Record<string, any>): SDK7Module {
       warning: () => {},
       error: () => {}
     }
+  })
+
+  Object.defineProperty(runtime, 'fetch', {
+    value: async (_url: string, _init: any) => {
+      return {
+        status: 200,
+        json: async () => {},
+        text: async () => ''
+      }
+    }
+  })
+
+  Object.defineProperty(runtime, 'WebSocket', {
+    value: WebSocket
   })
 
   const loadedModules: Record<string, GenericRpcModule> = {}
