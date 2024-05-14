@@ -1,10 +1,10 @@
 import { customEvalSdk7 } from '../logic/scene-runtime/sandbox'
 import { createModuleRuntime } from '../logic/scene-runtime/sdk7-runtime'
 import { setTimeout } from 'timers/promises'
+import { initSourcemap } from '../logic/sourcemap'
 
 export const FRAMES_TO_RUN = 90
 export let framesCount = 1
-
 
 export type ISceneComponent = {
   start(hash: string, sourceCode: string): Promise<void>
@@ -17,20 +17,30 @@ export async function createSceneComponent(): Promise<ISceneComponent> {
   async function start(hash: string, sourceCode: string) {
     abortController = new AbortController()
     loaded = true
-
     const runtimeExecutionContext = Object.create(null)
     const sceneModule = createModuleRuntime(runtimeExecutionContext)
     try {
       await customEvalSdk7(sourceCode, runtimeExecutionContext)
+
+      // This only works for scenes that has the sourcemap uploaded inside the .js file or local scenes.
+      const sourceMap = await initSourcemap(sourceCode, true)
       //30 FPS
       const updateIntervalMs: number = 33.33
 
-      await sceneModule.runStart()
+      try {
+        await sceneModule.runStart()
+      } catch (e: any) {
+        console.log('[Start failed]: ', sourceMap.parseError(e))
+      }
 
       // start event loop
       if (sceneModule.exports.onUpdate) {
         // first update always use 0.0 as delta time
-        await sceneModule.runUpdate(0.0)
+        try {
+          await sceneModule.runUpdate(0.0)
+        } catch (e: any) {
+          console.log('[Update failed]: ', sourceMap.parseError(e))
+        }
         let start = performance.now()
 
         while (framesCount < FRAMES_TO_RUN) {
@@ -62,6 +72,6 @@ export async function createSceneComponent(): Promise<ISceneComponent> {
   }
 
   return {
-    start,
+    start
   }
 }

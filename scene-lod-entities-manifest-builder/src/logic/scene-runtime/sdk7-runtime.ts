@@ -45,9 +45,12 @@ export function createModuleRuntime(runtime: Record<string, any>): SDK7Module {
   })
 
   Object.defineProperty(runtime, 'fetch', {
-    value: async (url: string, init: any) => {
-      console.log({ url, init })
-      return { status: 200, json: async () => {{ }}, text: async () => '' }
+    value: async (_url: string, _init: any) => {
+      return {
+        status: 200,
+        json: async () => {},
+        text: async () => ''
+      }
     }
   })
 
@@ -91,21 +94,13 @@ export function createModuleRuntime(runtime: Record<string, any>): SDK7Module {
     },
     async runStart() {
       if (module.exports.onStart) {
-        try {
-          await module.exports.onStart()
-        } catch (e) {
-          console.log('[onStart error]: ', e)
-        }
+        await module.exports.onStart()
       }
       await runSetImmediate()
     },
     async runUpdate(deltaTime: number) {
       if (module.exports.onUpdate) {
-        try {
-          await module.exports.onUpdate(deltaTime)
-        } catch (e) {
-          console.log('[onUpdate error]: ', e)
-        }
+        await module.exports.onUpdate(deltaTime)
       }
       await runSetImmediate()
     }
