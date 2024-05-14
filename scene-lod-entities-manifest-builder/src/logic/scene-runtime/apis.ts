@@ -1,7 +1,7 @@
 import { serializeCrdtMessages } from './logger'
 import { contentFetchBaseUrl, mainCrdt, sceneId, sdk6FetchComponent, sdk6SceneContent } from '../sceneFetcher'
 import { writeFile, mkdir } from 'fs'
-import { engine, Entity, PutComponentOperation, Transform, UiCanvasInformation } from '@dcl/ecs/dist-cjs'
+import {CameraMode, engine, Entity, PutComponentOperation, Transform, UiCanvasInformation} from '@dcl/ecs/dist-cjs'
 import { ReadWriteByteBuffer } from '@dcl/ecs/dist-cjs/serialization/ByteBuffer'
 import { FRAMES_TO_RUN, framesCount } from '../../adapters/scene'
 
@@ -32,7 +32,7 @@ function addPlayerEntityTransform() {
   const transformData = buffer.toCopiedBinary()
   buffer.resetBuffer()
   PutComponentOperation.write(1 as Entity, 1, Transform.componentId, transformData, buffer)
-
+  PutComponentOperation.write(2 as Entity, 1, Transform.componentId, transformData, buffer)
   return buffer.toBinary()
 }
 
@@ -44,6 +44,16 @@ function addUICanvasOnRootEntity() {
   buffer.resetBuffer()
   PutComponentOperation.write(0 as Entity, 1, UiCanvasInformation.componentId, uiCanvasComponentData, buffer)
 
+  return buffer.toBinary()
+}
+
+function addCameraMode() {
+  const buffer = new ReadWriteByteBuffer()
+  const cameraMode = CameraMode.create(engine.RootEntity)
+  CameraMode.schema.serialize(cameraMode, buffer)
+  const cameraModeComponentData = buffer.toCopiedBinary()
+  buffer.resetBuffer()
+  PutComponentOperation.write(2 as Entity, 1, CameraMode.componentId, cameraModeComponentData, buffer)
   return buffer.toBinary()
 }
 
@@ -104,7 +114,7 @@ export const LoadableApis: LoadableApis = {
     unsubscribe: async () => ({ events: [] }),
     crdtGetState: async () => ({
       hasEntities: mainCrdt !== undefined,
-      data: [addPlayerEntityTransform(), addUICanvasOnRootEntity(), mainCrdt]
+      data: [addPlayerEntityTransform(), addUICanvasOnRootEntity(), addCameraMode() ,mainCrdt]
     }),
     crdtGetMessageFromRenderer: async () => ({ data: [] }),
     crdtSendToRenderer: async ({ data }: { data: Uint8Array }) => {
@@ -266,3 +276,4 @@ function joinBuffers(...buffers: ArrayBuffer[]) {
   }
   return tmp
 }
+
