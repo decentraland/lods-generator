@@ -22,7 +22,7 @@
     "tabWidth": 2
   },
   "dependencies": {
-    "@dcl/ecs": "^7.3.30",
+    "@dcl/ecs": "^7.4.21",
     "@dcl/js-runtime": "^7.4.21",
     "@well-known-components/env-config-provider": "^1.2.0",
     "@well-known-components/fetch-component": "^2.0.2",
