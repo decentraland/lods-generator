@@ -170,25 +170,26 @@ namespace DCL_PiXYZ
         private async Task<bool> GenerateManifest(SceneConversionPathHandler pathHandler, SceneConversionInfo sceneConversionInfo, List<string> errorsToIgnore)
         {
             FileWriter.WriteToConsole($"BEGIN MANIFEST GENERATION FOR SCENE {sceneConversionInfo.SceneImporter.GetSceneBasePointer()}");
-            string possibleError = await NPMUtils.RunNPMTool(pathHandler.ManifestProjectDirectory, sceneConversionInfo.SceneType, sceneConversionInfo.SceneImporter.GetSceneBasePointer());
+            string manifestGenerationError = await NPMUtils.RunNPMTool(pathHandler.ManifestProjectDirectory, sceneConversionInfo.SceneType, sceneConversionInfo.SceneImporter.GetSceneBasePointer());
 
             //TODO: Im adding because there were issues were the file was not fully written after  
             //the NPM tools closes
             await Task.Delay(2000);
             if (File.Exists(pathHandler.ManifestOutputJsonFile))
             {
-                bool isIgnorableError = errorsToIgnore.Any(errorToIgnore => !string.IsNullOrEmpty(possibleError) && possibleError.Contains(errorToIgnore));
-                // If the error is not ignorable, log it and return false.
-                if (!isIgnorableError)
+                if (!string.IsNullOrEmpty(manifestGenerationError))
                 {
-                    FileWriter.WriteToConsole($"MANIFEST EXISTS, BUT HAS ERROR: {possibleError}");
-                    FileWriter.WriteToFile($"{sceneConversionInfo.SceneImporter.GetSceneBasePointer()}\tMANIFEST EXISTS, BUT HAS ERROR: {possibleError}", pathHandler.SuccessFile);
+                    if (!errorsToIgnore.Any(errorToIgnore => manifestGenerationError.Contains(errorToIgnore)))
+                    {
+                        FileWriter.WriteToConsole($"MANIFEST EXISTS, BUT HAS ERROR: {manifestGenerationError}");
+                        FileWriter.WriteToFile($"{sceneConversionInfo.SceneImporter.GetSceneBasePointer()}\tMANIFEST EXISTS, BUT HAS ERROR: {manifestGenerationError}", pathHandler.SuccessFile);
+                    }
                 }
                 return true;
             }
             
-            FileWriter.WriteToConsole($"MANIFEST DOES NOT EXIST: {possibleError}");
-            FileWriter.WriteToFile($"{sceneConversionInfo.SceneImporter.GetSceneBasePointer()}\tMANIFEST ERROR: {possibleError}", pathHandler.FailFile);
+            FileWriter.WriteToConsole($"MANIFEST DOES NOT EXIST: {manifestGenerationError}");
+            FileWriter.WriteToFile($"{sceneConversionInfo.SceneImporter.GetSceneBasePointer()}\tMANIFEST ERROR: {manifestGenerationError}", pathHandler.FailFile);
             return false; 
         }
 

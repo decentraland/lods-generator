@@ -1,16 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using CommandLine;
-using DCL_PiXYZ.SceneRepositioner.JsonParsing;
-using DCL_PiXYZ.Utils;
-using Newtonsoft.Json;
-using SceneImporter;
-using UnityEngine.Pixyz.API;
-using UnityEngine.Pixyz.Core;
 
 namespace DCL_PiXYZ
 {
