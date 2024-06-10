@@ -3,7 +3,7 @@ import { createModuleRuntime } from '../logic/scene-runtime/sdk7-runtime'
 import { setTimeout } from 'timers/promises'
 import { initSourcemap } from '../logic/sourcemap'
 
-export const FRAMES_TO_RUN = 90
+export const FRAMES_TO_RUN = 91
 export let framesCount = 1
 
 export type ISceneComponent = {
