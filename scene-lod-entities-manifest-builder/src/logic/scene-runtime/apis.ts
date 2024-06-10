@@ -73,7 +73,10 @@ type LoadableApis = {
   Scene: typeof Scene
 }
 
-export const LoadableApis: LoadableApis = {
+export const LoadableApis: LoadableApis & { AdaptationLayerHelper: unknown } = {
+  AdaptationLayerHelper: {
+    getTextureSize: async () => ({})
+  },
   // Emulating old EnvironmentAPI from browser-interface/kernel at https://github.com/decentraland/unity-renderer/blob/dev/browser-interface/packages/shared/apis/host/EnvironmentAPI.ts#L29%60L77
   // to avoid compilation errors on very old sdk6 scenes when running their eval to generate the manifest.
   EnvironmentApi: {
