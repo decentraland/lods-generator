@@ -16,28 +16,28 @@ namespace DCL_PiXYZ
             DefaultSceneLodManifestDirectory = Path.Combine(Directory.GetCurrentDirectory(), "scene-lod-entities-manifest-builder/");
         }
         
-        [Option("sceneToConvert", Required = false, Default = "5,19")]
+        [Option("sceneToConvert", Required = false, Default = "5,19", HelpText = "The scene coordinate to convert")]
         public string SceneToConvert { get; set; }
         
-        [Option("defaultOutputPath", Required = false)]
+        [Option("defaultOutputPath", Required = false, HelpText = "Output path for all files (LODs and Downloads)")]
         public string DefaultOutputPath { get; set; }
         
-        [Option("defaultSceneLodManifestDirectory", Required = false)]
+        [Option("defaultSceneLodManifestDirectory", Required = false, HelpText = "Path to the manifest project")]
         public string DefaultSceneLodManifestDirectory { get; set; }
         
-        [Option("decimationValues", Required = false, Default = "7000;500") ]
+        [Option("decimationValues", Required = false, Default = "7000;500", HelpText = "Triangle max count per lod level. Separate each leavel by a ;") ]
         public string DecimationValues { get; set; }
         
-        [Option("startingLODLevel", Required = false, Default = 0) ]
+        [Option("startingLODLevel", Required = false, Default = 0, HelpText = "Starting LOD level to generate. Modifiers depend on this value") ]
         public int StartingLODLevel { get; set; }
         
-        [Option("loadConvertedScenesFile", Required = false, Default = false)]
+        [Option("loadConvertedScenesFile", Required = false, Default = false, HelpText = "Load converted scenes file. Allows filtering of previous converted scenes")]
         public bool LoadConvertedScenesFile { get; set; }
         
-        [Option("debugMode", Required = false, Default = true)]
+        [Option("debugMode", Required = false, Default = true, HelpText = "If true, all debug info will go to a single file in root level and generated manifest wont be deleted")]
         public bool DebugMode { get; set; }
         
-        [Option("installNPM", Required = false, Default = true)]
+        [Option("installNPM", Required = false, Default = true, HelpText = "Install npm and build the manifest project.")]
         public bool InstallNPM { get; set; }
 
     }
