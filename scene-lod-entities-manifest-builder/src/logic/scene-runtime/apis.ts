@@ -150,12 +150,6 @@ export const LoadableApis: LoadableApis & { AdaptationLayerHelper: unknown } = {
         previousSavedData = savedData.length
       }
 
-      if (framesCount < FRAMES_TO_RUN - 1 && savedData.length === 0) {
-        const emptyOutputJSONManifest = '[]'
-        await ensureDirectoryExists(manifestFileDir)
-        await writeToFile(`${manifestFileDir}/${sceneId}${manifestFileNameEnd}`, emptyOutputJSONManifest)
-      }
-
       //console.log(outputJSONManifest)
       return { data: [] }
     },

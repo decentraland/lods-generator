@@ -17,7 +17,7 @@ namespace DCL_PiXYZ
         private readonly int lodLevel;
         private readonly SceneConversionPathHandler pathHandler;
 
-        public PXZExporter(PXZParams pxzParams, SceneConversionPathHandler pathHandler, SceneConversionInfo sceneConversionInfo)
+        public PXZExporter(PXZUtils pxzParams, SceneConversionPathHandler pathHandler, SceneConversionInfo sceneConversionInfo)
         {
             this.pathHandler = pathHandler;
             path = pathHandler.OutputPath;

@@ -76,17 +76,14 @@ namespace DCL_PiXYZ.Utils
                 EnableRaisingEvents = true
             };
             
-            var outputBuilder = new StringBuilder();
-            var errorBuilder = new StringBuilder();
             string firstErrorLine = "";
             using (process)
             {
-                process.OutputDataReceived += (sender, args) => { outputBuilder.AppendLine(args.Data); };
+                process.OutputDataReceived += (sender, args) => { };
                 process.ErrorDataReceived += (sender, args) =>
                 {
                     if (string.IsNullOrEmpty(firstErrorLine))
                         firstErrorLine = args.Data;
-                    errorBuilder.AppendLine(args.Data);
                 };
 
                 process.Start();
@@ -102,8 +99,6 @@ namespace DCL_PiXYZ.Utils
                 if (!process.WaitForExit(20_000))
                     process.Kill();
                 });
-
-                
                 
                 if (!string.IsNullOrEmpty(firstErrorLine))
                     return firstErrorLine;

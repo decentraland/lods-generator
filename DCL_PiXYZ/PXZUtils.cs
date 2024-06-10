@@ -2,11 +2,47 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using SceneImporter;
+using CommandLine;
 
 namespace DCL_PiXYZ
 {
-    public struct PXZParams
+    
+    public class PXZEntryArgs
+    {
+
+        public PXZEntryArgs()
+        {
+            DefaultOutputPath = Path.Combine(Directory.GetCurrentDirectory(), "built-lods");
+            DefaultSceneLodManifestDirectory = Path.Combine(Directory.GetCurrentDirectory(), "scene-lod-entities-manifest-builder/");
+        }
+        
+        [Option("sceneToConvert", Required = false, Default = "5,19", HelpText = "The scene coordinate to convert")]
+        public string SceneToConvert { get; set; }
+        
+        [Option("defaultOutputPath", Required = false, HelpText = "Output path for all files (LODs and Downloads)")]
+        public string DefaultOutputPath { get; set; }
+        
+        [Option("defaultSceneLodManifestDirectory", Required = false, HelpText = "Path to the manifest project")]
+        public string DefaultSceneLodManifestDirectory { get; set; }
+        
+        [Option("decimationValues", Required = false, Default = "7000;500", HelpText = "Triangle max count per lod level. Separate each leavel by a ;") ]
+        public string DecimationValues { get; set; }
+        
+        [Option("startingLODLevel", Required = false, Default = 0, HelpText = "Starting LOD level to generate. Modifiers depend on this value") ]
+        public int StartingLODLevel { get; set; }
+        
+        [Option("loadConvertedScenesFile", Required = false, Default = false, HelpText = "Load converted scenes file. Allows filtering of previous converted scenes")]
+        public bool LoadConvertedScenesFile { get; set; }
+        
+        [Option("debugMode", Required = false, Default = true, HelpText = "If true, all debug info will go to a single file in root level and generated manifest wont be deleted")]
+        public bool DebugMode { get; set; }
+        
+        [Option("installNPM", Required = false, Default = true, HelpText = "Install npm and build the manifest project.")]
+        public bool InstallNPM { get; set; }
+
+    }
+    
+    public struct PXZUtils
     {
         public Dictionary<string, string> SceneContent { get; set; }
         public int ParcelAmount { get; set; }
@@ -97,43 +133,53 @@ namespace DCL_PiXYZ
 
         private readonly string DefaultOutputPath;
 
+        private bool isDebug;
 
-        public SceneConversionPathHandler(bool isDebug, string defaultOutputPath, string manifestProjectDirectory, string successFile, string failFile, string vertexCountFile, string failGlbImporterFile, string scene)
+        public SceneConversionPathHandler(bool isDebug, string defaultOutputPath, string manifestProjectDirectory)
         {
             DefaultOutputPath = defaultOutputPath;
             ManifestProjectDirectory = manifestProjectDirectory;
             DownloadPath = PXZConstants.RESOURCES_DIRECTORY;
-            if (isDebug)
-            {
-                Directory.CreateDirectory(DefaultOutputPath);
-                SuccessFile = Path.Combine(defaultOutputPath, successFile);
-                FailFile = Path.Combine(defaultOutputPath, failFile);
-                PolygonCountFile =  Path.Combine(defaultOutputPath, vertexCountFile);
-                FailGLBImporterFile = Path.Combine(defaultOutputPath, failGlbImporterFile);
-            }
-            else
-            {
-                //TODO: Clean this directory issue
-                Directory.CreateDirectory(Path.Combine(defaultOutputPath, scene));
-                string pathWithBasePointer = $"{scene}/output.txt";
-                SuccessFile = Path.Combine(defaultOutputPath, pathWithBasePointer);
-                FailFile = Path.Combine(defaultOutputPath, pathWithBasePointer);
-                PolygonCountFile =  Path.Combine(defaultOutputPath, pathWithBasePointer);
-                FailGLBImporterFile =  Path.Combine(defaultOutputPath, pathWithBasePointer);
-            }
+            this.isDebug = isDebug;
 
             OutputPath = "";
             ManifestOutputJsonFile = "";
             ManifestOutputJsonDirectory = "";
+            
+            SuccessFile = "";
+            FailFile = "";
+            PolygonCountFile = "";
+            FailGLBImporterFile = "";
         }
 
         public void SetOutputPath(SceneImporter sceneSceneImporter)
         {
-            DownloadPath = Path.Combine(PXZConstants.RESOURCES_DIRECTORY, sceneSceneImporter.GetSceneBasePointer());
-            OutputPath = Path.Combine(DefaultOutputPath, sceneSceneImporter.GetSceneBasePointer());
+            string sceneBasePointer = sceneSceneImporter.GetSceneBasePointer();
+            DownloadPath = Path.Combine(PXZConstants.RESOURCES_DIRECTORY, sceneBasePointer);
+            OutputPath = Path.Combine(DefaultOutputPath, sceneBasePointer);
             ManifestOutputJsonDirectory = Path.Combine(ManifestProjectDirectory, "output-manifests");
             ManifestOutputJsonFile = Path.Combine(ManifestOutputJsonDirectory, sceneSceneImporter.GetSceneHash() + "-lod-manifest.json");
 
+            if (isDebug)
+            {
+                Directory.CreateDirectory(DefaultOutputPath);
+                SuccessFile = Path.Combine(DefaultOutputPath, "SuccessScenes.txt");
+                FailFile = Path.Combine(DefaultOutputPath, "FailScenes.txt");
+                PolygonCountFile =  Path.Combine(DefaultOutputPath, "PolygonCount.txt");
+                FailGLBImporterFile = Path.Combine(DefaultOutputPath, "FailedGLBImport.txt");
+            }
+            else
+            {
+                //TODO: Clean this directory issue
+                Directory.CreateDirectory(Path.Combine(DefaultOutputPath, sceneBasePointer));
+                string pathWithBasePointer = $"{sceneBasePointer}/output.txt";
+                SuccessFile = Path.Combine(DefaultOutputPath, pathWithBasePointer);
+                FailFile = Path.Combine(DefaultOutputPath, pathWithBasePointer);
+                PolygonCountFile =  Path.Combine(DefaultOutputPath, pathWithBasePointer);
+                FailGLBImporterFile =  Path.Combine(DefaultOutputPath, pathWithBasePointer);
+            }
+
+            Directory.CreateDirectory(DownloadPath);
             Directory.CreateDirectory(DefaultOutputPath);
             Directory.CreateDirectory(OutputPath);
         }
