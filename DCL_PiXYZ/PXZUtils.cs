@@ -34,7 +34,7 @@ namespace DCL_PiXYZ
         [Option("loadConvertedScenesFile", Required = false, Default = false)]
         public bool LoadConvertedScenesFile { get; set; }
         
-        [Option("debug", Required = false, Default = true)]
+        [Option("debugMode", Required = false, Default = true)]
         public bool DebugMode { get; set; }
         
         [Option("installNPM", Required = false, Default = true)]
