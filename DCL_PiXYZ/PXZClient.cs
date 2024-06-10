@@ -197,7 +197,7 @@ namespace DCL_PiXYZ
         {
             SceneRepositioner.SceneRepositioner sceneRepositioner =
                 new SceneRepositioner.SceneRepositioner(pxzParams.SceneContent, pxz, pathHandler, pxzParams.LodLevel);
-            List<PXZModel> models = await sceneRepositioner.SetupSceneInPiXYZ();
+            List<PXZModel> models = sceneRepositioner.SetupSceneInPiXYZ();
             
             List<IPXZModifier> modifiers = new List<IPXZModifier>();
             modifiers.Add(new PXZBeginCleanMaterials());

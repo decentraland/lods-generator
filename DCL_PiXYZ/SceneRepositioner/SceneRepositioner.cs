@@ -25,7 +25,7 @@ namespace DCL_PiXYZ.SceneRepositioner
             this.lodLevel = lodLevel;
         }
     
-        public async Task<List<PXZModel>> SetupSceneInPiXYZ()
+        public List<PXZModel> SetupSceneInPiXYZ()
         {
             FileWriter.WriteToConsole("BEGIN REPOSITIONING");
             List<PXZModel> models = new List<PXZModel>();
