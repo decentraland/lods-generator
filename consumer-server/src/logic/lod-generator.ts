@@ -27,14 +27,13 @@ export function createLodGeneratorComponent({ logs }: Pick<AppComponents, 'logs'
 
     const commandParts = [
       lodGeneratorProgram,
-      'coords',
-      basePointer,
-      outputPath,
-      sceneLodEntitiesManifestBuilder,
-      'false',
-      'false',
-      '7000;500',
-      '0'
+      "--sceneToConvert " + basePointer,
+      "--defaultOutputPath " + outputPath,
+      "--defaultSceneLodManifestDirectory " + sceneLodEntitiesManifestBuilder,
+      "--debugMode false",
+      "--instalNPM false",
+      "--decimationValues 7000;500",
+      '--startingLODLevel 0'
     ]
     const childProcess = spawn(commandParts[0], commandParts.slice(1))
 
