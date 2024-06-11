@@ -30,8 +30,6 @@ export function createLodGeneratorComponent({ logs }: Pick<AppComponents, 'logs'
       "--sceneToConvert", basePointer,
       "--defaultOutputPath", outputPath,
       "--defaultSceneLodManifestDirectory", sceneLodEntitiesManifestBuilder,
-      "--debugMode", "false",
-      "--installNPM", "false",
       "--decimationValues", "7000;500",
       "--startingLODLevel", "0"
     ]
