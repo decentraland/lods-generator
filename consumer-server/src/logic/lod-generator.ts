@@ -38,8 +38,7 @@ export function createLodGeneratorComponent({ logs }: Pick<AppComponents, 'logs'
 
     result = await new Promise((resolve, _) => {
       childProcess.on('error', (error) => {
-        const generatedFiles = fs.readdirSync(processOutput)
-        const logFile = generatedFiles.find((file) => file.endsWith('output.txt')) || ''
+        const logFile = fs.existsSync(processOutput) ? fs.readdirSync(processOutput).find((file) => file.endsWith('output.txt')) || '' : ''
 
         resolve({
           error: {
@@ -53,6 +52,19 @@ export function createLodGeneratorComponent({ logs }: Pick<AppComponents, 'logs'
       })
 
       childProcess.on('exit', (code) => {
+        if (!fs.existsSync(processOutput)) {
+          resolve({
+            error: {
+              message: 'Output directory does not exist',
+              detailedError: `Directory ${processOutput} was not created`
+            },
+            lodsFiles: [],
+            logFile: '',
+            outputPath: processOutput
+          })
+          return
+        }
+
         const generatedFiles = fs.readdirSync(processOutput)
         const logFile = generatedFiles.find((file) => file.endsWith('output.txt')) || ''
         if (code !== 0) {

@@ -61,7 +61,7 @@ describe('message-processor', () => {
     const components = getMessageProcessorMockComponents()
     components.lodGenerator.generate.mockResolvedValue({
         lodsFiles: [],
-        logFile: '',
+        logFile: 'somefile',
         error: {
             message: 'Error message',
             detailedError: 'Detailed error message'
@@ -85,7 +85,7 @@ describe('message-processor', () => {
     await messageProcessor.process(message, 'receiptHandle-3')
 
     expect(components.queue.deleteMessage).toHaveBeenCalledWith('receiptHandle-3')
-    expect(components.storage.storeFiles).toHaveBeenCalledWith([''], 'failures/0,0')
+    expect(components.storage.storeFiles).toHaveBeenCalledWith(['somefile'], 'failures/0,0')
     expect(components.queue.send).not.toHaveBeenCalled()
   })
 
