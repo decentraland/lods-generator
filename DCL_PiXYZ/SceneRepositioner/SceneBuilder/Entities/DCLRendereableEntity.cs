@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Numerics;
 using DCL_PiXYZ.SceneRepositioner.JsonParsing;
+using DCL_PiXYZ.Utils;
 using UnityEngine.Pixyz.API;
 using UnityEngine.Pixyz.Geom;
 using Vector3 = System.Numerics.Vector3;

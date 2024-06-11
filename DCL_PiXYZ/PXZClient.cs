@@ -56,7 +56,7 @@ namespace DCL_PiXYZ
                 if (!await ManifestGeneratedSuccesfully(sceneConversionInfo, pathHandler)) continue;
          
                 if (!await sceneConversionInfo.SceneImporter.DownloadAllContent(pathHandler)) continue;
-                var pxzParams = new PXZUtils
+                var pxzParams = new PXZConversionParams
                 {
                     DecimationType = sceneConversionInfo.DecimationType, 
                     ParcelAmount = sceneConversionInfo.SceneImporter.GetCurrentScenePointersList().Length, 
@@ -95,7 +95,7 @@ namespace DCL_PiXYZ
                 fi.Delete();
         }
 
-        private async Task DoConversion(PXZUtils pxzParams, SceneConversionInfo sceneConversionInfo, string scene, SceneConversionPathHandler pathHandler)
+        private async Task DoConversion(PXZConversionParams pxzParams, SceneConversionInfo sceneConversionInfo, string scene, SceneConversionPathHandler pathHandler)
         {
             var stopwatch = new Stopwatch();
 
@@ -193,7 +193,7 @@ namespace DCL_PiXYZ
             return false; 
         }
 
-        private async Task ConvertScene(PXZUtils pxzParams, SceneConversionPathHandler pathHandler, SceneConversionInfo sceneConversionInfo)
+        private async Task ConvertScene(PXZConversionParams pxzParams, SceneConversionPathHandler pathHandler, SceneConversionInfo sceneConversionInfo)
         {
             SceneRepositioner.SceneRepositioner sceneRepositioner =
                 new SceneRepositioner.SceneRepositioner(pxzParams.SceneContent, pxz, pathHandler, pxzParams.LodLevel);
@@ -203,7 +203,7 @@ namespace DCL_PiXYZ
             modifiers.Add(new PXZBeginCleanMaterials());
             modifiers.Add(new PXZRepairMesh(models));
             modifiers.Add(new PXZMaterialNameRandomizer());
-            
+
             if (pxzParams.LodLevel != 0)
             {
                 modifiers.Add(new PXZDeleteByName(".*collider.*"));

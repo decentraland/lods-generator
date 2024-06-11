@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using DCL_PiXYZ.SceneRepositioner.JsonParsing;
 using DCL_PiXYZ.SceneRepositioner.SceneBuilder.PrimitiveFactory;
+using DCL_PiXYZ.Utils;
 using UnityEngine.Pixyz.API;
 using UnityEngine.Pixyz.Geom;
 using Vector3 = System.Numerics.Vector3;
