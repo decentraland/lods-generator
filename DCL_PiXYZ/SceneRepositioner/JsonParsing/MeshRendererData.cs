@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using AssetBundleConverter.LODs;
 using DCL_PiXYZ.SceneRepositioner.JsonParsing.Parsers;
+using DCL_PiXYZ.Utils;
 using Newtonsoft.Json;
 using UnityEngine.Pixyz.API;
 

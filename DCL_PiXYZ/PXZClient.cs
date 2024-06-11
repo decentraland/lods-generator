@@ -203,10 +203,10 @@ namespace DCL_PiXYZ
             modifiers.Add(new PXZBeginCleanMaterials());
             modifiers.Add(new PXZRepairMesh(models));
             modifiers.Add(new PXZMaterialNameRandomizer());
-            
+            modifiers.Add(new PXZDeleteByName(".*collider.*"));
+
             if (pxzParams.LodLevel != 0)
             {
-                modifiers.Add(new PXZDeleteByName(".*collider.*"));
                 modifiers.Add(new PXZDecimator(sceneConversionInfo.SceneImporter.GetSceneBasePointer(), pxzParams.DecimationType,
                     pxzParams.DecimationValue, pxzParams.ParcelAmount, pathHandler));
                 modifiers.Add(new PXZMergeMeshes(pxzParams.LodLevel));
