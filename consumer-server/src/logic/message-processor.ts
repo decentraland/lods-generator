@@ -121,8 +121,12 @@ export async function createMessageProcesorComponent({
             base,
             attempt: retry + 1
           })
-          await storage.storeFiles([lodGenerationResult.logFile], `failures/${base}`)
-          metrics.increment('lod_generation_count', { status: 'failed' }, 1)
+
+          if (!!lodGenerationResult.logFile) {
+            logger.debug(`Output file exists, uploading it to the bucket`)
+            await storage.storeFiles([lodGenerationResult.logFile], `failures/${base}`)
+            metrics.increment('lod_generation_count', { status: 'failed' }, 1)
+          }
         }
 
         await queue.deleteMessage(receiptMessageHandle)
