@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using CommandLine;
+using DCL_PiXYZ.Utils;
 
 namespace DCL_PiXYZ
 {

@@ -9,14 +9,7 @@ namespace DCL_PiXYZ
     
  
     
-    public struct PXZConversionParams
-    {
-        public Dictionary<string, string> SceneContent { get; set; }
-        public int ParcelAmount { get; set; }
-        public double DecimationValue { get; set; }
-        public int LodLevel { get; set; }
-        public string DecimationType { get; set; }  
-    }
+
 
     public struct SceneConversionInfo
     {
