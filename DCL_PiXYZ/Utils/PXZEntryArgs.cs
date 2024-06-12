@@ -11,7 +11,7 @@ namespace DCL_PiXYZ.Utils
             DefaultSceneLodManifestDirectory = Path.Combine(Directory.GetCurrentDirectory(), "scene-lod-entities-manifest-builder/");
         }
         
-        [Option("sceneToConvert", Required = false, Default = "0,0", HelpText = "The scene coordinate to convert")]
+        [Option("sceneToConvert", Required = false, Default = "5,19", HelpText = "The scene coordinate to convert")]
         public string SceneToConvert { get; set; }
         
         [Option("defaultOutputPath", Required = false, HelpText = "Output path for all files (LODs and Downloads)")]
