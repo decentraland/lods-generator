@@ -62,6 +62,7 @@ export function createLodGeneratorComponent({ logs }: Pick<AppComponents, 'logs'
             logFile: '',
             outputPath: processOutput
           })
+
           return
         }
 
@@ -77,6 +78,8 @@ export function createLodGeneratorComponent({ logs }: Pick<AppComponents, 'logs'
             logFile,
             outputPath: processOutput
           })
+
+          return
         }
 
         const parsedResult = generatedFiles.reduce((acc, file) => {
