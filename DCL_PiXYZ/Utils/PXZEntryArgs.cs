@@ -20,7 +20,7 @@ namespace DCL_PiXYZ.Utils
         [Option("defaultSceneLodManifestDirectory", Required = false, HelpText = "Path to the manifest project")]
         public string DefaultSceneLodManifestDirectory { get; set; }
         
-        [Option("decimationValues", Required = false, Default = "7000", HelpText = "Triangle max count per lod level. Separate each leavel by a ;") ]
+        [Option("decimationValues", Required = false, Default = "7000;500", HelpText = "Triangle max count per lod level. Separate each leavel by a ;") ]
         public string DecimationValues { get; set; }
         
         [Option("startingLODLevel", Required = false, Default = 0, HelpText = "Starting LOD level to generate. Modifiers depend on this value") ]
