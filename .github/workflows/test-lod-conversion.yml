@@ -14,10 +14,10 @@ jobs:
         include:
           - lodLevelsToTest: ["500", "3"]
             files: "QmTpsFiaJVPv5mU6ERBzkDcZ39Lyq9sEfiLw9Ep3VQAFgK_3.fbx"
-            sizes: "1880064"
+            sizes: "1413120"
           - lodLevelsToTest: ["7000;3000;1000;500", "0"]
             files: "QmTpsFiaJVPv5mU6ERBzkDcZ39Lyq9sEfiLw9Ep3VQAFgK_0.fbx QmTpsFiaJVPv5mU6ERBzkDcZ39Lyq9sEfiLw9Ep3VQAFgK_1.fbx QmTpsFiaJVPv5mU6ERBzkDcZ39Lyq9sEfiLw9Ep3VQAFgK_2.fbx QmTpsFiaJVPv5mU6ERBzkDcZ39Lyq9sEfiLw9Ep3VQAFgK_3.fbx"
-            sizes: "48934912 7024640 2895872 1880064"
+            sizes: "48934912 2572288 1708032 1413120"
             
     steps:
     - uses: actions/checkout@v2

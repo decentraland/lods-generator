@@ -11,7 +11,7 @@ namespace DCL_PiXYZ.Utils
             DefaultSceneLodManifestDirectory = Path.Combine(Directory.GetCurrentDirectory(), "scene-lod-entities-manifest-builder/");
         }
         
-        [Option("sceneToConvert", Required = false, Default = "0,0", HelpText = "The scene coordinate to convert")]
+        [Option("sceneToConvert", Required = false, Default = "5,19", HelpText = "The scene coordinate to convert")]
         public string SceneToConvert { get; set; }
         
         [Option("defaultOutputPath", Required = false, HelpText = "Output path for all files (LODs and Downloads)")]
@@ -20,7 +20,7 @@ namespace DCL_PiXYZ.Utils
         [Option("defaultSceneLodManifestDirectory", Required = false, HelpText = "Path to the manifest project")]
         public string DefaultSceneLodManifestDirectory { get; set; }
         
-        [Option("decimationValues", Required = false, Default = "7000", HelpText = "Triangle max count per lod level. Separate each leavel by a ;") ]
+        [Option("decimationValues", Required = false, Default = "7000;500", HelpText = "Triangle max count per lod level. Separate each leavel by a ;") ]
         public string DecimationValues { get; set; }
         
         [Option("startingLODLevel", Required = false, Default = 0, HelpText = "Starting LOD level to generate. Modifiers depend on this value") ]
