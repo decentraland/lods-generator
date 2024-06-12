@@ -114,7 +114,7 @@ namespace DCL_PiXYZ
             }
             catch (Exception e)
             {
-                FileWriter.WriteToFile($"{scene}\t{pxzParams.DecimationValue}\tCONVERSION ERROR: {e.Message}", pathHandler.FailFile);
+                FileWriter.WriteToFile($"{scene}\tCONVERSION ERROR {pxzParams.DecimationValue}: {e.Message}", pathHandler.FailFile);
             }
         }
 
