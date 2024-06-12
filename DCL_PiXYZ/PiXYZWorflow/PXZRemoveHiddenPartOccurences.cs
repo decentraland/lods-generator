@@ -13,7 +13,7 @@ namespace DCL_PiXYZ
             OccurrenceList hiddenOccurrences = pxz.Algo.FindOccludedPartOccurrences(new OccurrenceList(new uint[]
             {
                 pxz.Scene.GetRoot()
-            }), 256, 2, 30, true);
+            }), 512, 2, 30, true);
             pxz.Scene.DeleteOccurrences(hiddenOccurrences);
         }
     }
