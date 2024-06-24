@@ -34,7 +34,7 @@ export async function createSqsAdapter(endpoint: string): Promise<QueueComponent
     const receiveCommand = new ReceiveMessageCommand({
       QueueUrl: endpoint,
       MaxNumberOfMessages: 1,
-      VisibilityTimeout: 3600 // 1 hour
+      VisibilityTimeout: 7200 // 2 hours: allow long-processing time
     })
     const { Messages = [] } = await client.send(receiveCommand)
 
