@@ -247,7 +247,8 @@ function getMessageProcessorMockComponents() {
     queue: {
       send: jest.fn(),
       receiveSingleMessage: jest.fn(),
-      deleteMessage: jest.fn()
+      deleteMessage: jest.fn(),
+      increaseMessageVisibility: jest.fn()
     },
     lodGenerator: {
       generate: jest.fn()
