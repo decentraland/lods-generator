@@ -1,4 +1,5 @@
 import {
+  ChangeMessageVisibilityCommand,
   DeleteMessageCommand,
   Message,
   ReceiveMessageCommand,
@@ -49,9 +50,20 @@ export async function createSqsAdapter(endpoint: string): Promise<QueueComponent
     await client.send(deleteCommand)
   }
 
+  async function increaseMessageVisibility(receiptHandle: string): Promise<void> {
+    await client.send(
+      new ChangeMessageVisibilityCommand({
+        QueueUrl: endpoint,
+        ReceiptHandle: receiptHandle,
+        VisibilityTimeout: 120
+      })
+    )
+  }
+
   return {
     send,
     receiveSingleMessage,
-    deleteMessage
+    deleteMessage,
+    increaseMessageVisibility
   }
 }

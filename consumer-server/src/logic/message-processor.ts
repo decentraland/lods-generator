@@ -19,6 +19,11 @@ export async function createMessageProcesorComponent({
   const logger = logs.getLogger('message-procesor')
   const abServers = (await config.requireString('AB_SERVERS')).split(';')
 
+  function isRelatedToVisibilityTimeout(errorMessage: string | undefined): boolean {
+    const visibilityTimeoutError = 'The receipt handle has expired'
+    return !!errorMessage && errorMessage.includes(visibilityTimeoutError)
+  }
+
   function isRelatedToAssetBundlePublish(errorMessage: string | undefined): boolean {
     return !!errorMessage && abServers.some((abServer) => errorMessage.includes(abServer))
   }
@@ -159,18 +164,22 @@ export async function createMessageProcesorComponent({
         error: error.message
       })
 
-      if (isRelatedToAssetBundlePublish(error?.message)) {
-        await reQueue(message)
+      if(isRelatedToVisibilityTimeout(error?.message)) {
+        await queue.increaseMessageVisibility(receiptMessageHandle)
       } else {
-        if (retry < 3) {
+        if (isRelatedToAssetBundlePublish(error?.message)) {
           await reQueue(message)
         } else {
-          logger.warn('Max attempts reached, message will not be retried', {
-            entityId: message.entity.entityId,
-            base: message.entity.metadata.scene.base,
-            attempt: retry
-          })
-          metrics.increment('lod_generation_count', { status: 'failed' }, 1)
+          if (retry < 3) {
+            await reQueue(message)
+          } else {
+            logger.warn('Max attempts reached, message will not be retried', {
+              entityId: message.entity.entityId,
+              base: message.entity.metadata.scene.base,
+              attempt: retry
+            })
+            metrics.increment('lod_generation_count', { status: 'failed' }, 1)
+          }
         }
       }
 

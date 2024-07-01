@@ -77,6 +77,7 @@ export type QueueComponent = {
   send(message: QueueMessage): Promise<void>
   receiveSingleMessage(): Promise<Message[]>
   deleteMessage(receiptHandle: string): Promise<void>
+  increaseMessageVisibility(receiptHandle: string): Promise<void>
 }
 
 export type QueueWorker = IBaseComponent

@@ -25,5 +25,5 @@ export function createMemoryQueueAdapter(): QueueComponent {
     queue.delete(receiptHandle)
   }
 
-  return { send, receiveSingleMessage, deleteMessage }
+  return { send, receiveSingleMessage, deleteMessage, increaseMessageVisibility: async () => {} }
 }

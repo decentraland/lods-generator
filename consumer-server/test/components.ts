@@ -44,7 +44,8 @@ async function initComponents(): Promise<TestComponents> {
   const queue: QueueComponent = {
     deleteMessage: jest.fn(),
     receiveSingleMessage: jest.fn(),
-    send: jest.fn()
+    send: jest.fn(),
+    increaseMessageVisibility: jest.fn()
   }
   const messageConsumer: QueueWorker = {
     start: jest.fn(),
