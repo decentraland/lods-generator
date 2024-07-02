@@ -165,6 +165,7 @@ export async function createMessageProcesorComponent({
       })
 
       if(isRelatedToVisibilityTimeout(error?.message)) {
+        logger.info('Increasing message visibility', { error: error.message || '', receiptMessageHandle })
         await queue.increaseMessageVisibility(receiptMessageHandle)
       } else {
         if (isRelatedToAssetBundlePublish(error?.message)) {
