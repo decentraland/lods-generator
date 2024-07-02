@@ -207,7 +207,7 @@ namespace DCL_PiXYZ
             if (pxzParams.LodLevel != 0)
             {
                 modifiers.Add(new PXZDeleteByName(".*collider.*"));
-                modifiers.Add(new PXZRemoveHiddenPartOccurrences());
+                //modifiers.Add(new PXZRemoveHiddenPartOccurrences());
                 modifiers.Add(new PXZDecimator(sceneConversionInfo.SceneImporter.GetSceneBasePointer(), pxzParams.DecimationType,
                     pxzParams.DecimationValue, pxzParams.ParcelAmount, pathHandler));
                 modifiers.Add(new PXZMergeMeshes(pxzParams.LodLevel));
