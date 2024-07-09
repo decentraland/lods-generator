@@ -79,9 +79,13 @@ namespace DCL_PiXYZ.Utils
             string firstErrorLine = "";
             using (process)
             {
-                process.OutputDataReceived += (sender, args) => { };
+                process.OutputDataReceived += (sender, args) =>
+                {
+                    FileWriter.WriteToConsole($"NPM OUTPUT: {args.Data}");
+                };
                 process.ErrorDataReceived += (sender, args) =>
                 {
+                    FileWriter.WriteToConsole($"NPM ERROR: {args.Data}");
                     if (string.IsNullOrEmpty(firstErrorLine))
                         firstErrorLine = args.Data;
                 };
