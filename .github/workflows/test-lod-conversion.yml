@@ -8,7 +8,7 @@ jobs:
   build-and-run:
     runs-on: windows-2019
     env:
-      COORDS: "-54,88"  # Define coordinates as an environment variable    
+      COORDS: "-55,1"  # Define coordinates as an environment variable    
     strategy:
       matrix:
         include:
