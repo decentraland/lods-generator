@@ -108,7 +108,6 @@ namespace DCL_PiXYZ
                     stopwatch.Elapsed.Hours, stopwatch.Elapsed.Minutes, stopwatch.Elapsed.Seconds);
 
                 FileWriter.WriteToFile($"{scene}\t{pxzParams.DecimationValue}\t{elapsedTime}" , pathHandler.SuccessFile);
-            }
         }
 
         private bool HasSceneBeenConverted(List<string> convertedScenes, string scene)
