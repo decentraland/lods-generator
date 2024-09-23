@@ -99,9 +99,6 @@ namespace DCL_PiXYZ
         {
             var stopwatch = new Stopwatch();
 
-            try
-            {
-                //Check if they were converted
                 stopwatch.Restart();
                 FileWriter.WriteToConsole($"BEGIN CONVERTING {scene} WITH {pxzParams.DecimationValue}");
                 await ConvertScene(pxzParams, pathHandler, sceneConversionInfo);
@@ -111,10 +108,6 @@ namespace DCL_PiXYZ
                     stopwatch.Elapsed.Hours, stopwatch.Elapsed.Minutes, stopwatch.Elapsed.Seconds);
 
                 FileWriter.WriteToFile($"{scene}\t{pxzParams.DecimationValue}\t{elapsedTime}" , pathHandler.SuccessFile);
-            }
-            catch (Exception e)
-            {
-                FileWriter.WriteToFile($"{scene}\tCONVERSION ERROR {pxzParams.DecimationValue}: {e.Message}", pathHandler.FailFile);
             }
         }
 
