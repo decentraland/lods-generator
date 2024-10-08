@@ -76,23 +76,28 @@ namespace DCL_PiXYZ
                 FileWriter.WriteToConsole("END SCENE CONVERSION FOR " + currentScene);
                 UpdateConvertedScenesFile(convertedScenes);
             }
-            //TODO (Juani): Clear  resources folder
             DoManifestCleanup(args.DebugMode, pathHandler);
+            ClearResourcesFolder(args.DebugMode, pathHandler);
             pxz.Core.ResetSession();
+        }
+
+        private void ClearResourcesFolder(bool isDebug, SceneConversionPathHandler pathHandler)
+        {
+            if (!isDebug)
+                return;
+            
+            if (Directory.Exists(PXZConstants.RESOURCES_DIRECTORY))
+                Directory.Delete(PXZConstants.RESOURCES_DIRECTORY, true);
+            
         }
 
         private void DoManifestCleanup(bool isDebug, SceneConversionPathHandler pathHandler)
         {
             if (!isDebug)
                 return;
-            
-            if (string.IsNullOrEmpty(pathHandler.ManifestOutputJsonDirectory) 
-                || Directory.Exists(pathHandler.ManifestOutputJsonDirectory)) return;
-            
-            var dir = new DirectoryInfo(pathHandler.ManifestOutputJsonDirectory);
-
-            foreach (var fi in dir.GetFiles())
-                fi.Delete();
+          
+            if (Directory.Exists(pathHandler.ManifestOutputJsonDirectory))
+                Directory.Delete(pathHandler.ManifestOutputJsonDirectory, true);
         }
 
         private async Task DoConversion(PXZConversionParams pxzParams, SceneConversionInfo sceneConversionInfo, string scene, SceneConversionPathHandler pathHandler)
