@@ -24,7 +24,10 @@ namespace DCL_PiXYZ.Utils
         {
             DriveInfo[] allDrives = DriveInfo.GetDrives();
             foreach (DriveInfo d in allDrives)
-                WriteToConsole($"{message} Drive {d.Name} - Total: {ConvertToGB(d.TotalSize)} GB, Available: {ConvertToGB(d.AvailableFreeSpace)} GB, Free: {ConvertToGB(d.TotalFreeSpace)} GB");
+            {
+                if(d.IsReady)
+                    WriteToConsole($"{message} Drive {d.Name} - Total: {ConvertToGB(d.TotalSize)} GB, Available: {ConvertToGB(d.AvailableFreeSpace)} GB, Free: {ConvertToGB(d.TotalFreeSpace)} GB");
+            }
         }
 
         private static double ConvertToGB(long bytes)
