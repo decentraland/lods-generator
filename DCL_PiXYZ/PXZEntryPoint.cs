@@ -16,7 +16,10 @@ namespace DCL_PiXYZ
         private static async Task RunLODGeneration(PXZEntryArgs obj)
         {
             PXZClient pxzClient = new PXZClient();
+            FileWriter.currentScene = obj.SceneToConvert;
+            FileWriter.PrintDriveSize("ON START PROCESS");
             await pxzClient.RunLODBuilder(obj);
+            FileWriter.PrintDriveSize("ON END PROCESS");
         }
         
         public static void CloseApplication(string errorMessage)
@@ -24,6 +27,7 @@ namespace DCL_PiXYZ
             Console.Error.WriteLine(errorMessage);
             Environment.Exit(1);
         }
+        
 
         
     }
