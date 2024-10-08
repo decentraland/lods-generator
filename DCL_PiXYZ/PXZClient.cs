@@ -83,7 +83,7 @@ namespace DCL_PiXYZ
 
         private void ClearResourcesFolder(bool isDebug, SceneConversionPathHandler pathHandler)
         {
-            if (!isDebug)
+            if (isDebug)
                 return;
             
             if (Directory.Exists(PXZConstants.RESOURCES_DIRECTORY))
@@ -93,7 +93,7 @@ namespace DCL_PiXYZ
 
         private void DoManifestCleanup(bool isDebug, SceneConversionPathHandler pathHandler)
         {
-            if (!isDebug)
+            if (isDebug)
                 return;
           
             if (Directory.Exists(pathHandler.ManifestOutputJsonDirectory))
