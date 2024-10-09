@@ -20,13 +20,13 @@ namespace DCL_PiXYZ.Utils
         }
         
         
-        public static void PrintDriveSize(string message)
+        public static void PrintDriveSize()
         {
             DriveInfo[] allDrives = DriveInfo.GetDrives();
             foreach (DriveInfo d in allDrives)
             {
                 if(d.IsReady)
-                    WriteToConsole($"{message} Drive {d.Name} - Total: {ConvertToGB(d.TotalSize)} GB, Available: {ConvertToGB(d.AvailableFreeSpace)} GB, Free: {ConvertToGB(d.TotalFreeSpace)} GB");
+                    WriteToConsole($"Drive {d.Name} - Total: {ConvertToGB(d.TotalSize)} GB, Available: {ConvertToGB(d.AvailableFreeSpace)} GB, Free: {ConvertToGB(d.TotalFreeSpace)} GB");
             }
         }
 
