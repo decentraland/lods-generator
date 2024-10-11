@@ -31,7 +31,7 @@ export async function createMessageProcesorComponent({
   async function reQueue(message: QueueMessage): Promise<void> {
     const retry = (message._retry || 0) + 1
     logger.info('Re-queuing message', {
-      entityId: message.entity.entityId,
+      entityId: message.entity.id,
       base: message.entity.metadata.scene.base,
       retry
     })
@@ -44,7 +44,7 @@ export async function createMessageProcesorComponent({
   }
 
   function isInvalid(message: QueueMessage): boolean {
-    return message.entity.entityType !== 'scene' || !message.entity.metadata?.scene?.base || !message.entity.entityId
+    return message.entity.type !== 'scene' || !message.entity.metadata?.scene?.base || !message.entity.id
   }
 
   async function process(message: QueueMessage, receiptMessageHandle: string): Promise<void> {
@@ -59,7 +59,7 @@ export async function createMessageProcesorComponent({
         return
       }
 
-      const entityId = message.entity.entityId
+      const entityId = message.entity.id
       const base = message.entity.metadata.scene.base
       if (RoadCoordinates.includes(base)) {
         logger.debug('Skipping process since it is a road', {
@@ -69,31 +69,6 @@ export async function createMessageProcesorComponent({
         await queue.deleteMessage(receiptMessageHandle)
         return
       }
-
-      /*
-      const alreadyUploadedFiles = await storage.getFiles(`${base}/LOD/Sources/${message.entity.entityTimestamp.toString()}`)
-
-      
-      if (!!alreadyUploadedFiles.length) {
-          const lastUploadDate = alreadyUploadedFiles.reduce((acc, file) => {
-            if (!file.lastModified) return acc
-            return file.lastModified > acc ? file.lastModified : acc
-          }, new Date(0))
-
-          const currentDate = new Date()
-          const diff = currentDate.getTime() - lastUploadDate.getTime()
-          const diffDays = diff / (1000 * 3600 * 24)
-          if (diffDays < 3) {
-            logger.debug('Skipping process since it was already processed within the last 3 days', {
-              entityId,
-              base,
-              lastUploadDate: lastUploadDate.toISOString(),
-              currentDate: currentDate.toISOString()
-            })
-            await queue.deleteMessage(receiptMessageHandle)
-            return
-          }
-      }*/
 
       logger.info('Processing scene deployment', {
         entityId,
@@ -148,7 +123,7 @@ export async function createMessageProcesorComponent({
 
       const uploadedFiles = await storage.storeFiles(
         lodGenerationResult.lodsFiles,
-        `${base}/LOD/Sources/${message.entity.entityTimestamp.toString()}`
+        `${base}/LOD/Sources/${message.entity.timestamp.toString()}`
       )
 
       logger.info('Publishing message to AssetBundle converter', { entityId, base })
@@ -158,7 +133,7 @@ export async function createMessageProcesorComponent({
       await storage.deleteFailureDirectory(base)
     } catch (error: any) {
       logger.error('Unexpected failure while handling message from queue', {
-        entityId: message.entity.entityId,
+        entityId: message.entity.id,
         base: message.entity.metadata.scene.base,
         attempt: retry + 1,
         error: error.message
@@ -175,7 +150,7 @@ export async function createMessageProcesorComponent({
             await reQueue(message)
           } else {
             logger.warn('Max attempts reached, message will not be retried', {
-              entityId: message.entity.entityId,
+              entityId: message.entity.id,
               base: message.entity.metadata.scene.base,
               attempt: retry
             })

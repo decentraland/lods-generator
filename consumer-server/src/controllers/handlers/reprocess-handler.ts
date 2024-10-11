@@ -1,6 +1,7 @@
 import { IHttpServerComponent } from '@well-known-components/interfaces'
-import { HandlerContextWithPath } from '../../types'
+import { HandlerContextWithPath, QueueMessage } from '../../types'
 import { InvalidRequestError } from '@dcl/platform-server-commons'
+import { Events } from '@dcl/schemas'
 
 function validatePointers(pointers: string[]) {
   if (!pointers.length) {
@@ -16,10 +17,10 @@ function validatePointers(pointers: string[]) {
 }
 
 export async function reprocessHandler(
-  context: Pick<HandlerContextWithPath<'logs' | 'sceneFetcher' | 'queue', '/reprocess'>, 'components' | 'request'>
+  context: Pick<HandlerContextWithPath<'logs' | 'config' | 'sceneFetcher' | 'queue', '/reprocess'>, 'components' | 'request'>
 ): Promise<IHttpServerComponent.IResponse> {
   const {
-    components: { logs, sceneFetcher, queue },
+    components: { logs, config, sceneFetcher, queue },
     request
   } = context
 
@@ -30,24 +31,23 @@ export async function reprocessHandler(
 
   validatePointers(pointers)
 
+  const catalystUrl = await config.requireString('CATALYST_URL')
+
   try {
     const entities = await sceneFetcher.fetchByPointers(pointers)
 
     logger.info('Reprocessing pointers', { pointers: pointers.join(', '), entitiesAmount: entities.length })
 
     for (const entity of entities) {
-      const message = {
-        entity: {
-          entityType: entity.type,
-          entityId: entity.id,
-          entityTimestamp: entity.timestamp,
-          metadata: {
-            scene: {
-              base: entity.metadata.scene.base
-            }
-          }
-        }
+      const message: QueueMessage = {
+        type: Events.Type.CATALYST_DEPLOYMENT,
+        subType: entity.type,
+        key: entity.id,
+        timestamp: entity.timestamp,
+        contentServerUrls: entity.contentServerUrls || [catalystUrl],
+        entity
       }
+
       logger.debug('Publishing message to queue', { message: JSON.stringify(message) })
       await queue.send(message)
     }

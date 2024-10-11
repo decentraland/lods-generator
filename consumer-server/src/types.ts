@@ -10,6 +10,7 @@ import { metricDeclarations } from './metrics'
 
 import { Message } from '@aws-sdk/client-sqs'
 import { Response } from '@well-known-components/interfaces'
+import { CatalystDeploymentEvent } from '@dcl/schemas'
 
 export type GlobalContext = {
   components: BaseComponents
@@ -54,17 +55,7 @@ export type HandlerContextWithPath<
 
 export type Context<Path extends string = any> = IHttpServerComponent.PathAwareContext<GlobalContext, Path>
 
-export type QueueMessage = {
-  entity: {
-    entityType: string
-    entityId: string
-    entityTimestamp: number
-    metadata: {
-      scene: {
-        base: string
-      }
-    }
-  }
+export type QueueMessage = CatalystDeploymentEvent & {
   /**
    * This metadata property keeps track of the number of times the same message has been retried.
    * 'undefined' means that the message was not retried yet.
