@@ -1,5 +1,4 @@
-import { AppComponents, BundleTriggererComponent } from '../types'
-import { AuthLinkType } from '@dcl/schemas'
+import { AppComponents, BundleTriggererComponent, QueueMessage } from '../types'
 import { Response } from '@well-known-components/interfaces'
 
 export async function createBundleTriggererComponent({
@@ -8,19 +7,10 @@ export async function createBundleTriggererComponent({
 }: Pick<AppComponents, 'fetcher' | 'config'>): Promise<BundleTriggererComponent> {
   const abToken = await config.requireString('AB_TOKEN')
 
-  async function queueGeneration(entityId: string, lods: string[], abServer: string): Promise<Response> {
+  async function queueGeneration(message: QueueMessage, lods: string[], abServer: string): Promise<Response> {
     const body = JSON.stringify({
       lods: lods.map((lod) => lod.replace('%2C', ',')),
-      entity: {
-        entityId,
-        authChain: [
-          {
-            type: AuthLinkType.SIGNER,
-            payload: '0x0000000000000000000000000000000000000000',
-            signature: ''
-          }
-        ]
-      }
+      ...message
     })
     const headers = { 'Content-Type': 'application/json', Authorization: abToken }
 
