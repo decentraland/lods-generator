@@ -60,10 +60,11 @@ namespace DCL_PiXYZ.Utils
         
         public static async Task<string> RunNPMTool(string sceneManifestProjectDirectory, string sceneType, string sceneValue)
         {
-            //TODO: I need standard output for it to work. Why?
-            var process = new Process()
+            string firstErrorLine = "";
+            using (var process = new Process())
             {
-                StartInfo = new ProcessStartInfo
+                //TODO: I need standard output for it to work. Why?
+                process.StartInfo = new ProcessStartInfo
                 {
                     FileName = "powershell", // or the full path to npm if not in PATH
                     Arguments = $"npm run start --{sceneType}={sceneValue}", // replace with your npm command
@@ -72,13 +73,9 @@ namespace DCL_PiXYZ.Utils
                     RedirectStandardOutput = true, // if you want to read output
                     UseShellExecute = false,
                     CreateNoWindow = true
-                }, 
-                EnableRaisingEvents = true
-            };
-            
-            string firstErrorLine = "";
-            using (process)
-            {
+                };
+                process.EnableRaisingEvents = true;
+                
                 process.OutputDataReceived += (sender, args) =>
                 {
                     FileWriter.WriteToConsole($"NPM OUTPUT: {args.Data}");
@@ -94,21 +91,25 @@ namespace DCL_PiXYZ.Utils
             
                 process.BeginOutputReadLine();
                 process.BeginErrorReadLine();
-
-                await Task.Run(() => 
-                {     
+                
                 //Timeout is based on the current frame rate (90 frames * 33ms)
                 //No scene should take longer than 2970ms to finish running frame,
                 //but all the setup may take time. So we are leaving a big and safe margin
-                if (!process.WaitForExit(20_000))
-                    process.Kill();
-                });
+                bool exited = await Task.Run(() => process.WaitForExit(20_000));
                 
-                if (!string.IsNullOrEmpty(firstErrorLine))
-                    return firstErrorLine;
+                // If process hasn't exited within the timeout, kill it
+                if (!exited)
+                {
+                    process.Kill();
+                }
+                else
+                {
+                    process.WaitForExit(); // ensure all async output is finished
+                }
+                
             }
-
-            return "";
+            return !string.IsNullOrEmpty(firstErrorLine) ? firstErrorLine : "";
+        }
         }
     }
 }
