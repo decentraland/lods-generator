@@ -110,6 +110,6 @@ namespace DCL_PiXYZ.Utils
             }
             return !string.IsNullOrEmpty(firstErrorLine) ? firstErrorLine : "";
         }
-        }
+        
     }
 }
