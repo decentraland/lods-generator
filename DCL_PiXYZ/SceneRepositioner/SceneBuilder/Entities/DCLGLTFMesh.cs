@@ -44,7 +44,7 @@ namespace AssetBundleConverter.LODs
             {
                 //TODO (Juani) : This is confusing. If you modify the material and it doesnt fail; but it fails on export of modified model, you wont know it
                 ModifyModelMaterials(modelPath);
-                ExportModifiedModel(modelPath, lodLevel);
+                ExportModifiedModel(modelPath, lodLevel, pathHandler.sceneBasePointer.Contains("-66,-56"));
             }
             catch (Exception e)
             {
@@ -85,7 +85,7 @@ namespace AssetBundleConverter.LODs
                 model.SaveGLTF(modelPath, new WriteSettings(ValidationMode.Skip));
         }
         
-        private void ExportModifiedModel(string modelPath, int lodLevel)
+        private void ExportModifiedModel(string modelPath, int lodLevel, bool forceIgnoreSMR = false)
         {
             var model = ModelRoot.Load(modelPath, new ReadSettings(ValidationMode.Skip));
             var modelRoot = ModelRoot.CreateModel();
@@ -96,7 +96,7 @@ namespace AssetBundleConverter.LODs
                 //If we arent, we dont want to throw a SMR to the merge since PiXYZ offers inconsistent results
                 if (modelLogicalNode.Skin != null)
                 {
-                    if (lodLevel == 0)
+                    if (lodLevel == 0 && !forceIgnoreSMR)
                         throw new Exception("Model has a SMR");
                     else
                         continue;

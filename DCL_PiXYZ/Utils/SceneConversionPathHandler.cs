@@ -13,6 +13,7 @@ public struct SceneConversionPathHandler
         public string ManifestOutputJsonFile;
         public string ManifestOutputJsonDirectory;
         public string ManifestProjectDirectory;
+        public string sceneBasePointer;
 
         private readonly string DefaultOutputPath;
 
@@ -33,11 +34,12 @@ public struct SceneConversionPathHandler
             FailFile = "";
             PolygonCountFile = "";
             FailGLBImporterFile = "";
+            sceneBasePointer = "";
         }
 
         public void SetOutputPath(SceneImporter sceneSceneImporter)
         {
-            string sceneBasePointer = sceneSceneImporter.GetSceneBasePointer();
+            sceneBasePointer = sceneSceneImporter.GetSceneBasePointer();
             DownloadPath = Path.Combine(PXZConstants.RESOURCES_DIRECTORY, sceneBasePointer);
             OutputPath = Path.Combine(DefaultOutputPath, sceneBasePointer);
             ManifestOutputJsonDirectory = Path.Combine(ManifestProjectDirectory, "output-manifests");
