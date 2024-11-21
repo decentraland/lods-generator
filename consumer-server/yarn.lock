@@ -1038,15 +1038,6 @@
     "@well-known-components/interfaces" "^1.4.2"
     node-fetch "^2.7.0"
 
-"@dcl/schemas@^10.3.0":
-  version "10.4.0"
-  resolved "https://registry.yarnpkg.com/@dcl/schemas/-/schemas-10.4.0.tgz#8cb19d6710635938c1746c4e4b8eed9a1bbce43b"
-  integrity sha512-gd69ProYNRxU4YqY7hruLlWdtfHfAuBdn10LIg0kPayvIraBX78emulVFy47r7qDRiqscRn6+1KLyIfMkXEBdA==
-  dependencies:
-    ajv "^8.11.0"
-    ajv-errors "^3.0.0"
-    ajv-keywords "^5.1.0"
-
 "@dcl/schemas@^9.0.0", "@dcl/schemas@^9.2.0":
   version "9.15.0"
   resolved "https://registry.yarnpkg.com/@dcl/schemas/-/schemas-9.15.0.tgz#81337faa396d21a2d1e704e5ec3cfd7b7b14343e"
@@ -1055,6 +1046,15 @@
     ajv "^8.11.0"
     ajv-errors "^3.0.0"
     ajv-keywords "^5.1.0"
+
+"@dcl/schemas@https://sdk-team-cdn.decentraland.org/@dcl/schemas/branch/feat/catalystdeployment-event-enhance/dcl-schemas-14.1.1-11298178941.commit-64eb184.tgz":
+  version "14.1.1-11298178941.commit-64eb184"
+  resolved "https://sdk-team-cdn.decentraland.org/@dcl/schemas/branch/feat/catalystdeployment-event-enhance/dcl-schemas-14.1.1-11298178941.commit-64eb184.tgz#60ef6f3512e99b8a313372879fc0d1dc6a0cea39"
+  dependencies:
+    ajv "^8.11.0"
+    ajv-errors "^3.0.0"
+    ajv-keywords "^5.1.0"
+    mitt "^3.0.1"
 
 "@eslint-community/eslint-utils@^4.2.0":
   version "4.4.0"
@@ -4362,7 +4362,7 @@ minimatch@^9.0.1:
   resolved "https://registry.yarnpkg.com/minipass/-/minipass-7.0.4.tgz#dbce03740f50a4786ba994c1fb908844d27b038c"
   integrity sha512-jYofLM5Dam9279rdkWzqHozUo4ybjdZmCsDHePy5V/PbBcVMiSZR97gmAy45aqi8CK1lG2ECd356FU86avfwUQ==
 
-mitt@^3.0.0:
+mitt@^3.0.0, mitt@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/mitt/-/mitt-3.0.1.tgz#ea36cf0cc30403601ae074c8f77b7092cdab36d1"
   integrity sha512-vKivATfr97l2/QBCYAkXYDbrIWPM2IIKEl7YPhjCvKlG3kE2gm+uBo6nEXK3M5/Ffh/FLpKExzOQ3JJoJGFKBw==
