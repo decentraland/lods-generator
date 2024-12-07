@@ -44,7 +44,7 @@ export async function createMessageProcesorComponent({
   }
 
   function isInvalid(message: QueueMessage): boolean {
-    return message.entity.entityType !== 'scene' || !message.entity.metadata?.scene?.base || !message.entity.entityId
+    return message.entity?.entityType !== 'scene' || !message.entity?.metadata?.scene?.base || !message.entity?.entityId
   }
 
   async function process(message: QueueMessage, receiptMessageHandle: string): Promise<void> {
@@ -158,8 +158,8 @@ export async function createMessageProcesorComponent({
       await storage.deleteFailureDirectory(base)
     } catch (error: any) {
       logger.error('Unexpected failure while handling message from queue', {
-        entityId: message.entity.entityId,
-        base: message.entity.metadata.scene.base,
+        entityId: message.entity?.entityId,
+        base: message.entity?.metadata.scene.base,
         attempt: retry + 1,
         error: error.message
       })
@@ -175,8 +175,8 @@ export async function createMessageProcesorComponent({
             await reQueue(message)
           } else {
             logger.warn('Max attempts reached, message will not be retried', {
-              entityId: message.entity.entityId,
-              base: message.entity.metadata.scene.base,
+              entityId: message.entity?.entityId,
+              base: message.entity?.metadata.scene.base,
               attempt: retry
             })
             metrics.increment('lod_generation_count', { status: 'failed' }, 1)
