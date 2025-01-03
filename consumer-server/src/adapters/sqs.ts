@@ -9,6 +9,7 @@ import {
 } from '@aws-sdk/client-sqs'
 
 import { QueueMessage, QueueComponent } from '../types'
+import { Events } from '@dcl/schemas'
 
 export async function createSqsAdapter(endpoint: string): Promise<QueueComponent> {
   const client = new SQSClient({ endpoint })
@@ -26,7 +27,17 @@ export async function createSqsAdapter(endpoint: string): Promise<QueueComponent
   async function send(message: QueueMessage): Promise<void> {
     const sendCommand = new SendMessageCommand({
       QueueUrl: endpoint,
-      MessageBody: JSON.stringify({ Message: JSON.stringify(message) })
+      MessageBody: JSON.stringify({ Message: JSON.stringify(message) }),
+      MessageAttributes: {
+        type: {
+          DataType: 'String',
+          StringValue: Events.Type.CATALYST_DEPLOYMENT
+        },
+        subType: {
+          DataType: 'String',
+          StringValue: message.entity.entityType
+        },
+      }
     })
     await client.send(sendCommand)
   }
