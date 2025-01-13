@@ -80,7 +80,7 @@ jobs:
       run: .\publish\DCL_PiXYZ.exe "coords" ${{ github.event.inputs.coords }} "OutputDirectoryPath/" "${{ github.workspace }}\publish\scene-lod-entities-manifest-builder" "false" "true" "${{ github.event.inputs.decimationValues }}" "${{ github.event.inputs.startingLODLevel }}"
      
     - name: Upload artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: LOD-${{ github.event.inputs.coords }}
         path: OutputDirectoryPath/
