@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Threading.Tasks;
-using DCL_PiXYZ.SceneRepositioner.JsonParsing;
 using DCL_PiXYZ.Utils;
 using UnityEngine.Pixyz.Algo;
 using UnityEngine.Pixyz.API;
@@ -28,12 +23,11 @@ namespace DCL_PiXYZ
             opaquesToMerge.list = new uint[]{};
             transparentsToMerge = new OccurrenceList();
             transparentsToMerge.list = new uint[]{};
-            maxVertexCountPerMerge = 200000;
+            maxVertexCountPerMerge = 200_000;
             
             bakeOption = new BakeOption();
             BakeMaps bakeMaps = new BakeMaps();
             bakeMaps.diffuse = true;
-            bakeOption.bakingMethod = BakingMethod.RayOnly;
             this.lodLevel = lodLevel;
             bakeOption.padding = 1;
             bakeOption.textures = bakeMaps;
@@ -99,9 +93,10 @@ namespace DCL_PiXYZ
             
             FileWriter.WriteToConsole($"Merging meshes {(isOpaque ? "OPAQUE" : "TRANSPARENT")} {toMerge.list.Length} vertex count {currentVertexCount}");
 
-            
-            uint combineMeshes = pxz.Algo.CombineMeshes(toMerge, bakeOption);
+
+            uint combineMeshes = pxz.Scene.MergePartOccurrences(toMerge)[0];
             pxz.Core.SetProperty(combineMeshes, "Name", $"MERGED MESH {index} {(isOpaque ? "OPAQUE" : PXZConstants.FORCED_TRANSPARENT_MATERIAL)}");
+            pxz.Algo.CombineMaterials(toMerge, bakeOption);
 
             FileWriter.WriteToConsole("Copying Material");
             //Apply a copy of the material not to lose the reference
@@ -114,7 +109,6 @@ namespace DCL_PiXYZ
                 pxz.Scene.SetOccurrenceMaterial(combineMeshes,copyMaterial);
                 FileWriter.WriteToConsole("Setting Material");
             }
-
         }
 
 
