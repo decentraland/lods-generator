@@ -32,10 +32,6 @@ jobs:
         path: 'PiXYZ-NuGetPackage'  
         lfs: true
 
-    - name: Build license
-      run: |
-        cd consumer-server && yarn && yarn admin:license ${{ secrets.LICENSE_KEY }}
-
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
