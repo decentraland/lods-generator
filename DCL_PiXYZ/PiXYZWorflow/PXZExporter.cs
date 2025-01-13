@@ -34,7 +34,13 @@ namespace DCL_PiXYZ
                 pxz.Scene.MergeOccurrencesByTreeLevel(new OccurrenceList(new[]
                 {
                     pxz.Scene.GetRoot()
-                }), 1);
+                }), 1);*/
+                AnimationList animationList = pxz.Scene.ListAnimations();
+                
+                foreach (var animation in animationList.list)
+                {
+                    pxz.Scene.DeleteAnimation(animation);
+                }
             }
             pxz.IO.ExportScene(Path.Combine(path, $"{filename}.fbx"), pxz.Scene.GetRoot());
         }
