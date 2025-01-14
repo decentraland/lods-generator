@@ -208,6 +208,9 @@ namespace DCL_PiXYZ
             modifiers.Add(new PXZBeginCleanMaterials());
             modifiers.Add(new PXZRepairMesh(models));
             modifiers.Add(new PXZMaterialNameRandomizer());
+            modifiers.Add(new PXZDeleteEmptyOccurrences());
+            modifiers.Add(new PXZDeleteAllAnimations());
+            modifiers.Add(new PXZDeleteInvalidTransforms());
 
             if (pxzParams.LodLevel != 0)
             {
@@ -216,8 +219,14 @@ namespace DCL_PiXYZ
                 modifiers.Add(new PXZDecimator(sceneConversionInfo.SceneImporter.GetSceneBasePointer(), pxzParams.DecimationType,
                     pxzParams.DecimationValue, pxzParams.ParcelAmount, pathHandler));
                 modifiers.Add(new PXZMergeMeshes(pxzParams.LodLevel));
+                
+                //Cleanup after merge
+                modifiers.Add(new PXZDeleteEmptyOccurrences());
+                
+                modifiers.Add(new PXZFlattenHierarchy());
             }
 
+            
             modifiers.Add(new PXZExporter(pxzParams, pathHandler, sceneConversionInfo));
 
             PXZStopwatch stopwatch = new PXZStopwatch();

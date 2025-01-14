@@ -28,20 +28,6 @@ namespace DCL_PiXYZ
         public void ApplyModification(PiXYZAPI pxz)
         {
             FileWriter.WriteToConsole($"BEGIN PXZ EXPORT {Path.Combine(path, $"{filename}.fbx")}");
-            //Use it to flatten the hierarchy
-            if (lodLevel != 0)
-            {
-                pxz.Scene.MergeOccurrencesByTreeLevel(new OccurrenceList(new[]
-                {
-                    pxz.Scene.GetRoot()
-                }), 1);*/
-                AnimationList animationList = pxz.Scene.ListAnimations();
-                
-                foreach (var animation in animationList.list)
-                {
-                    pxz.Scene.DeleteAnimation(animation);
-                }
-            }
             pxz.IO.ExportScene(Path.Combine(path, $"{filename}.fbx"), pxz.Scene.GetRoot());
         }
 

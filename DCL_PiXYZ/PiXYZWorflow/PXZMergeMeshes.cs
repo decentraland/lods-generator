@@ -28,6 +28,7 @@ namespace DCL_PiXYZ
             bakeOption = new BakeOption();
             BakeMaps bakeMaps = new BakeMaps();
             bakeMaps.diffuse = true;
+            bakeOption.resolution = 1024;
             this.lodLevel = lodLevel;
             bakeOption.padding = 1;
             bakeOption.textures = bakeMaps;
@@ -84,15 +85,7 @@ namespace DCL_PiXYZ
             if (toMerge.list.Length == 0)
                 return;
 
-            //TODO: What would be the best option here?
-            bakeOption.resolution = 1024;
-            if (lodLevel == 1 && currentVertexCount < 150000)
-                bakeOption.resolution = 512;
-            else if (lodLevel >= 2 && currentVertexCount < 150000)
-                bakeOption.resolution = 256;
-            
             FileWriter.WriteToConsole($"Merging meshes {(isOpaque ? "OPAQUE" : "TRANSPARENT")} {toMerge.list.Length} vertex count {currentVertexCount}");
-
 
             uint combineMeshes = pxz.Scene.MergePartOccurrences(toMerge)[0];
             pxz.Core.SetProperty(combineMeshes, "Name", $"MERGED MESH {index} {(isOpaque ? "OPAQUE" : PXZConstants.FORCED_TRANSPARENT_MATERIAL)}");
