@@ -79,4 +79,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: LOD-${{ github.event.inputs.coords }}
-        path: OutputDirectoryPath/
+        path: ${{ github.workspace }}\publish\OutputDirectoryPath
