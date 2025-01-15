@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Threading.Tasks;
-using DCL_PiXYZ.SceneRepositioner.JsonParsing;
 using DCL_PiXYZ.Utils;
 using UnityEngine.Pixyz.Algo;
 using UnityEngine.Pixyz.API;
@@ -28,12 +23,12 @@ namespace DCL_PiXYZ
             opaquesToMerge.list = new uint[]{};
             transparentsToMerge = new OccurrenceList();
             transparentsToMerge.list = new uint[]{};
-            maxVertexCountPerMerge = 200000;
+            maxVertexCountPerMerge = 200_000;
             
             bakeOption = new BakeOption();
             BakeMaps bakeMaps = new BakeMaps();
             bakeMaps.diffuse = true;
-            bakeOption.bakingMethod = BakingMethod.RayOnly;
+            bakeOption.resolution = 1024;
             this.lodLevel = lodLevel;
             bakeOption.padding = 1;
             bakeOption.textures = bakeMaps;
@@ -90,18 +85,11 @@ namespace DCL_PiXYZ
             if (toMerge.list.Length == 0)
                 return;
 
-            //TODO: What would be the best option here?
-            bakeOption.resolution = 1024;
-            if (lodLevel == 1 && currentVertexCount < 150000)
-                bakeOption.resolution = 512;
-            else if (lodLevel >= 2 && currentVertexCount < 150000)
-                bakeOption.resolution = 256;
-            
             FileWriter.WriteToConsole($"Merging meshes {(isOpaque ? "OPAQUE" : "TRANSPARENT")} {toMerge.list.Length} vertex count {currentVertexCount}");
 
-            
-            uint combineMeshes = pxz.Algo.CombineMeshes(toMerge, bakeOption);
+            uint combineMeshes = pxz.Scene.MergePartOccurrences(toMerge)[0];
             pxz.Core.SetProperty(combineMeshes, "Name", $"MERGED MESH {index} {(isOpaque ? "OPAQUE" : PXZConstants.FORCED_TRANSPARENT_MATERIAL)}");
+            pxz.Algo.CombineMaterials(toMerge, bakeOption);
 
             FileWriter.WriteToConsole("Copying Material");
             //Apply a copy of the material not to lose the reference
@@ -114,7 +102,6 @@ namespace DCL_PiXYZ
                 pxz.Scene.SetOccurrenceMaterial(combineMeshes,copyMaterial);
                 FileWriter.WriteToConsole("Setting Material");
             }
-
         }
 
 
