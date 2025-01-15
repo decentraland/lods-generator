@@ -109,7 +109,7 @@ namespace DCL_PiXYZ
                 //Check if they were converted
                 stopwatch.Restart();
                 FileWriter.WriteToConsole($"BEGIN CONVERTING {scene} WITH {pxzParams.DecimationValue}");
-                await ConvertScene(pxzParams, pathHandler, sceneConversionInfo);
+                ConvertScene(pxzParams, pathHandler, sceneConversionInfo);
                 stopwatch.Stop();
 
                 string elapsedTime = string.Format("{0:00}:{1:00}:{2:00}",
@@ -198,7 +198,7 @@ namespace DCL_PiXYZ
             return false; 
         }
 
-        private async Task ConvertScene(PXZConversionParams pxzParams, SceneConversionPathHandler pathHandler, SceneConversionInfo sceneConversionInfo)
+        private void ConvertScene(PXZConversionParams pxzParams, SceneConversionPathHandler pathHandler, SceneConversionInfo sceneConversionInfo)
         {
             SceneRepositioner.SceneRepositioner sceneRepositioner =
                 new SceneRepositioner.SceneRepositioner(pxzParams.SceneContent, pxz, pathHandler, pxzParams.LodLevel);
