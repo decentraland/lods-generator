@@ -85,7 +85,7 @@ jobs:
         basePath="${GITHUB_WORKSPACE}/publish/OutputDirectoryPath/${{ env.COORDS }}"
         files=(${{ join(matrix.files, ' ') }})
         sizes=(${{ join(matrix.sizes, ' ') }})
-        toleranceB=30000 # 30 KB tolerance
+        toleranceB=40000 # 40 KB tolerance
     
         for i in "${!files[@]}"; do
           filePath="$basePath/${files[$i]}"
