@@ -109,7 +109,7 @@ namespace DCL_PiXYZ
                 //Check if they were converted
                 stopwatch.Restart();
                 FileWriter.WriteToConsole($"BEGIN CONVERTING {scene} WITH {pxzParams.DecimationValue}");
-                await ConvertScene(pxzParams, pathHandler, sceneConversionInfo);
+                ConvertScene(pxzParams, pathHandler, sceneConversionInfo);
                 stopwatch.Stop();
 
                 string elapsedTime = string.Format("{0:00}:{1:00}:{2:00}",
@@ -198,7 +198,7 @@ namespace DCL_PiXYZ
             return false; 
         }
 
-        private async Task ConvertScene(PXZConversionParams pxzParams, SceneConversionPathHandler pathHandler, SceneConversionInfo sceneConversionInfo)
+        private void ConvertScene(PXZConversionParams pxzParams, SceneConversionPathHandler pathHandler, SceneConversionInfo sceneConversionInfo)
         {
             SceneRepositioner.SceneRepositioner sceneRepositioner =
                 new SceneRepositioner.SceneRepositioner(pxzParams.SceneContent, pxz, pathHandler, pxzParams.LodLevel);
@@ -208,6 +208,9 @@ namespace DCL_PiXYZ
             modifiers.Add(new PXZBeginCleanMaterials());
             modifiers.Add(new PXZRepairMesh(models));
             modifiers.Add(new PXZMaterialNameRandomizer());
+            modifiers.Add(new PXZDeleteEmptyOccurrences());
+            modifiers.Add(new PXZDeleteAllAnimations());
+            modifiers.Add(new PXZDeleteInvalidTransforms());
 
             if (pxzParams.LodLevel != 0)
             {
@@ -216,8 +219,14 @@ namespace DCL_PiXYZ
                 modifiers.Add(new PXZDecimator(sceneConversionInfo.SceneImporter.GetSceneBasePointer(), pxzParams.DecimationType,
                     pxzParams.DecimationValue, pxzParams.ParcelAmount, pathHandler));
                 modifiers.Add(new PXZMergeMeshes(pxzParams.LodLevel));
+                
+                //Cleanup after merge
+                modifiers.Add(new PXZDeleteEmptyOccurrences());
+                
+                modifiers.Add(new PXZFlattenHierarchy());
             }
 
+            
             modifiers.Add(new PXZExporter(pxzParams, pathHandler, sceneConversionInfo));
 
             PXZStopwatch stopwatch = new PXZStopwatch();
