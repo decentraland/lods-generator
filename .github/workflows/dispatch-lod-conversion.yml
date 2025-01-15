@@ -73,8 +73,8 @@ jobs:
       env:
        PIXYZPRODUCTNAME: ${{ secrets.PIXYZPRODUCTNAME }}
        PIXYZTOKEN: ${{ secrets.PIXYZTOKEN }}
-      run: .\publish\DCL_PiXYZ.exe "coords" ${{ github.event.inputs.coords }} "OutputDirectoryPath/" "${{ github.workspace }}\publish\scene-lod-entities-manifest-builder" "false" "true" "${{ github.event.inputs.decimationValues }}" "${{ github.event.inputs.startingLODLevel }}"
-     
+       run: .\publish\DCL_PiXYZ.exe --sceneToConvert "${{ github.event.inputs.coords }}" --defaultOutputPath "${{ github.workspace }}\publish\OutputDirectoryPath" --defaultSceneLodManifestDirectory "${{ github.workspace }}\publish\scene-lod-entities-manifest-builder" --debugMode false --installNPM true --decimationValues "${{ github.event.inputs.decimationValues }}" --startingLODLevel "${{ github.event.inputs.startingLODLevel }}"
+    
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
