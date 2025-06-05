@@ -6,7 +6,7 @@ on:
 
 jobs:
   build-and-run:
-    runs-on: windows-2019
+    runs-on: windows-2022
     env:
       COORDS: "-55,1"  # Define coordinates as an environment variable    
     strategy:
