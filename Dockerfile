@@ -46,7 +46,7 @@ COPY consumer-server .
 RUN yarn build
 
 #build the dotnet app
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1 as dotnet-build
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1-nanoserver-1809 as dotnet-build
 
 WORKDIR /build
 
