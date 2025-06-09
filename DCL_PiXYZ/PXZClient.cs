@@ -290,7 +290,7 @@ namespace DCL_PiXYZ
             pxz = PiXYZAPI.Initialize(); 
 
             if (!pxz.Core.CheckLicense())
-                pxz.Core.ConfigureLicenseServer("10.0.10.41", 27000);
+                pxz.Core.ConfigureLicenseServer("34.237.238.231", 27000);
         }
 
         private void CreateDirectories(SceneConversionInfo sceneConversionInfo)
