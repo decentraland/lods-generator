@@ -50,11 +50,6 @@ jobs:
           Copy-Item -Path "${{ github.workspace }}\DCL_PiXYZ\bin\Release\netcoreapp3.1\win10-x64\SingleParcelRoadCoordinates.json" -Destination "${{ github.workspace }}\publish"
       shell: pwsh 
 
-    - name: Copy license file
-      run: |
-          Copy-Item -Path "${{ github.workspace }}\DCL_PiXYZ\bin\Release\netcoreapp3.1\win10-x64\pixyz_license_decentraland.bin" -Destination "${{ github.workspace }}\publish"
-      shell: pwsh 
-
     - name: Install Vulkan SDK
       uses: jakoch/install-vulkan-sdk-action@v1.0.0
       with:

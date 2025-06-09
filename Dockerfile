@@ -50,7 +50,6 @@ FROM mcr.microsoft.com/dotnet/core/sdk:3.1 as dotnet-build
 
 WORKDIR /build
 
-COPY ./pixyz_license_decentraland.bin ./
 COPY SingleParcelRoadCoordinates.json ./
 COPY DCL_PiXYZ/ ./DCL_PiXYZ
 COPY nuget.config ./
@@ -62,7 +61,6 @@ COPY PiXYZ.sln ./
 RUN dotnet publish -c Release -r win10-x64 -o ./publish --self-contained true
 ARG VULKAN_DLL_PATH
 COPY ${VULKAN_DLL_PATH} ./publish/vulkan-1.dll
-COPY pixyz_license_decentraland.bin ./publish/pixyz_license_decentraland.bin
 
 # bundle all apps
 FROM mcr.microsoft.com/windows:ltsc2019
@@ -86,11 +84,9 @@ RUN setx /M PATH "%PATH%;C:/vulkan-sdt"
 
 WORKDIR /app/api
 COPY --from=dotnet-build /build/publish/ .
-COPY pixyz_license_decentraland.bin ./pixyz_license_decentraland.bin
 
 WORKDIR /app
 
-COPY pixyz_license_decentraland.bin ./pixyz_license_decentraland.bin
 COPY SingleParcelRoadCoordinates.json ./SingleParcelRoadCoordinates.json
 COPY --from=scene-lod-build /scene-lod/dist ./scene-lod/dist
 COPY --from=scene-lod-build /scene-lod/package.json ./scene-lod/
