@@ -291,6 +291,9 @@ namespace DCL_PiXYZ
 
             if (!pxz.Core.CheckLicense())
                 pxz.Core.ConfigureLicenseServer("34.237.238.231", 27000);
+            
+            foreach (string tokenName in pxz.Core.ListTokens().list)
+                pxz.Core.NeedToken(tokenName);
         }
 
         private void CreateDirectories(SceneConversionInfo sceneConversionInfo)
