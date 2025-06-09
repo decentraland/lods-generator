@@ -290,7 +290,7 @@ namespace DCL_PiXYZ
             pxz = PiXYZAPI.Initialize(); 
 
             if (!pxz.Core.CheckLicense())
-                pxz.Core.ConfigureLicenseServer("34.237.238.231", 27000);
+                pxz.Core.ConfigureLicenseServer("34.237.238.231", 27000, true);
             
             foreach (string tokenName in pxz.Core.ListTokens().list)
                 pxz.Core.NeedToken(tokenName);
