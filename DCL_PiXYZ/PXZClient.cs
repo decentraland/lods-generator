@@ -290,7 +290,7 @@ namespace DCL_PiXYZ
             pxz = PiXYZAPI.Initialize(); 
             
             if (!pxz.Core.CheckLicense())
-                pxz.Core.ConfigureLicenseServer(Environment.GetEnvironmentVariable("PIXYZ_IP"), ushort.Parse(Environment.GetEnvironmentVariable("PIXYZ_PORT")));
+                pxz.Core.ConfigureLicenseServer(Environment.GetEnvironmentVariable("PIXYZ_IP"), (ushort)int.Parse(Environment.GetEnvironmentVariable("PIXYZ_PORT")));
             
             foreach (string tokenName in pxz.Core.ListTokens().list)
                 pxz.Core.NeedToken(tokenName);
