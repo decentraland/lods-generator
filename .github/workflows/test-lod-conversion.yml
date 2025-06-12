@@ -68,8 +68,8 @@ jobs:
 
     - name: Run the application
       env:
-       PIXYZPRODUCTNAME: ${{ secrets.PIXYZPRODUCTNAME }}
-       PIXYZTOKEN: ${{ secrets.PIXYZTOKEN }}
+       PIXYZ_IP: ${{ secrets.PIXYZ_IP }}
+       PIXYZ_PORT: ${{ secrets.PIXYZ_PORT }}
       run: .\publish\DCL_PiXYZ.exe --sceneToConvert "${{ env.COORDS }}" --defaultOutputPath "${{ github.workspace }}\publish\OutputDirectoryPath" --defaultSceneLodManifestDirectory "${{ github.workspace }}\publish\scene-lod-entities-manifest-builder" --debugMode false --installNPM true --decimationValues "${{ matrix.lodLevelsToTest[0] }}" --startingLODLevel ${{ matrix.lodLevelsToTest[1] }}
 
     - name: Check Output Files with Size Tolerance in KB
