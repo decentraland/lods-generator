@@ -19,10 +19,6 @@
             <RoadManifest Include="..\SingleParcelRoadCoordinates.json" />
             <RoadCoordinatesFolder Include="@(RoadManifest->'%(FullPath)')" TargetPath="%(Filename)%(Extension)" />
 
-            <!-- Addition of a single file with the same relative output path -->
-            <LicenseFile Include="..\pixyz_license_decentraland.bin" />
-            <LicenseFileFolder Include="@(LicenseFile->'%(FullPath)')" TargetPath="%(Filename)%(Extension)" />
-
         </ItemGroup>
         <Copy SourceFiles="@(SceneLODManifestFolder)" DestinationFiles="@(SceneLODManifestFolder->'$(OutputPath)%(TargetPath)')" SkipUnchangedFiles="true" />
         <Copy SourceFiles="@(RoadCoordinatesFolder)" DestinationFiles="@(RoadCoordinatesFolder->'$(OutputPath)%(TargetPath)')" SkipUnchangedFiles="true" />

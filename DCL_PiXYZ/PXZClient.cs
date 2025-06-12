@@ -287,10 +287,13 @@ namespace DCL_PiXYZ
 
         private void InitializePiXYZ()
         {
-            pxz = PiXYZAPI.Initialize(Environment.GetEnvironmentVariable("PIXYZPRODUCTNAME"), Environment.GetEnvironmentVariable("PIXYZTOKEN")); 
-
+            pxz = PiXYZAPI.Initialize(); 
+            
             if (!pxz.Core.CheckLicense())
-                pxz.Core.InstallLicense("pixyz_license_decentraland.bin");
+                pxz.Core.ConfigureLicenseServer(Environment.GetEnvironmentVariable("PIXYZ_IP"), (ushort)int.Parse(Environment.GetEnvironmentVariable("PIXYZ_PORT")));
+            
+            foreach (string tokenName in pxz.Core.ListTokens().list)
+                pxz.Core.NeedToken(tokenName);
         }
 
         private void CreateDirectories(SceneConversionInfo sceneConversionInfo)

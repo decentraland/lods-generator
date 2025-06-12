@@ -12,9 +12,6 @@ jobs:
     strategy:
       matrix:
         include:
-          - lodLevelsToTest: ["500", "3"]
-            files: "QmTpsFiaJVPv5mU6ERBzkDcZ39Lyq9sEfiLw9Ep3VQAFgK_3.fbx"
-            sizes: "5378768"
           - lodLevelsToTest: ["7000;3000;1000;500", "0"]
             files: "QmTpsFiaJVPv5mU6ERBzkDcZ39Lyq9sEfiLw9Ep3VQAFgK_0.fbx QmTpsFiaJVPv5mU6ERBzkDcZ39Lyq9sEfiLw9Ep3VQAFgK_1.fbx QmTpsFiaJVPv5mU6ERBzkDcZ39Lyq9sEfiLw9Ep3VQAFgK_2.fbx QmTpsFiaJVPv5mU6ERBzkDcZ39Lyq9sEfiLw9Ep3VQAFgK_3.fbx"
             sizes: "35727600 9031680 7032832 5378768"
@@ -50,11 +47,6 @@ jobs:
           Copy-Item -Path "${{ github.workspace }}\DCL_PiXYZ\bin\Release\netcoreapp3.1\win10-x64\SingleParcelRoadCoordinates.json" -Destination "${{ github.workspace }}\publish"
       shell: pwsh 
 
-    - name: Copy license file
-      run: |
-          Copy-Item -Path "${{ github.workspace }}\DCL_PiXYZ\bin\Release\netcoreapp3.1\win10-x64\pixyz_license_decentraland.bin" -Destination "${{ github.workspace }}\publish"
-      shell: pwsh 
-
     - name: Install Vulkan SDK
       uses: jakoch/install-vulkan-sdk-action@v1.0.0
       with:
@@ -76,8 +68,8 @@ jobs:
 
     - name: Run the application
       env:
-       PIXYZPRODUCTNAME: ${{ secrets.PIXYZPRODUCTNAME }}
-       PIXYZTOKEN: ${{ secrets.PIXYZTOKEN }}
+       PIXYZ_IP: ${{ secrets.PIXYZ_IP }}
+       PIXYZ_PORT: ${{ secrets.PIXYZ_PORT }}
       run: .\publish\DCL_PiXYZ.exe --sceneToConvert "${{ env.COORDS }}" --defaultOutputPath "${{ github.workspace }}\publish\OutputDirectoryPath" --defaultSceneLodManifestDirectory "${{ github.workspace }}\publish\scene-lod-entities-manifest-builder" --debugMode false --installNPM true --decimationValues "${{ matrix.lodLevelsToTest[0] }}" --startingLODLevel ${{ matrix.lodLevelsToTest[1] }}
 
     - name: Check Output Files with Size Tolerance in KB
