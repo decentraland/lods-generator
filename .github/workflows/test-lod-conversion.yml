@@ -35,7 +35,7 @@ jobs:
         dotnet-version: 8.0.x
 
     - name: Publish with dotnet
-      run:  dotnet publish -c Release -o ./publish --self-contained true 
+      run:  dotnet publish -c Release -o ./publish --self-contained true
       
     - name: Copy manifest builder to publish directory
       run: |
@@ -45,7 +45,7 @@ jobs:
     - name: Copy road coordinates
       run: |
           Copy-Item -Path "${{ github.workspace }}\DCL_PiXYZ\bin\Release\net8.0\win-x64\SingleParcelRoadCoordinates.json" -Destination "${{ github.workspace }}\publish"
-      shell: pwsh 
+      shell: pwsh
 
     - name: Install Vulkan SDK
       uses: jakoch/install-vulkan-sdk-action@v1.2.5

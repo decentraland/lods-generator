@@ -20,12 +20,12 @@ jobs:
   build-and-run:
     runs-on: windows-2022
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         lfs: true
             
     - name: Checkout NuGet PiXYZ package
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
         repository: 'decentraland/PiXYZ-NuGetPackage'
         token: ${{ secrets.PAT_NUGET_TOKEN }}
@@ -33,30 +33,31 @@ jobs:
         lfs: true
 
     - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '3.1.x'
+        dotnet-version: 8.0.x
 
     - name: Publish with dotnet
-      run:  dotnet publish -c Release -r win10-x64 -o ./publish --self-contained true 
+      run:  dotnet publish -c Release -o ./publish --self-contained true
       
     - name: Copy manifest builder to publish directory
       run: |
-        Copy-Item -Path "${{ github.workspace }}\DCL_PiXYZ\bin\Release\netcoreapp3.1\win10-x64\scene-lod-entities-manifest-builder" -Destination "${{ github.workspace }}\publish\scene-lod-entities-manifest-builder" -Recurse
+        Copy-Item -Path "${{ github.workspace }}\DCL_PiXYZ\bin\Release\net8.0\win-x64\scene-lod-entities-manifest-builder" -Destination "${{ github.workspace }}\publish\scene-lod-entities-manifest-builder" -Recurse
       shell: pwsh
       
     - name: Copy road coordinates
       run: |
-          Copy-Item -Path "${{ github.workspace }}\DCL_PiXYZ\bin\Release\netcoreapp3.1\win10-x64\SingleParcelRoadCoordinates.json" -Destination "${{ github.workspace }}\publish"
-      shell: pwsh 
+          Copy-Item -Path "${{ github.workspace }}\DCL_PiXYZ\bin\Release\net8.0\win-x64\SingleParcelRoadCoordinates.json" -Destination "${{ github.workspace }}\publish"
+      shell: pwsh
 
     - name: Install Vulkan SDK
-      uses: jakoch/install-vulkan-sdk-action@v1.0.0
+      uses: jakoch/install-vulkan-sdk-action@v1.2.5
       with:
         vulkan_version: 1.3.268.0
         optional_components: com.lunarg.vulkan.vma
         install_runtime: true
         cache: true
+        stripdown: true
         destination: ${{ github.workspace }}/vulkan-sdt
 
     - name: Move Vulkan DLL to output directory
@@ -65,7 +66,7 @@ jobs:
       shell: bash
 
     - name: Setup Node.js
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v4
       with:
         node-version: '18.14.2'
 
