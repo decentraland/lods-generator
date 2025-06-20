@@ -2,7 +2,8 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
+        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -23,6 +24,44 @@
         <Copy SourceFiles="@(SceneLODManifestFolder)" DestinationFiles="@(SceneLODManifestFolder->'$(OutputPath)%(TargetPath)')" SkipUnchangedFiles="true" />
         <Copy SourceFiles="@(RoadCoordinatesFolder)" DestinationFiles="@(RoadCoordinatesFolder->'$(OutputPath)%(TargetPath)')" SkipUnchangedFiles="true" />
         <Copy SourceFiles="@(LicenseFileFolder)" DestinationFiles="@(LicenseFileFolder->'$(OutputPath)%(TargetPath)')" SkipUnchangedFiles="true" />
+    </Target>
+
+    <!--
+      The following two targets are required due to the PiXYZCSharpAPI NuGet package
+      including multiple files with duplicate names and extensions in different locations.
+      These cause publish-time conflicts (error NETSDK1152) when using .NET 8.0,
+      so we explicitly remove the duplicate or conflicting files before the ComputeFilesToPublish target.
+    -->
+
+    <Target Name="RemoveDuplicatePublishFiles" BeforeTargets="ComputeFilesToPublish">
+        <ItemGroup>
+            <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)"
+              Condition=" '%(ResolvedFileToPublish.PathInPackage)' != '' and (
+                '%(ResolvedFileToPublish.PathInPackage)' == 'runtimes/win-x64/native/podofo.dll' or
+                '%(ResolvedFileToPublish.PathInPackage)' == 'runtimes/win-x64/native/plugins/OdaImportPlugin/tbb12.dll' or
+                '%(ResolvedFileToPublish.PathInPackage)' == 'runtimes/win-x64/native/plugins/OdaImportPlugin/xerces-c_3_1.dll' or
+                '%(ResolvedFileToPublish.PathInPackage)' == 'runtimes/win-x64/native/xerces-c_3_1.dll'
+              )" />
+        </ItemGroup>
+    </Target>
+
+    <Target Name="RemoveUSDConflicts" BeforeTargets="ComputeFilesToPublish">
+        <ItemGroup>
+            <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)"
+              Condition=" '%(ResolvedFileToPublish.PathInPackage)' != '' and (
+                (
+                  ('%(ResolvedFileToPublish.Filename)' == 'schema' or
+                  '%(ResolvedFileToPublish.Filename)' == 'generatedSchema') and
+                  '%(ResolvedFileToPublish.Extension)' == '.usda'
+                ) or
+                (
+                  '%(ResolvedFileToPublish.Filename)' == 'plugInfo' and
+                  '%(ResolvedFileToPublish.Extension)' == '.json'
+                ) or
+                '%(ResolvedFileToPublish.Extension)' == '.txt' or
+                '%(ResolvedFileToPublish.Extension)' == '.TXT'
+              )" />
+        </ItemGroup>
     </Target>
 
     <ItemGroup>
