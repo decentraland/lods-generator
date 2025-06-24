@@ -1,5 +1,5 @@
 # prepare base image for TS projects
-FROM mcr.microsoft.com/windows/servercore:ltsc2019 as base
+FROM mcr.microsoft.com/windows/servercore:ltsc2022 as base
 
 ADD https://aka.ms/vs/16/release/vc_redist.x64.exe C:\\vc_redist.x64.exe
 RUN C:\\vc_redist.x64.exe /quiet /install
@@ -46,7 +46,7 @@ COPY consumer-server .
 RUN yarn build
 
 #build the dotnet app
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1 as dotnet-build
+FROM mcr.microsoft.com/dotnet/sdk:8.0-windowsservercore-ltsc2022 as dotnet-build
 
 WORKDIR /build
 
@@ -58,12 +58,12 @@ COPY ${PIXYZ_PACKAGE} ./PiXYZ-NuGetPackage/
 
 COPY PiXYZ.sln ./
 
-RUN dotnet publish -c Release -r win10-x64 -o ./publish --self-contained true
+RUN dotnet publish -c Release -o ./publish --self-contained true
 ARG VULKAN_DLL_PATH
 COPY ${VULKAN_DLL_PATH} ./publish/vulkan-1.dll
 
 # bundle all apps
-FROM mcr.microsoft.com/windows:ltsc2019
+FROM mcr.microsoft.com/windows/servercore:ltsc2022
 
 RUN powershell -Command Set-ExecutionPolicy RemoteSigned -Force
 

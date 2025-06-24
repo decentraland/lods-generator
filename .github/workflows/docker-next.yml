@@ -7,26 +7,27 @@ on:
 
 jobs:
   build-and-push:
-    runs-on: windows-2019
+    runs-on: windows-2022
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
         ref: ${{ github.event.inputs.branch_name }}
         lfs: true
 
     - name: Install Vulkan SDK
-      uses: jakoch/install-vulkan-sdk-action@v1.0.0
+      uses: jakoch/install-vulkan-sdk-action@v1.2.5
       with:
         vulkan_version: 1.3.268.0
         optional_components: com.lunarg.vulkan.vma
         install_runtime: true
         cache: true
+        stripdown: true
         destination: ${{ github.workspace }}/vulkan-sdt
 
     - name: Checkout NuGet PiXYZ package
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
         repository: 'decentraland/PiXYZ-NuGetPackage'
         token: ${{ secrets.PAT_NUGET_TOKEN }}
