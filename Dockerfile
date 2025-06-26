@@ -2,7 +2,9 @@
 FROM mcr.microsoft.com/windows/servercore:ltsc2022 as base
 
 ADD https://aka.ms/vs/16/release/vc_redist.x64.exe C:\\vc_redist.x64.exe
-RUN C:\\vc_redist.x64.exe /quiet /install
+RUN powershell -Command \
+    Start-Process -FilePath C:\\vc_redist.x64.exe -ArgumentList '/quiet','/install' -Wait; \
+    Remove-Item -Force C:\\vc_redist.x64.exe
 
 ADD https://nodejs.org/dist/v18.14.2/node-v18.14.2-win-x64.zip C:\\node.zip
 RUN powershell -Command \
@@ -68,7 +70,9 @@ FROM mcr.microsoft.com/windows/servercore:ltsc2022
 RUN powershell -Command Set-ExecutionPolicy RemoteSigned -Force
 
 ADD https://aka.ms/vs/16/release/vc_redist.x64.exe C:\\vc_redist.x64.exe
-RUN C:\\vc_redist.x64.exe /quiet /install
+RUN powershell -Command \
+    Start-Process -FilePath C:\\vc_redist.x64.exe -ArgumentList '/quiet','/install' -Wait; \
+    Remove-Item -Force C:\\vc_redist.x64.exe
 
 ADD https://nodejs.org/dist/v18.14.2/node-v18.14.2-win-x64.zip C:\\node.zip
 RUN powershell -Command \
@@ -79,7 +83,8 @@ RUN setx /M PATH "%PATH%;C:/Node/node-v18.14.2-win-x64"
 WORKDIR /vulkan-sdt
 ARG VULKAN_DLL_PATH
 COPY ${VULKAN_DLL_PATH} .
-
+# Copy required OpenGL runtime DLLs for 3D rendering support
+COPY OPENGL32.dll GLU32.dll ./
 RUN setx /M PATH "%PATH%;C:/vulkan-sdt"
 
 WORKDIR /app/api
@@ -95,15 +100,13 @@ COPY --from=scene-lod-build /scene-lod/package-lock.json ./scene-lod/
 COPY --from=scene-lod-build /scene-lod/node_modules ./scene-lod/node_modules
 COPY --from=scene-lod-build /scene-lod/.env.default ./scene-lod/dist/.env.default
 ARG COMMIT_HASH
-RUN echo "COMMIT_HASH=$COMMIT_HASH" >> ./scene-lod/.env
-RUN echo "COMMIT_HASH=$COMMIT_HASH" >> ./scene-lod/.env.default
+RUN echo "COMMIT_HASH=$COMMIT_HASH" >> ./scene-lod/.env && echo "COMMIT_HASH=$COMMIT_HASH" >> ./scene-lod/.env.default
 
 COPY --from=consumer-server-build /app/consumer-server/dist ./consumer-server/dist
 COPY --from=consumer-server-build /app/consumer-server/package.json ./consumer-server/package.json
 COPY --from=consumer-server-build /app/consumer-server/yarn.lock ./consumer-server/yarn.lock
 COPY --from=consumer-server-build /app/consumer-server/node_modules ./consumer-server/node_modules
 COPY --from=consumer-server-build /app/consumer-server/.env.default ./consumer-server/dist/.env.default
-RUN echo "COMMIT_HASH=$COMMIT_HASH" >> ./consumer-server/.env
-RUN echo "COMMIT_HASH=$COMMIT_HASH" >> ./consumer-server/.env.default
+RUN echo "COMMIT_HASH=$COMMIT_HASH" >> ./consumer-server/.env && echo "COMMIT_HASH=$COMMIT_HASH" >> ./consumer-server/.env.default
 
 CMD ["node", "./consumer-server/dist/index.js"]
