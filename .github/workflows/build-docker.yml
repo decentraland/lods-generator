@@ -25,6 +25,12 @@ jobs:
         stripdown: true
         destination: ${{ github.workspace }}/vulkan-sdt
 
+    - name: Copy OpenGL DLLs to workspace
+      shell: pwsh
+      run: |
+        Copy-Item -Path "C:\Windows\System32\OPENGL32.dll" -Destination "${{ github.workspace }}\OPENGL32.dll"
+        Copy-Item -Path "C:\Windows\System32\GLU32.dll" -Destination "${{ github.workspace }}\GLU32.dll"
+
     - name: Checkout NuGet PiXYZ package
       uses: actions/checkout@v4
       with:
@@ -43,5 +49,5 @@ jobs:
     - name: Build and push
       id: docker_build
       run: |
-        docker build --build-arg COMMIT_HASH=${{ github.sha }} --build-arg PIXYZ_PACKAGE=./PiXYZ-NuGetPackage --build-arg VULKAN_DLL_PATH=./vulkan-sdt/1.3.268.0/runtime/x64/vulkan-1.dll -t quay.io/decentraland/lods-generator:${{ github.sha }} .
-        docker push quay.io/decentraland/lods-generator:${{ github.sha }}
+        docker build --build-arg COMMIT_HASH=${{ github.sha }} --build-arg PIXYZ_PACKAGE=./PiXYZ-NuGetPackage --build-arg VULKAN_DLL_PATH=./vulkan-sdt/1.3.268.0/runtime/x64/vulkan-1.dll -t quay.io/decentraland/lods-generator:test2 .
+        docker push quay.io/decentraland/lods-generator:test2

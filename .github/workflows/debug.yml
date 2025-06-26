@@ -1,0 +1,82 @@
+name: Check DLL Dependencies
+
+on:
+  push:
+    branches:
+      - test/debug-windows2022-imagexxx
+
+jobs:
+  check-dll:
+    runs-on: windows-2022
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+    #   - name: Restore Docker image cache
+    #     id: restore-cache
+    #     uses: actions/cache@v4
+    #     with:
+    #         path: lods-generator-image.tar
+    #         key: lods-generator-${{ runner.os }}-v1
+
+    #   - name: Load Docker image from tar
+    #     shell: pwsh
+    #     run: |
+    #       if (Test-Path 'lods-generator-image.tar') {
+    #         docker load -i lods-generator-image.tar
+    #       }
+
+    #   - name: Pull and save Docker image to tar if tar is missing
+    #     shell: pwsh
+    #     run: |
+    #         if (-not (Test-Path 'lods-generator-image.tar')) {
+    #         if (-not (docker image inspect quay.io/decentraland/lods-generator:test -ErrorAction SilentlyContinue)) {
+    #             docker pull quay.io/decentraland/lods-generator:test
+    #         }
+    #         docker save quay.io/decentraland/lods-generator:test -o lods-generator-image.tar
+    #         }
+
+    #   - name: Save Docker image cache
+    #     if: steps.restore-cache.outputs.cache-hit != 'true'
+    #     uses: actions/cache/save@v4
+    #     with:
+    #         path: lods-generator-image.tar
+    #         key: lods-generator-${{ runner.os }}-v1
+
+      - name: Download Dependencies tool
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/lucasg/Dependencies/releases/latest/download/Dependencies_x64_Release.zip" -OutFile Dependencies.zip
+          Expand-Archive Dependencies.zip -DestinationPath tools
+
+      - name: Copy GL dll to workspace
+        shell: pwsh
+        run: |
+            Copy-Item -Path "C:\Windows\System32\OPENGL32.dll" -Destination "${{ github.workspace }}\OPENGL32.dll"
+            Copy-Item -Path "C:\Windows\System32\GLU32.dll" -Destination "${{ github.workspace }}\GLU32.dll"
+
+      - name: List files in Docker container
+        shell: pwsh
+        run: |
+          $workspace = "${{ github.workspace }}"
+          docker run --rm quay.io/decentraland/lods-generator:next cmd /S /C "dir C:\vulkan-sdt"
+
+      - name: Copy GL dll and run Dependencies.exe inside Docker
+        shell: pwsh
+        run: |
+            $workspace = "${{ github.workspace }}"
+            docker run --rm -v "D:\a\lods-generator\lods-generator:C:/workspace" -v "$workspace/tools:C:/tools" quay.io/decentraland/lods-generator:next cmd /S /C "copy C:\workspace\OPENGL32.dll C:\vulkan-sdt\OPENGL32.dll && copy C:\workspace\GLU32.dll C:\vulkan-sdt\GLU32.dll && C:\tools\Dependencies.exe -modules C:\app\api\PiXYZAPI.dll"
+
+      - name: List files in Docker container
+        shell: pwsh
+        run: |
+          $workspace = "${{ github.workspace }}"
+          docker run --rm quay.io/decentraland/lods-generator:next cmd /S /C "dir C:\vulkan-sdt"
+
+    #   - name: Run Dependencies.exe inside Docker
+    #     shell: pwsh
+    #     run: |
+    #         $workspace = "${{ github.workspace }}"
+    #         docker pull quay.io/decentraland/lods-generator:test
+    #         docker run --rm -v "$workspace/tools:C:/tools" quay.io/decentraland/lods-generator:test cmd /S /C "C:\tools\Dependencies.exe -modules C:\app\api\PiXYZAPI.dll"
