@@ -25,6 +25,12 @@ jobs:
         stripdown: true
         destination: ${{ github.workspace }}/vulkan-sdt
 
+    - name: Copy OpenGL DLLs to workspace
+      shell: pwsh
+      run: |
+        Copy-Item -Path "C:\Windows\System32\OPENGL32.dll" -Destination "${{ github.workspace }}\OPENGL32.dll"
+        Copy-Item -Path "C:\Windows\System32\GLU32.dll" -Destination "${{ github.workspace }}\GLU32.dll"
+
     - name: Checkout NuGet PiXYZ package
       uses: actions/checkout@v4
       with:
