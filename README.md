@@ -1,7 +1,7 @@
 
 # Decentraland PiXYZ integration
 
-## 🤖 AI Agent Context
+## AI Agent Context
 
 **Service Purpose:** Generates Level of Detail (LOD) models for Decentraland scene entities. Uses PiXYZ plugin integration to create optimized LOD versions of 3D assets for performance optimization, reducing polygon count and texture resolution for distant viewing.
 
